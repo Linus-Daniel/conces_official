@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Header";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-
-
 
 export const metadata: Metadata = {
   title: "Conces",
@@ -19,13 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="">
       <body className="antialiased">
-          <Header />
+        <Header />
 
-    
-          
-            <main className="">{children}</main>
-            <Footer />
-      
+        <main className="">{children}</main>
+        <Footer />
       </body>
     </html>
   );
