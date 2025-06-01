@@ -4,6 +4,7 @@ import {
   FormEvent,
   InputHTMLAttributes,
   ReactHTMLElement,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -18,28 +19,34 @@ import {
   FaGoogle,
   FaMicrosoft,
   FaBell,
-  FaComment,
-  FaGaugeHigh,
-  FaChartLine,
-  FaUsers,
-  FaUserGraduate,
-  FaUserTie,
-  FaUserShield,
-  FaBookOpen,
-  FaCalendarDays,
-  FaBookBible,
-  FaGear,
-  FaShield,
-  FaFileLines,
-  FaArrowUp,
-  FaClock,
 } from "react-icons/fa6";
 import { FaInfoCircle, FaCheck, FaTimes } from "react-icons/fa";
+import { useSearchParams } from "next/navigation";
 
 const AuthFlow = () => {
   const [activeTab, setActiveTab] = useState("signup");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const params = useSearchParams();
+
+  const mode = params.get("mode");
+
+  useEffect(()=>{
+    if (mode === "login") {
+      setActiveTab("login");
+    } else if (mode === "signup") {
+      setActiveTab("signup");
+    } else if (mode === "verification") {
+      setActiveTab("verification");
+    } else if (mode === "alumni-dashboard") {
+      setActiveTab("alumni-dashboard");
+    } else {
+      setActiveTab("signup"); // Default to signup if no mode is specified
+    }
+  },[])
+
+  console.log(mode)
+
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",

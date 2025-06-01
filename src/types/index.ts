@@ -9,3 +9,14 @@ export type Product = {
   reviews: number;
   slug: string;
 };
+
+
+import { IconType } from 'react-icons';
+
+export interface Category {
+  name: string;
+  count: number;
+  icon: IconType;
+  bgColor: string;
+  iconColor: string;
+}

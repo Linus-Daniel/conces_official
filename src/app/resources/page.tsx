@@ -1,7 +1,55 @@
+import CategoryCard from "@/components/CategoryCard";
 import ResourceCard from "@/components/ResourceCard";
 import React from "react";
 import { FaBible, FaExternalLinkAlt, FaPhotoVideo, FaPray, FaSearch, FaTools } from "react-icons/fa";
 import { FaBars, FaBook, FaBookmark, FaBookOpen, FaBorderAll, FaBriefcase, FaDownload, FaEye, FaFileExcel, FaFilePdf, FaPlay, FaShare, FaUpload, FaUsers, FaVideo } from "react-icons/fa6";
+
+
+export const categories = [
+  {
+    name: 'Engineering Resources',
+    count: 54,
+    icon: FaTools,
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+  },
+  {
+    name: 'Devotionals',
+    count: 37,
+    icon: FaBible,
+    bgColor: 'bg-purple-100',
+    iconColor: 'text-purple-600',
+  },
+  {
+    name: 'Career Resources',
+    count: 29,
+    icon: FaBriefcase,
+    bgColor: 'bg-green-100',
+    iconColor: 'text-green-600',
+  },
+  {
+    name: 'Seminars & Webinars',
+    count: 18,
+    icon: FaVideo,
+    bgColor: 'bg-red-100',
+    iconColor: 'text-red-600',
+  },
+  {
+    name: 'Community Content',
+    count: 42,
+    icon: FaUsers,
+    bgColor: 'bg-yellow-100',
+    iconColor: 'text-yellow-600',
+  },
+  {
+    name: 'Multimedia',
+    count: 23,
+    icon: FaPhotoVideo,
+    bgColor: 'bg-indigo-100',
+    iconColor: 'text-indigo-600',
+  },
+];
+
 
 function page() {
   return (
@@ -141,51 +189,10 @@ function page() {
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <span className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition flex flex-col items-center cursor-pointer">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                <FaTools className="fa-solid fa-tools text-blue-600 text-xl" />
-              </div>
-              <h3 className="font-medium text-gray-800">
-                Engineering Resources
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">54 items</p>
-            </span>
-            <span className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition flex flex-col items-center cursor-pointer">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
-                <FaBible className="fa-solid fa-bible text-purple-600 text-xl" />
-              </div>
-              <h3 className="font-medium text-gray-800">Devotionals</h3>
-              <p className="text-sm text-gray-500 mt-1">37 items</p>
-            </span>
-            <span className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition flex flex-col items-center cursor-pointer">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
-                <FaBriefcase className="fa-solid fa-briefcase text-green-600 text-xl" />
-              </div>
-              <h3 className="font-medium text-gray-800">Career Resources</h3>
-              <p className="text-sm text-gray-500 mt-1">29 items</p>
-            </span>
-            <span className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition flex flex-col items-center cursor-pointer">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
-                <FaVideo className="fa-solid fa-video text-red-600 text-xl" />
-              </div>
-              <h3 className="font-medium text-gray-800">Seminars & Webinars</h3>
-              <p className="text-sm text-gray-500 mt-1">18 items</p>
-            </span>
-            <span className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition flex flex-col items-center cursor-pointer">
-              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-3">
-                <FaUsers className="fa-solid fa-users text-yellow-600 text-xl" />
-              </div>
-              <h3 className="font-medium text-gray-800">Community Content</h3>
-              <p className="text-sm text-gray-500 mt-1">42 items</p>
-            </span>
-            <span className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition flex flex-col items-center cursor-pointer">
-              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
-                <FaPhotoVideo className="fa-solid fa-photo-video text-indigo-600 text-xl" />
-              </div>
-              <h3 className="font-medium text-gray-800">Multimedia</h3>
-              <p className="text-sm text-gray-500 mt-1">23 items</p>
-            </span>
-          </div>
+            {
+              categories.map((category, index) => (<CategoryCard {...category} key={index} />))
+            }
+            </div>
         </section>
 
         <section id="engineering-resources" className="mb-10">
@@ -199,7 +206,7 @@ function page() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
          
-            {Array(8)
+            {Array(4)
               .fill(8)
               .map((item, index) => (
                 <ResourceCard key={index} />

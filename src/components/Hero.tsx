@@ -1,5 +1,6 @@
 "use client"
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function Hero() {
@@ -36,7 +37,7 @@ export default function Hero() {
                 </div>
                 <div className="w-full md:w-1/2 flex justify-center">
                     <div className="relative w-80 h-80 animate-float">
-                        <img className="w-full h-full object-contain" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/3976f3120b-c37919a760f40b202955.png" alt="modern logo for CONCES with cross symbol integrated with engineering gear icon, blue and gold colors, transparent background"/>
+                        <Image width={500} height={500} className="w-full rounded h-full object-contain" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/3976f3120b-c37919a760f40b202955.png" alt="modern logo for CONCES with cross symbol integrated with engineering gear icon, blue and gold colors, transparent background"/>
                     </div>
                 </div>
             </div>

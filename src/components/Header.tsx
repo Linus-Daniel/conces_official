@@ -79,13 +79,13 @@ function Header() {
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-3">
             <a
-              href="/auth"
+              href="/auth?mode=login"
               className="px-4 py-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white hover:border-primary-light cursor-pointer"
             >
               Login
             </a>
             <a
-              href="/auth"
+              href="/auth?mode=signup"
               className="px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-dark hover:bg-primary cursor-pointer"
             >
               Join Now
