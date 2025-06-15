@@ -1,376 +1,1003 @@
-"use client"
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
-import { LockIcon, UserIcon, MailIcon, EyeIcon, EyeOffIcon, Github, GitBranch, Facebook } from 'lucide-react'
-import { FacebookIcon } from './Icons'
-import { FaFacebook, FaGoogle } from 'react-icons/fa'
-
-interface FormData {
-  email: string
-  password: string
-  name: string
-}
-
-interface FormErrors {
-  email?: string
-  password?: string
-  name?: string
-  submit?: string
-}
+"use client";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import {
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaBuildingColumns,
+  FaUserTag,
+  FaLock,
+  FaEye,
+  FaChevronDown,
+  FaGoogle,
+  FaMicrosoft,
+  FaBell,
+} from "react-icons/fa6";
+import { FaInfoCircle, FaCheck, FaTimes, FaSpinner } from "react-icons/fa";
+import { useSearchParams } from "next/navigation";
+import useAuthStore from "@/zustand/authStore";
+import { useRouter } from "next/navigation";
+import { User } from "@/types";
 
 const AuthForm = () => {
-  const [isLogin, setIsLogin] = useState(true)
-  const [formData, setFormData] = useState<FormData>({
-    email: '',
-    password: '',
-    name: ''
-  })
-  const [errors, setErrors] = useState<FormErrors>({})
-  const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  
+  const [activeTab, setActiveTab] = useState("signup");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
 
-  const variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -20,
-      transition: { duration: 0.3, ease: "easeIn" }
-    }
-  }
+  // Get auth store methods and state
+  const {
+    register,
+    login,
+    verifyEmail,
+    resendVerification,
+    verificationStep,
+    verificationId,
+  } = useAuthStore();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value
-    })
-  
-    if (errors[name as keyof FormErrors]) {
-      setErrors({
-        ...errors,
-        [name]: undefined
-      })
-    }
-  }
-  
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {}
-  
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
-    }
-  
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
-    }
-  
-    if (!isLogin && !formData.name) {
-      newErrors.name = 'Name is required'
-    }
-  
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-  
+  const params = useSearchParams();
+  const mode = params.get("mode");
 
-  const handleSubmit = async (e:FormEvent) => {
-    e.preventDefault()
-    if (validate()) {
-      setIsSubmitting(true)
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        // Redirect on success
-        router.push('/dashboard')
-      } catch (error:any) {
-        setErrors({ submit: error.message })
-      } finally {
-        setIsSubmitting(false)
+  useEffect(() => {
+    if (mode === "login") {
+      setActiveTab("login");
+    } else if (mode === "signup") {
+      setActiveTab("signup");
+    } else if (mode === "verification") {
+      setActiveTab("verification");
+    } else if (mode === "alumni-dashboard") {
+      setActiveTab("alumni-dashboard");
+    } else {
+      setActiveTab("signup");
+    }
+  }, [mode]);
+
+  const [formData, setFormData] = useState({
+    fullname: "",
+    email: "",
+    phone: "",
+    institution: "",
+    role: "student",
+    password: "",
+    confirmPassword: "",
+    terms: false,
+    captcha: false,
+  });
+
+  const [loginFormData, setLoginFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
+
+  const [verificationCode, setVerificationCode] = useState([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
+  const [passwordStrength, setPasswordStrength] = useState("weak");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Handle verification code input
+  const handleVerificationCodeChange = (index: number, value: string) => {
+    const newCode = [...verificationCode];
+    newCode[index] = value;
+    setVerificationCode(newCode);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`verification-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  // Handle signup submission
+  const handleSignupSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error("Passwords don't match!");
       }
+      if (!formData.terms) {
+        throw new Error("You must agree to the terms and conditions");
+      }
+      if (!formData.captcha) {
+        throw new Error("Please verify you're not a robot");
+      }
+
+      const userData = {
+        fullName: formData.fullname,
+        email: formData.email,
+        phone: formData.phone,
+        institution: formData.institution,
+        role: formData.role,
+        password: formData.password,
+      };
+
+      await register(userData);
+
+      // If we get here, verification was required
+      setActiveTab("verification");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
+
+  // Handle verification submission
+  const handleVerificationSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      if (!verificationId) {
+        throw new Error("Verification session expired. Please register again.");
+      }
+
+      const code = verificationCode.join("");
+      if (code.length !== 6) {
+        throw new Error("Please enter a complete 6-digit code");
+      }
+      const userData = {
+        fullName: formData.fullname,
+        email: formData.email,
+        phone: formData.phone,
+        institution: formData.institution,
+        role: formData.role,
+        password: formData.password,
+      };
+
+      await verifyEmail(code, userData, verificationId);
+      if (userData.role === "student") {
+        router.push("/student-dashboard");
+      } else if (userData.role === "alumni") {
+        router.push("/alumni-dashboard");
+      }
+
+      setFormData({
+        fullname: "",
+        email: "",
+        phone: "",
+        institution: "",
+        role: "student",
+        password: "",
+        confirmPassword: "",
+        terms: false,
+        captcha: false,
+      });
+
+      setVerificationCode(["", "", "", "", "", ""]);
+      // If we get here, verification was successful
+    } catch (err) {
+      setVerificationCode(["", "", "", "", "", ""]);
+      setError(err instanceof Error ? err.message : "Verification failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle resend verification code
+  const handleResendVerification = async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      await resendVerification(formData.email);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to resend code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox" && e.target instanceof HTMLInputElement
+          ? e.target.checked
+          : value,
+    }));
+
+    if (name === "password") {
+      calculatePasswordStrength(value);
+    }
+  };
+
+  const handleLoginInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+
+    setLoginFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const calculatePasswordStrength = (password: string) => {
+    // Simple password strength calculation
+    if (password.length === 0) {
+      setPasswordStrength("");
+    } else if (password.length < 6) {
+      setPasswordStrength("weak");
+    } else if (password.length < 10) {
+      setPasswordStrength("medium");
+    } else {
+      setPasswordStrength("strong");
+    }
+  };
+  const handleLoginSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const userData = {
+        email: loginFormData.email,
+        password: loginFormData.password,
+      };
+
+      const role = (await login(
+        userData.email,
+        userData.password
+      )) as unknown as string;
+
+      // Redirect based on role
+      switch (role) {
+        case "admin":
+          router.push("/admin");
+          break;
+        case "branch-admin":
+          router.push("/branch-admin");
+          break;
+        case "alumni":
+          router.push("/alumni");
+          break;
+        case "student":
+          router.push("/user");
+          break;
+        default:
+          console.warn("Unrecognized role");
+          console.log("User data:", role);
+          router.push("/");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+    }
+  };
+
+  const getPasswordStrengthColor = () => {
+    switch (passwordStrength) {
+      case "weak":
+        return "bg-red-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "strong":
+        return "bg-green-500";
+      default:
+        return "bg-gray-200";
+    }
+  };
+
+  const getPasswordStrengthText = () => {
+    switch (passwordStrength) {
+      case "weak":
+        return "Weak";
+      case "medium":
+        return "Medium";
+      case "strong":
+        return "Strong";
+      default:
+        return "";
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden"
-      >
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-4 px-6 text-center font-medium focus:outline-none ${isLogin ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            Sign In
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-4 px-6 text-center font-medium focus:outline-none ${!isLogin ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
-          >
-            Sign Up
-          </button>
+    <div className="font-sans bg-gray-50 min-h-screen">
+      {/* Authentication Flow Tabs */}
+      <div className="w-full max-w-4xl mx-auto mt-8 px-4">
+        <div className="flex justify-center mb-8">
+          <div className="flex space-x-2 bg-white rounded-lg shadow p-1">
+            <button
+              onClick={() => handleTabChange("signup")}
+              className={`px-6 py-2 rounded-md transition-all ${
+                activeTab === "signup"
+                  ? "bg-conces-blue text-white font-medium"
+                  : "text-gray-700 bg-slate-200 font-medium hover:bg-gray-100"
+              }`}
+            >
+              Sign Up
+            </button>
+            <button
+              onClick={() => handleTabChange("login")}
+              className={`px-6 py-2 rounded-md transition-all ${
+                activeTab === "login"
+                  ? "bg-conces-blue text-white font-medium"
+                  : "text-gray-700 font-medium bg-slate-200 hover:bg-gray-100"
+              }`}
+            >
+              Log In
+            </button>
+          </div>
         </div>
 
-        <div className="p-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isLogin ? 'login' : 'signup'}
-              variants={variants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              <div className="text-center mb-8">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
-                  <LockIcon className="h-6 w-6 text-primary" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {isLogin ? 'Sign in to your account' : 'Create a new account'}
+        {/* Authentication Forms Container */}
+        <div className="w-full">
+          {/* Signup Form */}
+          {activeTab === "signup" && (
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl font-bold text-conces-blue">
+                  Create Your Account
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
-                  {isLogin ? 'Welcome back, signin to continue' : 'Get started with our platform'}
+                <p className="text-royal-500 mt-2">
+                  Join our community and access role-specific features
                 </p>
               </div>
 
-              {errors.submit && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm"
-                >
-                  {errors.submit}
-                </motion.div>
-              )}
-
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                {!isLogin && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                        Full Name
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <UserIcon className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <input
-                          id="name"
-                          name="name"
-                          type="text"
-                          value={formData.name}
-                          onChange={handleChange}
-                          className={`pl-10 block w-full px-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary`}
-                          placeholder="John Doe"
-                        />
+              <form onSubmit={handleSignupSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="fullname"
+                    >
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaUser />
                       </div>
-                      {errors.name && (
-                        <motion.p 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="mt-1 text-sm text-red-600"
-                        >
-                          {errors.name}
-                        </motion.p>
-                      )}
+                      <input
+                        type="text"
+                        id="fullname"
+                        name="fullname"
+                        value={formData.fullname}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        placeholder="John Doe"
+                        required
+                      />
                     </div>
-                  </motion.div>
-                )}
+                  </div>
 
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email address
+                  <div>
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="email"
+                    >
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaEnvelope />
+                      </div>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        placeholder="your@email.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="phone"
+                    >
+                      Phone Number
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaPhone />
+                      </div>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        placeholder="+234 123 456 7890"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="institution"
+                    >
+                      Institution
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaBuildingColumns />
+                      </div>
+                      <input
+                        type="text"
+                        id="institution"
+                        name="institution"
+                        value={formData.institution}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        placeholder="University Name"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    className="block text-sm font-medium text-gray-800 mb-1"
+                    htmlFor="role"
+                  >
+                    Select Your Role
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <MailIcon className="h-5 w-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                      <FaUserTag />
                     </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className={`pl-10 block w-full px-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary`}
-                      placeholder="you@example.com"
-                    />
-                  </div>
-                  {errors.email && (
-                    <motion.p 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-600"
+                    <select
+                      id="role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
                     >
-                      {errors.email}
-                    </motion.p>
-                  )}
+                      <option value="student">Student</option>
+                      <option value="alumni">Branch Alumni</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
+                      <FaChevronDown />
+                    </div>
+                  </div>
+                  <div
+                    id="role-description"
+                    className="mt-2 text-sm text-royal-500 italic"
+                  >
+                    <p>
+                      As a Student, you'll have access to courses, events,
+                      mentorship, and devotionals.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="password"
+                    >
+                      Password
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaLock />
+                      </div>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        placeholder="••••••••"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-royal-400 hover:text-royal-600"
+                      >
+                        <FaEye />
+                      </button>
+                    </div>
+                    {passwordStrength && (
+                      <div className="mt-1">
+                        <div className="flex items-center mt-1">
+                          <div
+                            className={`h-1 w-1/4 rounded-full ${
+                              passwordStrength === "weak"
+                                ? "bg-red-500"
+                                : "bg-gray-200"
+                            }`}
+                          ></div>
+                          <div
+                            className={`h-1 w-1/4 rounded-full mx-1 ${
+                              passwordStrength === "medium" ||
+                              passwordStrength === "strong"
+                                ? "bg-yellow-500"
+                                : "bg-gray-200"
+                            }`}
+                          ></div>
+                          <div
+                            className={`h-1 w-1/4 rounded-full mx-1 ${
+                              passwordStrength === "strong"
+                                ? "bg-green-500"
+                                : "bg-gray-200"
+                            }`}
+                          ></div>
+                          <div className="h-1 w-1/4 bg-gray-200 rounded-full"></div>
+                        </div>
+                        <p className="text-xs text-royal-500 mt-1">
+                          Password strength: {getPasswordStrengthText()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label
+                      className="block text-sm  font-medium text-gray-800 mb-1"
+                      htmlFor="confirm-password"
+                    >
+                      Confirm Password
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaLock />
+                      </div>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        id="confirm-password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        placeholder="••••••••"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-royal-400 hover:text-royal-600"
+                      >
+                        <FaEye />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-center">
+                    <input
+                      id="terms"
+                      type="checkbox"
+                      name="terms"
+                      checked={formData.terms}
+                      onChange={handleInputChange}
+                      className="h-4 w-4 text-gold-600 border-royal-300 rounded focus:ring-gold-500"
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="ml-2 block text-sm text-gray-800"
+                    >
+                      I agree to the{" "}
+                      <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
+                        Terms of Service
+                      </span>{" "}
+                      and{" "}
+                      <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
+                        Privacy Policy
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="bg-gray-100 p-4 rounded-md flex items-center justify-center">
+                    <div className="w-full max-w-xs">
+                      <p className="text-center text-sm text-gray-800 mb-2">
+                        Please verify you're human
+                      </p>
+                      <div className="border border-royal-300 rounded-md bg-white p-3 flex items-center">
+                        <input
+                          type="checkbox"
+                          id="captcha"
+                          name="captcha"
+                          checked={formData.captcha}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 text-gold-600 border-royal-300 rounded focus:ring-gold-500"
+                        />
+                        <span className="ml-3 text-sm text-gray-800">
+                          I'm not a robot
+                        </span>
+                        <img
+                          src="https://www.gstatic.com/recaptcha/api2/logo_48.png"
+                          alt="reCAPTCHA"
+                          className="h-8 ml-auto"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
+                  <button
+                    type="submit"
+                    className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
+                  >
+                    Create Account
+                  </button>
+                  <p className="mt-4 text-center text-sm text-royal-600">
+                    Already have an account?{" "}
+                    <span
+                      className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer"
+                      onClick={() => handleTabChange("login")}
+                    >
+                      Log in
+                    </span>
+                  </p>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Login Form */}
+          {activeTab === "login" && (
+            <div className="bg-white rounded-lg shadow-md p-8">
+              <div className="mb-6 text-center">
+                <h2 className="text-2xl font-bold text-conces-blue">
+                  Welcome Back
+                </h2>
+                <p className="text-royal-500 mt-2">
+                  Log in to access your dashboard
+                </p>
+              </div>
+
+              <form onSubmit={handleLoginSubmit}>
+                <div className="mb-4">
+                  <label
+                    className="block text-sm font-medium text-gray-800 mb-1"
+                    htmlFor="login-email"
+                  >
+                    Email Address
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <LockIcon className="h-5 w-5 text-gray-400" />
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                      <FaEnvelope />
                     </div>
                     <input
-                      id="password"
-                      name="password"
+                      type="email"
+                      id="login-email"
+                      name="email"
+                      value={loginFormData.email}
+                      onChange={handleLoginInputChange}
+                      className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <label
+                      className="block text-sm font-medium text-gray-800"
+                      htmlFor="login-password"
+                    >
+                      Password
+                    </label>
+                    <span className="text-sm text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
+                      Forgot password?
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                      <FaLock />
+                    </div>
+                    <input
                       type={showPassword ? "text" : "password"}
-                      autoComplete={isLogin ? "current-password" : "new-password"}
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`pl-10 block w-full px-3 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary`}
-                      placeholder={isLogin ? "Enter your password" : "Create a password"}
+                      id="login-password"
+                      name="password"
+                      value={loginFormData.password}
+                      onChange={handleLoginInputChange}
+                      className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                      placeholder="••••••••"
+                      required
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-royal-400 hover:text-royal-600"
                     >
-                      {showPassword ? (
-                        <EyeOffIcon className="h-5 w-5 text-gray-400 hover:text-gray-500" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-500" />
-                      )}
+                      <FaEye />
                     </button>
                   </div>
-                  {errors.password && (
-                    <motion.p 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-600"
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      type="checkbox"
+                      name="rememberMe"
+                      checked={loginFormData.rememberMe}
+                      onChange={handleLoginInputChange}
+                      className="h-4 w-4 text-gold-600 border-royal-300 rounded focus:ring-gold-500"
+                    />
+                    <label
+                      htmlFor="remember-me"
+                      className="ml-2 block text-sm text-gray-800"
                     >
-                      {errors.password}
-                    </motion.p>
-                  )}
+                      Remember me on this device
+                    </label>
+                  </div>
                 </div>
 
-                {isLogin && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                        Remember me
-                      </label>
-                    </div>
-
-                    <div className="text-sm">
-                      <a href="/forgot-password" className="font-medium text-primary hover:text-primary-dark">
-                        Forgot your password?
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <motion.button
+                <div className="mb-6">
+                  <button
                     type="submit"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    disabled={isSubmitting}
-                    className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
                   >
-                    {isSubmitting ? (
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : null}
-                    {isLogin ? 'Sign in' : 'Sign up'}
-                  </motion.button>
+                    Log In
+                  </button>
                 </div>
+
+                <div className="relative flex items-center justify-center mb-6">
+                  <div className="border-t border-gray-300 absolute w-full"></div>
+                  <div className="bg-white px-4 relative z-10 text-sm text-royal-500">
+                    Or continue with
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <button
+                    type="button"
+                    className="flex items-center justify-center py-2 px-4 border border-royal-300 rounded-md shadow-sm bg-white text-gray-800 hover:bg-gray-50 transition-colors"
+                  >
+                    <FaGoogle className="text-red-500 mr-2" />
+                    Google
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center py-2 px-4 border border-royal-300 rounded-md shadow-sm bg-white text-gray-800 hover:bg-gray-50 transition-colors"
+                  >
+                    <FaMicrosoft className="text-blue-500 mr-2" />
+                    Microsoft
+                  </button>
+                </div>
+
+                <p className="text-center text-sm text-royal-600">
+                  Don't have an account?{" "}
+                  <span
+                    className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer"
+                    onClick={() => handleTabChange("signup")}
+                  >
+                    Sign up
+                  </span>
+                </p>
               </form>
+            </div>
+          )}
 
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <motion.button
-                    whileHover={{ y: -2 }}
-                    type="button"
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    <FaFacebook size={30} />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ y: -2 }}
-                    type="button"
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                   <FaGoogle size={30} />
-                  </motion.button>
-                </div>
+          {/* Email Verification */}
+          {activeTab === "verification" && (
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <div className="w-16 h-16 bg-gold-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaEnvelope className="text-gold-600 text-2xl" />
               </div>
+              <h2 className="text-2xl font-bold text-conces-blue mb-2">
+                Verify Your Email
+              </h2>
+              <p className="text-royal-600 mb-6">
+                We've sent a 6-digit verification code to{" "}
+                <span className="font-medium">{formData.email}</span>.
+              </p>
 
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
-                  {isLogin ? (
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleVerificationSubmit}>
+                <div className="mb-6">
+                  <p className="text-royal-600 mb-2">Enter the 6-digit code:</p>
+                  <div className="flex justify-center space-x-2">
+                    {verificationCode.map((digit, index) => (
+                      <input
+                        key={index}
+                        id={`verification-${index}`}
+                        type="text"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) =>
+                          handleVerificationCodeChange(
+                            index,
+                            e.target.value.replace(/\D/g, "")
+                          )
+                        }
+                        className="w-12 h-12 text-center border border-royal-300 rounded-md text-xl font-medium focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || verificationCode.join("").length !== 6}
+                  className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 mb-4 flex items-center justify-center"
+                >
+                  {isLoading ? (
                     <>
-                      Don't have an account?{' '}
-                      <button
-                        type="button"
-                        onClick={() => setIsLogin(false)}
-                        className="font-medium text-primary hover:text-primary-dark"
-                      >
-                        Sign up
-                      </button>
+                      <FaSpinner className="animate-spin mr-2" />
+                      Verifying...
                     </>
                   ) : (
-                    <>
-                      Already have an account?{' '}
-                      <button
-                        type="button"
-                        onClick={() => setIsLogin(true)}
-                        className="font-medium text-primary hover:text-primary-dark"
-                      >
-                        Sign in
-                      </button>
-                    </>
+                    "Verify Email"
                   )}
-                </p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-    </div>
-  )
-}
+                </button>
 
-export default AuthForm
+                <p className="text-royal-600">
+                  Didn't receive the code?{" "}
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={isLoading}
+                    className="text-gold-600 hover:text-gold-700 font-medium"
+                  >
+                    Resend
+                  </button>
+                </p>
+              </form>
+            </div>
+          )}
+
+          {/* {activeTab === 'alumni-pending' && (
+            <div className="bg-white rounded-lg shadow-md p-8 text-center">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaClock className="text-yellow-600 text-2xl" />
+              </div>
+              <h2 className="text-2xl font-bold text-conces-blue mb-2">Alumni Verification Pending</h2>
+              <p className="text-royal-600 mb-6">Thank you for registering as a Branch Alumni. Your application is currently under review by our administrators.</p>
+              
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 text-left">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <FaInfoCircle className="text-yellow-400" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-700">
+                      You will receive an email notification once your alumni status has been verified. This process typically takes 1-2 business days.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setActiveTab('student-dashboard')}
+                className="w-full bg-royal-600 hover:bg-royal-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 mb-4"
+              >
+                Continue as Student
+              </button>
+              
+              <p className="text-royal-600">
+                Need help? <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">Contact Support</span>
+              </p>
+            </div>
+          )} */}
+        </div>
+      </div>
+
+      {/* Alumni Dashboard */}
+      {activeTab === "alumni-dashboard" && (
+        <div>
+          <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div className="flex items-center justify-between px-6 py-3">
+              <div className="flex items-center">
+                <div className="text-gold-600 text-2xl font-bold mr-8">
+                  CONCES
+                </div>
+                <nav className="hidden md:flex space-x-6">
+                  <span className="text-royal-900 font-medium hover:text-gold-600 transition-colors cursor-pointer">
+                    Home
+                  </span>
+                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
+                    Alumni Network
+                  </span>
+                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
+                    Guest Lectures
+                  </span>
+                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
+                    Mentorship
+                  </span>
+                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
+                    Job Board
+                  </span>
+                </nav>
+              </div>
+              <div className="flex items-center space-x-4">
+                <button className="text-royal-500 hover:text-gray-800">
+                  <FaBell />
+                </button>
+                <div className="relative">
+                  <button className="flex items-center text-gray-800 hover:text-royal-900">
+                    <img
+                      src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg"
+                      alt="User"
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="ml-2 font-medium hidden md:block">
+                      Robert Smith
+                    </span>
+                    <span className="ml-1 text-xs px-2 py-0.5 bg-gold-100 text-gold-700 rounded-full hidden md:block">
+                      Alumni
+                    </span>
+                    <FaChevronDown className="ml-1 text-xs" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 min-h-[calc(100vh-64px)]">
+            <div className="max-w-7xl mx-auto px-4 py-8">
+              <div className="bg-gradient-to-r from-gold-600 to-gold-800 rounded-lg p-6 mb-8">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                  <div>
+                    <h1 className="text-white text-2xl font-bold mb-2">
+                      Welcome back, Robert! 👋
+                    </h1>
+                    <p className="text-gold-100">
+                      Your alumni journey continues. Let's explore what's new
+                      today.
+                    </p>
+                  </div>
+                  <div className="mt-4 md:mt-0">
+                    <button className="bg-white text-gold-600 hover:bg-gold-50 px-4 py-2 rounded-md font-medium">
+                      View Your Network
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alumni-specific content goes here */}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 py-6 mt-8">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-sm text-royal-500">
+            © 2023 CONCES. All rights reserved.
+          </p>
+          <div className="mt-2 space-x-4">
+            <span className="text-gold-600 hover:text-gold-700 cursor-pointer">
+              Privacy Policy
+            </span>
+            <span className="text-gold-600 hover:text-gold-700 cursor-pointer">
+              Terms of Service
+            </span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default AuthForm;
