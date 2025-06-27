@@ -1,10 +1,19 @@
-// lib/axios.ts
 import axios from "axios";
 
-const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
- const URL = process.env.NODE_ENV === "production"?"linus":"http://localhost:3000/api"
+const isBrowser = typeof window !== "undefined";
+
+const hostname = isBrowser ? window.location.hostname : "localhost";
+
+// Dynamically build baseURL based on the device
+const baseURL =
+  process.env.NODE_ENV === "production"
+    ? "https://your-prod-domain.com/api"
+    : `http://${hostname}:3000/api`;
+
+const token = isBrowser ? localStorage.getItem("token") : null;
+
 const api = axios.create({
-  baseURL: URL, 
+  baseURL,
   headers: {
     "Content-Type": "application/json",
     ...(token && { Authorization: `Bearer ${token}` }),

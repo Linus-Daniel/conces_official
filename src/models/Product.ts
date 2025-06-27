@@ -6,6 +6,7 @@ export interface IProduct extends Document {
   description: string;
   price: number;
   images: string[];
+  branch:string
   category: ICategory['_id'];
   stock: number;
   featured: boolean;
@@ -20,7 +21,7 @@ const ProductSchema: Schema = new Schema(
     branch:{ type: String, required: true },
     price: { type: Number, required: true },
     images: { type: [String], required: true },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    category: { type:String, require:true },
     stock: { type: Number, default: 0 },
     featured: { type: Boolean, default: false },
   },

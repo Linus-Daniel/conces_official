@@ -4,6 +4,8 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import { hashPassword } from '@/lib/hash';
 import crypto from 'crypto';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../[...nextauth]/route';
 
 const verificationCodes = new Map<string, { email: string; code: string; expiresAt: number }>();
 
@@ -14,8 +16,16 @@ function generateVerificationCode(): string {
 export async function POST(req: NextRequest) {
   await dbConnect();
 
+  const session = await getServerSession(authOptions);
+  const isAdmin = session?.user?.role === 'admin';
+
   const body = await req.json();
   const { verificationCode, verificationId } = body;
+
+  if (isAdmin) {
+    // Bypass OTP verification for admin
+    return handleAdminRegistration(body);
+  }
 
   if (verificationCode && verificationId) {
     return handleVerification({ verificationCode, verificationId, userData: body });
@@ -25,10 +35,10 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleInitialRegistration(body: any) {
-  const { fullName, email, phone, institution, role, password } = body;
+  const { fullName, email, phone, institution, role, password,branch } = body;
 
   // Basic validation
-  if (!fullName || !email || !password || !role) {
+  if (!fullName || !email || !password || !role || !branch) {
     return NextResponse.json(
       { message: 'Please fill all required fields' },
       { status: 400 }
@@ -165,6 +175,61 @@ async function handleVerification(params: {
     );
   } catch (error) {
     console.error('Verification error:', error);
+    return NextResponse.json(
+      { message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleAdminRegistration(body: any) {
+  const { fullName, email, phone, institution, role, password,branch } = body;
+
+  // Basic validation
+  if (!fullName || !email || !password || !role || !branch) {
+    return NextResponse.json(
+      { message: 'Please fill all required fields' },
+      { status: 400 }
+    );
+  }
+
+  if (!['student', 'branch-admin', 'admin'].includes(role)) {
+    return NextResponse.json(
+      { message: 'Invalid role selected' },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { message: 'Email is already registered' },
+        { status: 409 }
+      );
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const newUser = new User({
+      fullName,
+      email,
+      phone,
+      institution,
+      role,
+      password: hashedPassword,
+      branch,
+      emailVerified: true,
+    });
+
+    await newUser.save();
+
+    return NextResponse.json(
+      { message: 'User registered successfully (admin bypass)' },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Admin registration error:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

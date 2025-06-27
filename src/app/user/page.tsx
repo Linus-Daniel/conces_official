@@ -15,24 +15,16 @@ import {
 } from "react-icons/fa";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 
-
 const UserDashboard = async () => {
-
-  const response = await getServerSession(authOptions)
-  const user = response?.user
+  const response = await getServerSession(authOptions);
+  const user = response?.user;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-semibold text-gray-800">
-              DashBoard
-            </h1>
-          </div>
-
+        <header className="bg-white border-b border-gray-200 p-1 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="relative">
               <input
@@ -45,7 +37,7 @@ const UserDashboard = async () => {
 
             <button className="relative text-gray-600 hover:text-conces-blue">
               <FaBell size={20} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full">  </span>
             </button>
 
             <button className="relative text-gray-600 hover:text-conces-blue">
@@ -65,13 +57,13 @@ const UserDashboard = async () => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+        <main className="flex-1 overflow-y-auto p-1 sm:p-6 bg-gray-50">
           <div>
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-conces-blue mb-4">
                 Welcome back, John!
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <DashboardCard
                   title="Upcoming Events"
                   count={3}

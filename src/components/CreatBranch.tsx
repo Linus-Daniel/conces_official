@@ -1,5 +1,6 @@
 'use client';
 
+import api from '@/lib/axiosInstance';
 import { useState } from 'react';
 import { FiX, FiMapPin, FiHome, FiUser, FiMail, FiPhone, FiLock } from 'react-icons/fi';
 
@@ -28,21 +29,16 @@ const CreateBranchModal = ({ isOpen, onClose, onSuccess }: CreateBranchModalProp
 
     try {
       // 1. Create branch
-      const branchRes = await fetch('/api/admin/branches', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: branchName, location: branchLocation }),
-      });
 
-      if (!branchRes.ok) {
-        const err = await branchRes.json();
-        throw new Error(err.message || 'Failed to create branch');
-      }
+      const response = await api.post("/branch",{branchName,branchLocation})
+      console.log("response",response.data.branch)
 
-      const branch = await branchRes.json();
+  
+
+      const branch = response.data.branch;
 
       // 2. Create branch admin linked to the branch
-      const adminRes = await fetch('/api/admin/users', {
+      const adminRes = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,7 +47,7 @@ const CreateBranchModal = ({ isOpen, onClose, onSuccess }: CreateBranchModalProp
           phone: adminPhone,
           password: adminPassword,
           role: 'branch-admin',
-          branch: branch.id, // or branch._id depending on your API response
+          branch: branch._id, // or branch._id depending on your API response
         }),
       });
 
@@ -87,7 +83,7 @@ const CreateBranchModal = ({ isOpen, onClose, onSuccess }: CreateBranchModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm  flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center sticky top-0 bg-white p-4 border-b z-10">
           <h2 className="text-xl font-semibold text-gray-900">Create New Branch and Admin</h2>

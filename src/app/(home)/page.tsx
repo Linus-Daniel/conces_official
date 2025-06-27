@@ -4,11 +4,11 @@ import Donate from "@/components/home/Donate";
 import Event from "@/components/home/Event";
 import Features from "@/components/home/Features";
 import Hero from "@/components/home/Hero";
-import Leaders from "@/components/home/Leaders";
 import Shop from "@/components/home/Shop";
 import Sponsor from "@/components/home/Sponsor";
 import Head from "next/head";
 import React from "react";
+import Testimonial from "@/components/home/Testimonials";
 
 function page() {
   return (
@@ -27,7 +27,7 @@ function page() {
 
       <Sponsor />
 
-      <Leaders />
+      <Testimonial />
 
       <Event />
 

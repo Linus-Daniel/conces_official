@@ -1,62 +1,97 @@
 "use client";
+
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ShoppingCartIcon, StarIcon } from "lucide-react";
+import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaShoppingCart } from "react-icons/fa";
 import { Product } from "@/types";
-import { FaHeart, FaStar } from "react-icons/fa6";
 
-type Props = { product: Product };
+type Props = { 
+  product: Product;
+};
 
-export default function ProductCard({product}:Props) {
+export default function ProductCard({ product }: Props) {
+  const rating = 4; // Replace with actual product rating
+  const reviewCount = 18; // Replace with actual review count
+  const isWishlisted = false; // Replace with actual wishlist state
 
   return (
     <motion.div
-      whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-      transition={{ duration: 0.3 }}
-      className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300"
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.2 }}
+      className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 hover:shadow-md"
     >
+      {/* Product Image with Wishlist Button */}
+      <div className="relative group">
+        <Link href={`/store/products/${product.id}`}>
+          <img
+            className="w-full h-32 sm:h-48 object-contain p-4 bg-gray-50"
+            src={product.images?.[0] || "/images/shirt.png"}
+            alt={product.name}
+          />
+        </Link>
+        
+        <button 
+          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-rose-50 hover:text-rose-500 transition-colors"
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          {isWishlisted ? (
+            <FaHeart className="text-rose-500" />
+          ) : (
+            <FaRegHeart className="text-gray-400 group-hover:text-rose-500" />
+          )}
+        </button>
+      </div>
 
+      {/* Product Details */}
+      <div className="p-4 space-y-2">
+        {/* Product Title */}
+        <Link href={`/store/products/${product.id}`}>
+          <h3 className="font-medium text-sm sm:text-md text-gray-900 line-clamp-2 hover:text-royal-DEFAULT">
+            {product.name}
+          </h3>
+        </Link>
 
-<div
-                  id="product-card-3"
-                  className="bg-white rounded-lg shadow-sm overflow-hidden transition hover:shadow-md"
-                >
-                  <Link href={`/store/products/${product.id}`} className="relative">
-                    <img
-                      className="w-full h-64 object-cover"
-                      src="https://storage.googleapis.com/uxpilot-auth.appspot.com/aacf65afde-9e8a27c8cab576d18a24.png"
-                      alt="eBook cover for Faith in Engineering showing bridge design with cross symbol, professional digital mockup"
-                    />
-                    <button className="absolute top-2 right-2 bg-white rounded-full p-2 text-gray-400 hover:text-royal-DEFAULT">
-                      <FaHeart className="fa-regular fa-heart" />
-                    </button>
-                  </Link>
-                  <div className="p-4">
-                    <h3 className="font-medium text-gray-900 mb-1">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center mb-2">
-                      <div className="flex text-gold">
-                        <FaStar className="fa-solid fa-star" />
-                        <FaStar className="fa-solid fa-star" />
-                        <FaStar className="fa-solid fa-star" />
-                        <FaStar className="fa-solid fa-star" />
-                        <FaStar className="fa-regular fa-star" />
-                      </div>
-                      <span className="text-xs text-gray-500 ml-1">(18)</span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                    {product.description}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-gold-DEFAULT text-lg">${product.price}</span>
-                      <button className="bg-royal-DEFAULT text-white px-3 py-2 rounded-full text-sm hover:bg-royal-dark transition">
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                </div>
-   
+        {/* Rating and Reviews */}
+        <div className="flex items-center gap-1">
+          <div className="flex text-amber-400">
+            {[...Array(5)].map((_, i) => (
+              i < Math.floor(rating) ? (
+                <FaStar key={i} className="w-3 h-3" />
+              ) : (
+                <FaRegStar key={i} className="w-3 h-3" />
+              )
+            ))}
+          </div>
+          <span className="text-xs text-gray-500">({reviewCount})</span>
+        </div>
+
+        {/* Price and Add to Cart */}
+        <div className="flex items-center justify-between pt-2">
+          <div className="space-y-1">
+            {product.discountPrice ? (
+              <>
+                <span className="font-bold text-lg text-royal-DEFAULT">
+                  ${product.discountPrice.toFixed(2)}
+                </span>
+                <span className="block text-xs text-gray-400 line-through">
+                  ${product.price.toFixed(2)}
+                </span>
+              </>
+            ) : (
+              <span className="font-bold text-lg text-royal-DEFAULT">
+                ${product.price.toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          <button 
+            className="p-2 rounded-full bg-royal-DEFAULT  text-white hover:bg-royal-detext-royal-DEFAULT-dark transition-colors"
+            aria-label="Add to cart"
+          >
+            <FaShoppingCart className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 }

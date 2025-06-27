@@ -17,7 +17,7 @@ const ResourceSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['Textbook', 'Lecture Note', 'Video', 'Article', 'Other'] // Optional: limit to specific types
+    enum: ['devotional', 'pdf', 'video', 'Article', 'Other'] // Optional: limit to specific types
   },
   tags: {
     type: [String],

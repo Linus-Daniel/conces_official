@@ -29,6 +29,7 @@ export const authOptions: NextAuthOptions = {
           institution: user.institution,
           phone: user.phone,
           role: user.role,
+          branch: user.branch
         };
       },
       
@@ -42,7 +43,8 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.institution = user.institution;
         token.phone = user.phone;
-        token.name = user.name; // include name explicitly (optional but good)
+        token.name = user.name;
+        token.branch = user.branch
       }
       return token;
     },
@@ -53,6 +55,7 @@ export const authOptions: NextAuthOptions = {
         session.user.institution = token.institution as string;
         session.user.phone = token.phone as string;
         session.user.name = token.name as string;
+        session.user.branch = token.branch as string
       }
       return session;
     },

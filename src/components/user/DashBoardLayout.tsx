@@ -133,7 +133,7 @@ const DashboardLayout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 overflow-y-auto p-4 pt-20 lg:pt-6">
+      <main className="flex-1 overflow-y-auto p-1 pt-20 lg:pt-6">
         <div className="bg-white text-gray-900 shadow p-4 rounded-lg min-h-[300px]">
           <SessionProvider>
             <SocketProvider>{children}</SocketProvider>

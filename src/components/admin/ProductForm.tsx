@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,26 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { ChevronLeft } from 'lucide-react';
-import Link from 'next/link';
 import { ICategory } from '@/models/Category';
-import { ImageUpload } from '@/components/admin/ImageUpload';
+import ImageUpload from '../ImageUpload';
+import { FaUpload, FaTimes } from 'react-icons/fa';
+import api from '@/lib/axiosInstance';
+import Link from 'next/link';
 
-export default function ProductForm({ categories }: { categories: Partial<ICategory[] >}) {
+interface ProductFormProps {
+  userRole: string;
+  branch: string;
+  categories: Partial<ICategory>[];
+  initialData?: any; // Add proper type for your product
+  onSuccess?: () => void;
+}
+ function ProductForm({ 
+  userRole, 
+  branch, 
+  categories, 
+  initialData, 
+  onSuccess 
+}: ProductFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,11 +36,37 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
     price: 0,
     category: '',
     stock: 0,
-    sku: '',
+    branch: userRole === 'admin' ? 'national' : branch,
     featured: false,
     images: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        description: initialData.description,
+        price: initialData.price,
+        category: initialData.category?.slug || initialData.category,
+        stock: initialData.stock,
+        branch: initialData.branch || (userRole === 'admin' ? 'national' : branch),
+        featured: initialData.featured || false,
+        images: initialData.images || [],
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        price: 0,
+        category: '',
+        stock: 0,
+        branch: userRole === 'admin' ? 'national' : branch,
+        featured: false,
+        images: [],
+      });
+    }
+  }, [initialData, userRole, branch]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -35,7 +76,6 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
     if (formData.price <= 0) newErrors.price = 'Price must be positive';
     if (!formData.category) newErrors.category = 'Category is required';
     if (formData.stock < 0) newErrors.stock = 'Stock must be positive';
-    if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
     if (formData.images.length === 0) newErrors.images = 'At least one image is required';
 
     setErrors(newErrors);
@@ -50,7 +90,21 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
     }));
   };
 
-   const handleSubmit = async (e: React.FormEvent) => {
+  const handleImageUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, url]
+    }));
+  };
+
+  const handleRemoveImage = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter(image => image !== url)
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -60,29 +114,33 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
 
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      const url = initialData 
+        ? `/api/admin/products/${initialData._id}`
+        : '/api/admin/products';
+      const method = initialData ? 'PUT' : 'POST';
+
+      const response = await api({
+        url,
+        method,
+        data: formData
       });
 
-      if (!response.ok) {
-        throw new Error(response.statusText);
+      toast.success(`Product ${initialData ? 'updated' : 'created'} successfully!`);
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/admin/store/products');
+        router.refresh();
       }
-
-      const result = await response.json();
-      toast.success('Product created successfully!');
-      router.push('/admin/store/products');
-      router.refresh();
     } catch (error) {
-      toast.error('Failed to create product. Please try again.');
+      toast.error(`Failed to ${initialData ? 'update' : 'create'} product. Please try again.`);
       console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="container py-6">
@@ -115,20 +173,24 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="sku">
-                SKU
+              <label className="block text-sm font-medium mb-1" htmlFor="branch">
+                Branch
               </label>
               <Input
-                id="sku"
-                name="sku"
-                value={formData.sku}
+                id="branch"
+                name="branch"
+                value={formData.branch}
                 onChange={handleChange}
-                placeholder="Enter product SKU"
+                disabled // Make it read-only since it's determined by role
+                placeholder="Branch"
               />
-              {errors.sku && <p className="text-sm text-red-500 mt-1">{errors.sku}</p>}
+              <p className="text-xs text-muted-foreground mt-1">
+                {userRole === 'admin' ? 'National (all branches)' : `Your branch: ${branch}`}
+              </p>
             </div>
           </div>
 
+          {/* Rest of your form remains the same */}
           <div>
             <label className="block text-sm font-medium mb-1" htmlFor="description">
               Description
@@ -182,15 +244,20 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
               </label>
               <Select
                 value={formData.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, category: value }));
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories?.map((category) => (
-                    <SelectItem key={category?._id as string} value={category?._id as string}>
-                      {category?.name}
+                  {categories?.map((category, index) => (
+                    <SelectItem 
+                      key={index} 
+                      value={category.slug as string}
+                    >
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -199,6 +266,7 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
             </div>
           </div>
 
+          {/* Rest of your form components... */}
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div>
               <label className="block text-sm font-medium" htmlFor="featured">
@@ -219,33 +287,63 @@ export default function ProductForm({ categories }: { categories: Partial<ICateg
             <label className="block text-sm font-medium mb-1">
               Product Images
             </label>
-            <ImageUpload
-              value={formData.images}
-              onChange={(urls:string[]) => setFormData(prev => ({ ...prev, images: urls }))}
-              onRemove={(url:string) => {
-                setFormData(prev => ({
-                  ...prev,
-                  images: prev.images.filter(image => image !== url)
-                }));
-              }}
-            />
-            {errors.images && <p className="text-sm text-red-500 mt-1">{errors.images}</p>}
+            <div className="space-y-4">
+              <ImageUpload
+                onSuccess={(info) => handleImageUpload(info.secure_url)}
+                folder="products/"
+              >
+                <div className="flex items-center justify-center p-4 border rounded-md cursor-pointer hover:bg-gray-50">
+                  <FaUpload className="mr-2" />
+                  Upload Images
+                </div>
+              </ImageUpload>
+              
+              {formData.images.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  {formData.images.map((image) => (
+                    <div key={image} className="relative group">
+                      <img
+                        src={image}
+                        alt="Product preview"
+                        className="rounded-md object-cover h-32 w-full"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(image)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <FaTimes className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {errors.images && <p className="text-sm text-red-500 mt-1">{errors.images}</p>}
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push('/admin/store/products')}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Product'}
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess ? () => onSuccess() : () => router.push('/admin/store/products')}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading 
+              ? initialData 
+                ? 'Updating...' 
+                : 'Creating...' 
+              : initialData 
+                ? 'Update Product' 
+                : 'Create Product'}
+          </Button>
+        </div>
         </form>
       </div>
     </div>
   );
 }
+
+export default ProductForm

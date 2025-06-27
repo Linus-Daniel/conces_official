@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link";
 import React, { useState } from "react";
 import { FaSearch, FaEdit, FaTrash, FaPlus, FaBook, FaFilePdf, FaVideo } from "react-icons/fa";
 
@@ -11,8 +12,8 @@ export type User = {
     branch?: string;
     status: 'active' | 'inactive';
     joinDate: string;
-  };
-  
+};
+
 
 export type Content = {
   id: string;
@@ -53,9 +54,9 @@ export default function ContentManagement() {
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-royal-DEFAULT">Resources Management</h2>
-        <button className="bg-royal-DEFAULT text-white px-4 py-2 rounded-lg flex items-center hover:bg-royal-dark transition">
+        <Link href={"/admin/resources/create"} className="bg-royal-DEFAULT text-white px-4 py-2 rounded-lg flex items-center hover:bg-royal-dark transition">
           <FaPlus className="mr-2" /> Add Resource
-        </button>
+        </Link>
       </div>
       
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">

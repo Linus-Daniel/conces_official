@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Head from "next/head";
 import BranchSummary from "@/components/ui/BranchSummary";
 import SearchFilters from "@/components/ui/SearchFilter";
@@ -8,12 +8,28 @@ import Pagination from "@/components/ui/Pagination";
 import CreateBranchModal from '@/components/CreatBranch';
 import { FiPlus } from 'react-icons/fi';
 import ViewActions from '@/components/ViewAction';
+import api from '@/lib/axiosInstance';
 
 const BranchOversight = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleSuccess = () => {
     setIsModalOpen(false);
   };
+
+   useEffect(()=>{
+      const fetchBranches = async ()=>{
+        try{
+            const response = await api.get("/branch")
+            console.log(response)
+        }catch(error){
+          console.log(error)
+        }
+      }
+
+      fetchBranches()
+   },[])
+
+
   const [branches, setBranches] = useState([
     {
       id: 1,

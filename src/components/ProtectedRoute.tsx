@@ -1,32 +1,23 @@
-// components/ProtectedRoute.tsx
+// app/protected/page.tsx or wherever your protected page is
 
-"use client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";// your NextAuth config
+import { redirect } from "next/navigation";
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-type ProtectedRouteProps = {
+type ProtectedPageProps = {
   expectedRole: string;
   children: React.ReactNode;
 };
 
-export default function ProtectedRoute({ expectedRole, children }: ProtectedRouteProps) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+export default async function ProtectedPage({ expectedRole, children }: ProtectedPageProps) {
+  const session = await getServerSession(authOptions);
 
-  useEffect(() => {
-    if (status === "loading") return;
+  if (!session) {
+    redirect("/auth");
+  }
 
-    if (!session) {
-      router.push("/auth");
-    } else if (session.user.role !== expectedRole) {
-      router.push("/unauthorized"); // You can customize this page
-    }
-  }, [status, session, expectedRole, router]);
-
-  if (status === "loading" || !session || session.user.role !== expectedRole) {
-    return <p>Loading...</p>;
+  if (session.user.role !== expectedRole) {
+    redirect("/unauthorized");
   }
 
   return <>{children}</>;

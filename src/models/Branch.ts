@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 export interface IBranch {
-    name: string;
-    location: string;
+    branchName: string;
+    branchLocation: string;
     motto: string;
     socialLinks?: {name:string; url:string}[];
     banner: string;
@@ -11,8 +11,8 @@ export interface IBranch {
 }
 
 const BranchSchema = new mongoose.Schema<IBranch>({
-    name: { type: String, required: true },
-    location: { type: String, required: true },
+    branchName: { type: String, required: true },
+    branchLocation: { type: String, required: true },
     motto: { type: String, required: false },
     socialLinks: [{ name: { type: String, required: false }, url: { type: String, required: false } }],
     banner: { type: String },

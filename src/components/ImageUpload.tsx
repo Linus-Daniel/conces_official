@@ -4,41 +4,59 @@ import { useState } from 'react';
 import { CldUploadWidget } from 'next-cloudinary';
 
 interface ImageUploadProps {
-  onUpload: (result: any) => void;
+  onSuccess: (result: any) => void;
   folder?: string;
   children: React.ReactNode;
 }
 
-export default function ImageUpload({ onUpload, folder, children }: ImageUploadProps) {
+export default function ImageUpload({ onSuccess, folder, children }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+  if (!uploadPreset) {
+    throw new Error('Cloudinary upload preset is not defined. Please set NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET.');
+  }
 
   return (
     <CldUploadWidget
-      uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+      uploadPreset={uploadPreset}
       options={{
         folder: folder || 'uploads',
         sources: ['local', 'url', 'camera'],
         multiple: false,
         maxFiles: 1,
       }}
-      onUpload={(result: any, widget) => {
-        if (result.event === 'success') {
-          onUpload(result.info);
+      onSuccess={(result: any) => {
+        if (result?.event === 'queues-start') {
+          setIsUploading(true);
+        }
+      
+        if (result?.event === 'success') {
+          setIsUploading(false);
+          console.log("UPLOAD SUCCESS INFO:", result.info); // ✅ log result.info
+          if (result.info) {
+            onSuccess(result.info);
+          }
+        }
+      
+        if (result?.event === 'queues-end') {
+          setIsUploading(false);
         }
       }}
+      
     >
-      {({ open }) => {
-        return (
-          <button
-            type="button"
-            onClick={() => open()}
-            disabled={isUploading}
-            className="relative"
-          >
-            {isUploading ? 'Uploading...' : children}
-          </button>
-        );
-      }}
+      {({ open }) => (
+        <button
+          type="button"
+          aria-label="Upload image"
+          onClick={() => open()}
+          disabled={isUploading}
+          className="relative px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isUploading ? 'Uploading...' : children}
+        </button>
+      )}
     </CldUploadWidget>
   );
 }

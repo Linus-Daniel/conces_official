@@ -13,7 +13,7 @@ import {
   FaMicrosoft,
   FaBell,
 } from "react-icons/fa6";
-import { FaInfoCircle, FaCheck, FaTimes, FaSpinner } from "react-icons/fa";
+import {FaSpinner } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
 import useAuthStore from "@/zustand/authStore";
 import { useRouter } from "next/navigation";
@@ -261,7 +261,7 @@ const AuthForm = () => {
           router.push("/admin");
           break;
         case "branch-admin":
-          router.push("/branch-admin");
+          router.push("/branch");
           break;
         case "alumni":
           router.push("/alumni");

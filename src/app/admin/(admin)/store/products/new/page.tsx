@@ -1,17 +1,50 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import ProductForm from '@/components/admin/ProductForm'
+import api from '@/lib/axiosInstance'
+import { ICategory } from '@/models/Category'
+import { getServerSession } from 'next-auth'
 import React from 'react'
 
 const  page = async () => {
-    const categories = [
-        { id: '1', name: 'Electronics' },
-        { id: '2', name: 'Books' },
-        { id: '3', name: 'Clothing' },
-        { id: '4', name: 'Home & Kitchen' },
-        { id: '5', name: 'Sports & Outdoors' }
+    const session = await getServerSession(authOptions)
+    const userRole = session?.user.role as string
+    let branchName;
+    if (userRole == "branch-adming"){
+      try{
+        const response = await api.get("/branches")
+        console.log(response.data)
+        branchName = response.data
+      }
+      catch(error){
+
+      }
+    }
+    const categories: Partial<ICategory>[] = [
+      {
+        name: "Shirts",
+        slug: "shirts"
+      },
+      {
+        name: "Wrist bangle",
+        slug: "wrist-band"
+      },
+      {
+        name: "Umbrellas",
+        slug: "umbrellas"
+      },
+      {
+        name: "shoes",
+        slug: "shoes"
+      },
+      {
+        name: "Holy books",
+        slug: "bible"
+      }
     ];
+  
   return (
     <div>
-            <ProductForm categories={categories} />
+            <ProductForm categories={categories} userRole={userRole} branch={branchName} />
     </div>
   )
 }

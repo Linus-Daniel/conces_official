@@ -2,7 +2,7 @@ import { FaSearch } from "react-icons/fa";
 
 export default function CommunityHeader() {
   return (
-    <section className="bg-white py-4 md:py-6 border-b sticky top-0 z-50">
+    <section className="bg-white py-4 md:py-6 border-b sticky top-0 z-30">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h1 className="text-2xl md:text-3xl font-bold text-royal-DEFAULT">

@@ -1,41 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaPray, FaCommentDots, FaLightbulb, FaPlus } from "react-icons/fa";
 import { PrayerWallItem,EventItem } from "@/app/(home)/community/page";
+import api from "@/lib/axiosInstance";
+import { Loader2 } from "lucide-react";
 
 type SidebarProps = {
-  prayerWallItems: PrayerWallItem[];
   upcomingEvents: EventItem[];
   onCreatePost: () => void;
 };
 
-export default function Sidebar({ prayerWallItems, upcomingEvents, onCreatePost }: SidebarProps) {
+export default function Sidebar({ upcomingEvents, onCreatePost }: SidebarProps) {
   return (
     <div className="w-full md:w-1/4 space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
-        <button
-          onClick={onCreatePost}
-          className="w-full bg-royal-DEFAULT text-white py-2 md:py-3 rounded-lg font-medium hover:bg-royal-dark transition duration-300 flex items-center justify-center"
-        >
-          <FaPlus className="mr-2" />
-          Create New Post
-        </button>
-        <div className="flex flex-col space-y-3 mt-4">
-          <button className="w-full text-left px-3 py-2 bg-gray-50 rounded-lg text-gray-700 hover:bg-gray-100 transition flex items-center text-sm">
-            <FaCommentDots className="text-royal-DEFAULT mr-2" />
-            Start Discussion
-          </button>
-          <button className="w-full text-left px-3 py-2 bg-gray-50 rounded-lg text-gray-700 hover:bg-gray-100 transition flex items-center text-sm">
-            <FaPray className="text-royal-DEFAULT mr-2" />
-            Submit Prayer Request
-          </button>
-          <button className="w-full text-left px-3 py-2 bg-gray-50 rounded-lg text-gray-700 hover:bg-gray-100 transition flex items-center text-sm">
-            <FaLightbulb className="text-royal-DEFAULT mr-2" />
-            Share Project Update
-          </button>
-        </div>
-      </div>
+   
 
-      <PrayerWall items={prayerWallItems} />
+      <PrayerWall />
       <UpcomingEvents events={upcomingEvents} />
       
       <div className="bg-gradient-to-r from-royal-DEFAULT to-royal-dark rounded-lg p-4 md:p-5 text-white">
@@ -52,7 +31,32 @@ export default function Sidebar({ prayerWallItems, upcomingEvents, onCreatePost 
   );
 }
 
-function PrayerWall({ items }: { items: PrayerWallItem[] }) {
+function PrayerWall() { 
+  const [prayers,setPrayers] = useState<PrayerWallItem[]>([])
+  const [loader,setLoader] = useState<boolean>(false)
+  useEffect(()=>{
+    const fetchPrayer = async()=>{
+      setLoader(true)
+      try{
+       const  response = await api.get("/prayer-request");
+       console.log(response.data)
+       setPrayers(response.data)
+       setLoader(false)
+      }
+      catch(error){
+        console.log(error,"Failed to fetch prayers")
+        setLoader(false)
+      }
+    }
+    fetchPrayer()
+  },[])
+  if (loader){
+return(
+  <div className="flex w-full h-full items-center justify-center">
+    <Loader2 className="animate-spin"/>
+    </div>
+)
+  }
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="bg-royal-DEFAULT text-white p-3 md:p-4 flex items-center justify-between">
@@ -62,19 +66,19 @@ function PrayerWall({ items }: { items: PrayerWallItem[] }) {
         </span>
       </div>
       <div className="p-3 md:p-4 space-y-4 max-h-[300px] overflow-y-auto">
-        {items.map(item => (
-          <div key={item.id} className="border-b border-gray-100 pb-3 last:border-0">
+        {prayers.map(item => (
+          <div key={item._id} className="border-b border-gray-100 pb-3 last:border-0">
             <div className="flex items-center mb-2">
               <img
-                src={item.author.avatar}
-                alt={item.author.name}
+                src={item.creator?.avatar}
+                alt={item.creator.fullName}
                 className="w-8 h-8 rounded-full mr-2"
               />
-              <p className="text-sm font-medium">{item.author.name}</p>
+              <p className="text-sm font-medium">{item.creator.fullName}</p>
             </div>
             <p className="text-sm text-gray-600 mb-2">{item.content}</p>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">{item.date}</span>
+              <span className="text-xs text-gray-500">{item.createdAt}</span>
               <button className="text-xs text-royal-DEFAULT hover:underline">
                 I've prayed ({item.prayed})
               </button>

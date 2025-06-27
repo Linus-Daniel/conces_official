@@ -49,7 +49,7 @@ const useAuthStore = create<AuthState>((set) => ({
   verificationStep: 'initial',
   verificationId: null,
 
-  login: async (email, password) => {
+  login: async (email:string, password:string) => {
     const res = await signIn("credentials", {
       redirect: false,
       email,

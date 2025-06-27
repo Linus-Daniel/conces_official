@@ -109,3 +109,67 @@ export interface Prayer {
   status: "pending" | "approved" | "rejected";
   prayedCount: number
 }
+
+
+
+
+export type OrderStatus = 'placed' | 'processed' | 'shipped' | 'delivered';
+
+export interface Products {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  color: string;
+  image: string;
+}
+
+export interface ShippingInfo {
+  name: string;
+  address: string;
+  method: string;
+}
+
+export interface PaymentInfo {
+  method: string;
+  date: string;
+  billingAddress: string;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  date: string;
+  status: OrderStatus;
+  progress: number;
+  trackingNumber: string;
+  carrier: string;
+  estimatedDelivery: string;
+  products: Products[];
+  shipping: ShippingInfo;
+  payment: PaymentInfo;
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  total: number;
+}
+
+
+
+export interface OrderItem {
+  id: string;
+  name: string;
+  image: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: string;
+  number: string;
+  date: string;
+  status: OrderStatus;
+  items: OrderItem[];
+  total: number;
+  deliveryDate: string;
+}
