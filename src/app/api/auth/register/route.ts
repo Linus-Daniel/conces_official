@@ -5,7 +5,7 @@ import User from '@/models/User';
 import { hashPassword } from '@/lib/hash';
 import crypto from 'crypto';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 
 const verificationCodes = new Map<string, { email: string; code: string; expiresAt: number }>();
 
@@ -38,14 +38,16 @@ async function handleInitialRegistration(body: any) {
   const { fullName, email, phone, institution, role, password,branch } = body;
 
   // Basic validation
-  if (!fullName || !email || !password || !role || !branch) {
+  if (!fullName || !email || !password || !role) {
+    console.log(fullName,email,password,role,branch)
     return NextResponse.json(
       { message: 'Please fill all required fields' },
       { status: 400 }
     );
   }
 
-  if (!['student', 'branch-admin', 'admin'].includes(role)) {
+  if (!['student', 'branch-admin', 'admin','alumni'].includes(role)) {
+    console.log(role)
     return NextResponse.json(
       { message: 'Invalid role selected' },
       { status: 400 }

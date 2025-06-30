@@ -1,4 +1,4 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/next-auth'
 import ProductForm from '@/components/admin/ProductForm'
 import api from '@/lib/axiosInstance'
 import { ICategory } from '@/models/Category'

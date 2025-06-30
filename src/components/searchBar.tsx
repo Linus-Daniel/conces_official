@@ -1,47 +1,56 @@
-// components/admin/SearchBar.tsx
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import { useDebounce } from "../hooks/hooks";
+import { useState } from "react";
+import axios from "axios";
 
-interface SearchBarProps {
-  placeholder?: string;
-  defaultValue?: string;
-}
+export default function ProductSearch() {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-export function SearchBar({ placeholder = "Search...", defaultValue = "" }: SearchBarProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(defaultValue);
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (debouncedSearchTerm) {
-      params.set("search", debouncedSearchTerm);
-      params.delete("page"); // Reset to first page when searching
-    } else {
-      params.delete("search");
+    try {
+      const response = await axios.get(`/api/search?q=${encodeURIComponent(query)}`);
+      setResults(response.data.products);
+    } catch (err) {
+      setError("Search failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    router.push(`?${params.toString()}`);
-  }, [debouncedSearchTerm, router, searchParams]);
+  };
 
   return (
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <FaSearch className="text-gray-400" />
-      </div>
-      <input
-        type="text"
-        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-royal-DEFAULT focus:border-royal-DEFAULT sm:text-sm"
-        placeholder={placeholder}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
+    <div className="p-4 max-w-xl mx-auto">
+      <form onSubmit={handleSearch} className="flex items-center space-x-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full px-4 py-2 border rounded-md"
+        />
+        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">
+          Search
+        </button>
+      </form>
+
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      {results.length > 0 && (
+        <ul className="space-y-2">
+          {results.map((product: any) => (
+            <li key={product._id} className="p-3 border rounded-md shadow-sm">
+              <h2 className="font-semibold">{product.name}</h2>
+              <p className="text-sm text-gray-500">Category: {product.category}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

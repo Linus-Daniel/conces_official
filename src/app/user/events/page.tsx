@@ -33,9 +33,7 @@ const Event = () => (
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-2xl font-bold text-conces-blue">Upcoming Events</h2>
-      <button className="bg-conces-blue text-white px-4 py-2 rounded-lg hover:bg-conces-blue-dark transition-colors">
-        Create Event
-      </button>
+      
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

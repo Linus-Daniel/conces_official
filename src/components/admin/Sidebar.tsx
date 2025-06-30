@@ -35,9 +35,7 @@ const menuItems = [
 
       { link: "/admin/store/products", label: "Products" },
       { link: "/admin/store/categories", label: "Categories" },
-      { link: "/admin/store/orders", label: "Orders" },
-      { link: "/admin/store/inventory", label: "Inventory" },
-      { link: "/admin/store/discounts", label: "Discounts" },
+      { link: "/admin/store/orders", label: "Orders" }
     ]
   },
   { link: "/admin/branches", label: "Branches", icon: FaMapMarkerAlt },

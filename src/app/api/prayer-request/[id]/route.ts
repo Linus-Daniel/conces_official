@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import PrayerRequest from "@/models/PrayerRequest";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/next-auth";
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     console.log("Database connected successfully for PUT");
@@ -19,7 +19,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const prayerRequestId = params.id;
+    // Await the params since it's now a Promise
+    const { id } = await params;
+    const prayerRequestId = id;
     const body = await request.json();
     console.log("Request body:", body);
 
@@ -69,7 +71,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
     console.log("Database connected successfully for DELETE");
@@ -84,7 +86,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const prayerRequestId = params.id;
+    // Await the params since it's now a Promise
+    const { id } = await params;
+    const prayerRequestId = id;
 
     // Find the prayer request and verify ownership
     const existingRequest = await PrayerRequest.findById(prayerRequestId);

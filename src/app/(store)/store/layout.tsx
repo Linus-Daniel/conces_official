@@ -1,8 +1,8 @@
+// app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import '@/app/(home)/globals.css';
-import Header from '@/components/store/Header';
-import Footer from '@/components/store/Footer';
+import StoreLayoutWrapper from '@/components/store/Wrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -11,18 +11,11 @@ export const metadata: Metadata = {
   description: 'Christian apparel, books, and devotionals',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-gray-50`}>
-        <Header />
-        {/* <PromoBanner /> */}
-        <main>{children}</main>
-        <Footer />
+    <html>
+      <body className="antialiased">
+        <StoreLayoutWrapper>{children}</StoreLayoutWrapper>
       </body>
     </html>
   );

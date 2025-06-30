@@ -1,10 +1,22 @@
-import { productData } from '@/constant'
+"use client"
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import ProductCard from '../ui/ProductCard'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
+import api from '@/lib/axiosInstance'
+import { IProduct } from '@/models/Product'
 
 function Shop() {
+  const [products,setProducts] = useState<IProduct[]>([])
+  useEffect(()=>{
+    const fetchProducts = async ()=>{
+      const response =await api.get("/store/products")
+      const productsData = response.data
+      setProducts(productsData)
+
+    }
+fetchProducts()
+  },[])
   return (
     <div>
         <section id="shop" className="py-20 bg-white">
@@ -26,7 +38,7 @@ function Shop() {
           <div className="relative">
             <div className="grid grid-cols-2 gap-2 md:grid-cols-2 lg:grid-cols-4">
               {
-                productData.map((product, index) => (
+                products.map((product, index) => (
                   <ProductCard product={product} key={index} />
                 ))
               }

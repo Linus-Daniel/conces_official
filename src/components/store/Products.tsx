@@ -4,8 +4,10 @@ import { FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import ProductCard from '../ui/ProductCard';
 import Link from 'next/link';
 import { productData } from '@/constant';
+import { IProduct } from '@/models/Product';
 
-export default function FeaturedProducts() {
+
+export default function FeaturedProducts({products}:{products:IProduct[]}) {
   return (
     <section className="py-12 bg-gray-100">
       <div className="container mx-auto px-4">
@@ -23,7 +25,7 @@ export default function FeaturedProducts() {
 
         <div className="relative">
           <div className="grid grid-cols-2 gap-2 md:grid-cols-2 lg:grid-cols-4">
-            {productData.map((product, index) => (
+            {products.map((product, index) => (
               <ProductCard product={product} key={index} />
             ))}
           </div>

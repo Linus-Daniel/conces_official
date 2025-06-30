@@ -7,7 +7,7 @@ type EventProps = {
     date: string;
     time: string;
     location: string;
-    type: 'worship' | 'bible_study' | 'community_service' | 'other';}
+    type: string;}
 };
 
 const EventCard = ({ event }:EventProps) => {

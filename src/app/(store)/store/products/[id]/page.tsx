@@ -1,59 +1,32 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { product as productData } from "@/constant";
 import { FaStar, FaRegStar, FaStarHalfAlt, FaHeart, FaSearch, FaMinus, FaPlus, FaCartPlus, FaWhatsapp, FaFacebookF, FaInstagram, FaTwitter, FaCcVisa, FaCcMastercard, FaShieldAlt, FaMoneyBillWave } from "react-icons/fa";
-
-type ProductVariant = {
-  name: string;
-  options: {
-    value: string;
-    label?: string;
-    stock?: number;
-    priceAdjustment?: number;
-    image?: string;
-  }[];
-};
-
-type Product = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  stock?: number;
-  variants?: ProductVariant[];
-  rating?: number;
-  reviews?: number;
-  isBestSeller?: boolean;
-  discountPercentage?: number;
-};
+import { IProduct } from "@/models/Product";
+import api from "@/lib/axiosInstance";
 
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const product = productData.find((item) => item.id === parseInt(id)) as Product;
+  const [product, setProducts] = useState<IProduct | null>(null)
+
+  useEffect(()=>{
+    const fetchProduct = async ()=>{
+      const response = await api.get(`/store/products/${id}`)
+      const data =  response.data
+      console.log(data)
+      setProducts(data)
+    }
+    fetchProduct()
+  },[id])
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-
-  // Initialize selected variants
-  useMemo(() => {
-    if (product?.variants) {
-      const initialVariants = product.variants.reduce((acc, variant) => {
-        // Find first in-stock option or fall back to first option
-        const availableOption = variant.options.find(opt => opt.stock !== 0) || variant.options[0];
-        acc[variant.name] = availableOption.value;
-        return acc;
-      }, {} as Record<string, string>);
-      setSelectedVariants(initialVariants);
-    }
-  }, [product]);
 
   if (!product) {
     return (
@@ -63,107 +36,33 @@ export default function ProductDetailPage() {
     );
   }
 
-  
-  // Calculate final price with variants
-  const finalPrice = useMemo(() => {
-    let price = product.price;
-    product.variants?.forEach(variant => {
-      const selectedOption = variant.options.find(
-        opt => opt.value === selectedVariants[variant.name]
-      );
-      if (selectedOption?.priceAdjustment) {
-        price += selectedOption.priceAdjustment;
-      }
-    });
-    return price;
-  }, [product, selectedVariants]);
-  
-  // Calculate available stock for current variant selection
-  const availableStock = useMemo(() => {
-    if (!product.variants) return product.stock || 0;
-    
-    // For products with variants, find the selected option's stock
-    let stock: number | undefined;
-    
-    product.variants.forEach(variant => {
-      const selectedOption = variant.options.find(
-        opt => opt.value === selectedVariants[variant.name]
-      );
-      
-      if (selectedOption?.stock !== undefined) {
-        if (stock === undefined || selectedOption.stock < stock) {
-          stock = selectedOption.stock;
-        }
-      }
-    });
-    
-    return stock ?? product.stock ?? 0;
-  }, [product, selectedVariants]);
-  
-  // Get variant image if available
-  const currentImage = useMemo(() => {
-    if (!product?.variants) return product?.images[selectedImage];
-    
-    // Check if any variant has an image for the current selection
-    for (const variant of product.variants) {
-      const selectedOption = variant.options.find(
-        opt => opt.value === selectedVariants[variant.name]
-      );
-      if (selectedOption?.image) return selectedOption.image;
-    }
-    
-    return product.images[selectedImage];
-  }, [product, selectedImage, selectedVariants]);
-  
-  console.log(currentImage)
+  const finalPrice = product.price;
+  const availableStock = product.stock || 0;
+  const currentImage = product?.images[selectedImage];
+console.log(typeof(product.images))
   const handleAddToCart = () => {
     if (!product || !product?.id || !product?.name) {
       console.error("Invalid product data.");
       return;
     }
-  
+
     const safeQuantity = Math.min(quantity, availableStock);
-  
-    const variants = product?.variants && selectedVariants
-      ? Object.entries(selectedVariants).map(([name, value]) => {
-          const variant = product.variants?.find(v => v.name === name);
-          const option = variant?.options?.find(o => o.value === value);
-  
-          return {
-            name,
-            value,
-            label: option?.label || value,
-          };
-        })
-      : [];
-  
+
     const cartItem = {
       productId: product.id,
       name: product.name,
       price: finalPrice,
       quantity: safeQuantity,
       image: currentImage,
-      variants,
       maxQuantity: availableStock,
     };
-  
-    // Replace with your cart context function
+
     console.log("Adding to cart:", cartItem);
-    // addToCart(cartItem);
-  
-    // Optionally show a toast
-    // toast.success("Added to cart!");
   };
-  
+
   const handleBuyNow = () => {
     handleAddToCart();
     router.push("/cart");
-  };
-
-  const handleVariantChange = (name: string, value: string) => {
-    setSelectedVariants(prev => ({ ...prev, [name]: value }));
-    // Reset to first image when variant changes (optional)
-    setSelectedImage(0);
   };
 
   const incrementQuantity = () => 
@@ -171,9 +70,6 @@ export default function ProductDetailPage() {
 
   const decrementQuantity = () => 
     setQuantity(q => Math.max(1, q - 1));
-
-  const discountPercentage = product.discountPercentage || 
-    Math.round(((product.price * 1.2 - product.price) / (product.price * 1.2)) * 100);
 
   return (
     <main className="bg-gray-50">
@@ -199,17 +95,7 @@ export default function ProductDetailPage() {
             {/* Image Gallery */}
             <div className="w-full lg:w-1/2">
               <div className="relative bg-white rounded-xl shadow-sm overflow-hidden mb-4">
-                {/* Badges */}
-                <div className="absolute top-4 left-4 z-10 flex gap-2">
-                  {product.isBestSeller && (
-                    <span className="bg-conces-blue text-white text-xs px-3 py-1 rounded-full">
-                      Best Seller
-                    </span>
-                  )}
-                  <span className="bg-red-500 text-white text-xs px-3 py-1 rounded-full">
-                    -{discountPercentage}%
-                  </span>
-                </div>
+                
                 
                 {/* Wishlist Button */}
                 <button
@@ -273,7 +159,7 @@ export default function ProductDetailPage() {
                 </h1>
 
                 {/* Rating */}
-                <div className="flex items-center gap-2 mb-4">
+                {/* <div className="flex items-center gap-2 mb-4">
                   <div className="flex text-conces-gold">
                     {[1, 2, 3, 4, 5].map((star) => (
                       star <= Math.floor(product.rating || 4.5) ? (
@@ -288,18 +174,18 @@ export default function ProductDetailPage() {
                   <span className="text-gray-600 text-sm">
                     {product.rating?.toFixed(1) || '4.5'} ({product.reviews || 126} reviews)
                   </span>
-                </div>
+                </div> */}
 
                 {/* Price */}
                 <div className="flex items-center gap-3 mb-6">
                   <span className="text-2xl font-bold text-conces-blue">
                     ₦{finalPrice.toLocaleString()}
                   </span>
-                  {discountPercentage > 0 && (
+                
                     <span className="text-gray-400 line-through">
                       ₦{(product.price * 1.2).toLocaleString()}
                     </span>
-                  )}
+                  
                   <span className={`px-2 py-1 rounded text-xs ${
                     availableStock > 0 
                       ? 'bg-green-100 text-green-700' 
@@ -321,38 +207,6 @@ export default function ProductDetailPage() {
                     </p>
                   </div>
                 </div>
-
-                {/* Variant Selectors */}
-                {product.variants?.map((variant) => (
-                  <div key={variant.name} className="mb-4">
-                    <label className="block text-gray-700 font-medium mb-2">
-                      {variant.name}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {variant.options.map((option) => (
-                        <button
-                          key={option.value}
-                          onClick={() => handleVariantChange(variant.name, option.value)}
-                          disabled={option.stock === 0}
-                          className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                            selectedVariants[variant.name] === option.value
-                              ? 'border-conces-blue bg-blue-50 text-conces-blue'
-                              : 'border-gray-300 hover:border-conces-blue'
-                          } ${
-                            option.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          {option.label || option.value}
-                          {option.stock !== undefined && (
-                            <span className="text-xs text-gray-500 ml-1">
-                              ({option.stock})
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
 
                 {/* Quantity Selector */}
                 <div className="mb-6">

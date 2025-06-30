@@ -23,7 +23,7 @@ export default function OrderStatus({
       id: 'delivered', 
       label: 'Delivered', 
       date: `Est. ${estimatedDelivery.split(' ').slice(0, 2).join(' ')}`, 
-      completed: status === 'delivered' 
+      completed: status === "DELIVERED" 
     }
   ];
 

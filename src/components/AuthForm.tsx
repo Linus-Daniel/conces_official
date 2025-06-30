@@ -463,8 +463,8 @@ const AuthForm = () => {
                       onChange={handleInputChange}
                       className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
                     >
-                      <option value="student">Student</option>
-                      <option value="alumni">Branch Alumni</option>
+                      <option value="student">student</option>
+                      <option value="alumni">alumni</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
                       <FaChevronDown />

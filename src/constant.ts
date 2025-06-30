@@ -180,81 +180,54 @@ export const product: Products[] = [
 
 
 import { Order } from '@/types';
+import { FaBible, FaPhotoVideo, FaTools } from "react-icons/fa";
+import { FaBriefcase, FaUsers, FaVideo } from "react-icons/fa6";
 
-export async function getOrders(): Promise<Order[]> {
-  // In a real app, this would fetch from your API
-  return [
-    {
-      id: '1',
-      number: 'RS-2023-456789',
-      date: 'October 15, 2023',
-      status: 'hipped',
-      items: [
-        {
-          id: '101',
-          name: 'Royal Blue Velvet Cushion',
-          image: '/placeholder-product.jpg',
-          quantity: 1,
-          price: 49.99
-        },
-        {
-          id: '102',
-          name: 'Gold Embroidered Throw Pillow',
-          image: '/placeholder-product.jpg',
-          quantity: 2,
-          price: 59.99
-        },
-        {
-          id: '103',
-          name: 'Regal Table Runner',
-          image: '/placeholder-product.jpg',
-          quantity: 1,
-          price: 39.99
-        }
-      ],
-      total: 225.94,
-      deliveryDate: 'October 22, 2023'
-    },
-    {
-      id: '2',
-      number: 'RS-2023-345678',
-      date: 'September 28, 2023',
-      status: 'Delivered',
-      items: [
-        {
-          id: '201',
-          name: 'Royal Ceramic Vase',
-          image: '/placeholder-product.jpg',
-          quantity: 1,
-          price: 89.99
-        },
-        {
-          id: '202',
-          name: 'Velvet Curtains',
-          image: '/placeholder-product.jpg',
-          quantity: 1,
-          price: 59.98
-        }
-      ],
-      total: 149.97,
-      deliveryDate: 'October 5, 2023'
-    },
-    {
-      id: '3',
-      number: 'RS-2023-234567',
-      date: 'September 15, 2023',
-      status: 'Processing',
-      items: [
-        {
-          id: '301',
-          name: 'Silk Pillowcase Set',
-          image: '/placeholder-product.jpg',
-          quantity: 1,
-          price: 89.98
-        }
-      ],
-      total: 89.98,
-      deliveryDate: 'September 18, 2023'
-    }
-  ];
-}
+
+
+
+
+export const categories = [
+  {
+    name: 'Engineering Resources',
+    count: 54,
+    icon: FaTools,
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+  },
+  {
+    name: 'Devotionals',
+    count: 37,
+    icon: FaBible,
+    bgColor: 'bg-purple-100',
+    iconColor: 'text-purple-600',
+  },
+  {
+    name: 'Career Resources',
+    count: 29,
+    icon: FaBriefcase,
+    bgColor: 'bg-green-100',
+    iconColor: 'text-green-600',
+  },
+  {
+    name: 'Seminars & Webinars',
+    count: 18,
+    icon: FaVideo,
+    bgColor: 'bg-red-100',
+    iconColor: 'text-red-600',
+  },
+  {
+    name: 'Community Content',
+    count: 42,
+    icon: FaUsers,
+    bgColor: 'bg-yellow-100',
+    iconColor: 'text-yellow-600',
+  },
+  {
+    name: 'Multimedia',
+    count: 23,
+    icon: FaPhotoVideo,
+    bgColor: 'bg-indigo-100',
+    iconColor: 'text-indigo-600',
+  },
+];

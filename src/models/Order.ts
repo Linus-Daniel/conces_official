@@ -3,6 +3,7 @@ import { IUser } from './User';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
+  PAID = 'PAID',
   PROCESSING = 'PROCESSING',
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
@@ -15,14 +16,29 @@ export interface IOrderItem {
   price: number;
 }
 
+export interface IShippingDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone: string;
+}
+
+
+
 export interface IOrder extends Document {
   user: IUser['_id'];
   items: IOrderItem[];
   total: number;
   status: OrderStatus;
+  shippingDetails: IShippingDetails;
   createdAt: Date;
   updatedAt: Date;
-}
+}  
 
 const OrderSchema: Schema = new Schema(
   {
@@ -39,6 +55,17 @@ const OrderSchema: Schema = new Schema(
       type: String,
       enum: Object.values(OrderStatus),
       default: OrderStatus.PENDING,
+    },
+    shippingDetails: {
+      firstName: { type: String, required: true },
+      lastName: { type: String, required: true },
+      email: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      postalCode: { type: String, required: true },
+      country: { type: String, required: true },
+      phone: { type: String, required: true },
     },
   },
   { timestamps: true }

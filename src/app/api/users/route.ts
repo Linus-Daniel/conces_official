@@ -1,9 +1,9 @@
 // app/api/users/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 
-export async function GET(res:NextResponse) {
+export async function GET(request: NextRequest) {
   try {
     await dbConnect();
     const users = await User.find({}).lean();

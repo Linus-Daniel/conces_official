@@ -1,5 +1,4 @@
 'use client';
-
 import {
   Table,
   TableBody,
@@ -14,12 +13,11 @@ import Link from 'next/link';
 import { IProduct } from '@/models/Product';
 import Image from 'next/image';
 import { Pagination } from '../Pagination';
-import { SearchBar } from '../searchBar';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
 import ProductForm from './ProductForm';
 import { ICategory } from '@/models/Category';
+import Modal from '../Modal';
 
 interface ProductTableProps {
   products: IProduct[];
@@ -85,7 +83,7 @@ export function ProductTable({
   return (
     <div>
       <div className="flex items-center w-full justify-between p-4 border-b">
-        <SearchBar 
+        <input
           placeholder="Search products..." 
           defaultValue={search}
         />   
@@ -153,14 +151,9 @@ export function ProductTable({
         />
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-      <DialogContent className="w-full h-full sm:w-[600px] sm:max-h-[90vh] sm:rounded-lg sm:p-4 p-2">
+      <Modal isOpen={isModalOpen} title='Product details' onClose={handleCloseModal}>
 
-          <DialogHeader>
-            <DialogTitle>
-              {editingProduct ? 'Edit Product' : 'Create New Product'}
-            </DialogTitle>
-          </DialogHeader>
+      
           <ProductForm 
             userRole={userRole}
             branch={branch}
@@ -168,8 +161,7 @@ export function ProductTable({
             initialData={editingProduct || undefined}
             onSuccess={handleCloseModal}
           />
-        </DialogContent>
-      </Dialog>
+      </Modal>
     </div>
   );
 }

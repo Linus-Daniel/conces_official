@@ -40,20 +40,7 @@ const stats = [
       textColor: 'text-red-600',
     },
   },
-  {
-    title: 'Top Performing',
-    value: 'UNILAG Branch',
-    icon: <FaTrophy className="text-yellow-600 text-xl" />,
-    iconBg: 'bg-yellow-100',
-    isText: true,
-  },
-  {
-    title: 'Least Active',
-    value: 'FUTO Branch',
-    icon: <FaBatteryQuarter className="text-gray-600 text-xl" />,
-    iconBg: 'bg-gray-100',
-    isText: true,
-  },
+
 ];
 
 const BranchSummary = () => {
@@ -76,9 +63,7 @@ const BranchSummary = () => {
                   </dt>
                   <dd className="flex items-baseline">
                     <div
-                      className={`${
-                        item.isText ? 'text-lg' : 'text-2xl'
-                      } font-semibold text-gray-900 truncate`}
+                    
                     >
                       {item.value}
                     </div>

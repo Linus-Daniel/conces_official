@@ -16,8 +16,8 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-gray-50`}>
+    <html>
+      <body className="antialiased">
         <BranchLayout>
           {children}
         </BranchLayout>

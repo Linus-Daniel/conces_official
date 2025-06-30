@@ -13,7 +13,7 @@ import {
   FaSearch,
   FaEnvelope,
 } from "react-icons/fa";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/next-auth";
 
 const UserDashboard = async () => {
   const response = await getServerSession(authOptions);

@@ -2,6 +2,7 @@
 import CheckoutForm, { formSchema } from '@/components/checkoutForm';
 import OrderSummary from '@/components/OrderSummary';
 import api from '@/lib/axiosInstance';
+import useCart from '@/zustand/useCart';
 import { useState } from 'react';
 import { z } from 'zod';
 
@@ -15,9 +16,12 @@ type OrderDetails = {
 export default function CheckoutPage() {
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const {cart} = useCart()
+  const{total} = cart
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
+    try {console.log(data)
+
       const res = await api.post('/store/payment', {
         shippingDetails: data,
       });
@@ -42,7 +46,7 @@ export default function CheckoutPage() {
       <div className="max-w-4xl mx-auto p-6">
         <h1 className="text-2xl font-bold text-conces-blue mb-6">Order Confirmed!</h1>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <p className="mb-4">Thank you for your order!</p>
+          <p className="mb-4">Thank you fo,r your order!</p>
           <p className="mb-4">Your order number is: <strong>{orderDetails.orderNumber}</strong></p>
           <p>A confirmation email has been sent to {orderDetails.customer.email}.</p>
         </div>
@@ -58,7 +62,7 @@ export default function CheckoutPage() {
           <CheckoutForm onSubmit={handleSubmit} />
         </div>
         <div className="md:w-1/3">
-          <OrderSummary items={[]} total={433} />
+          <OrderSummary items={[]} total={Math.round(total)} />
         </div>
       </div>
     </div>

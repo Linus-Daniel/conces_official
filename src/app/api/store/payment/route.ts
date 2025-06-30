@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { initializePayment } from '@/lib/paystack';
 import dbConnect from '@/lib/dbConnect';
+import Product from '@/models/Product';
 import Cart from '@/models/Cart';
 import Order from '@/models/Order';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
+import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +34,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
+    console.log(cart.total)
     // Create order
     const order = new Order({
       user: session.user.id,
@@ -42,7 +44,7 @@ export async function POST(request: Request) {
         price: item.price,
       })),
       total: cart.total,
-      shippingDetails,
+      shippingDetails:shippingDetails,
       status: 'PENDING',
     });
 
@@ -51,21 +53,26 @@ export async function POST(request: Request) {
     // Initialize Paystack payment
     const paymentData = await initializePayment({
       email: shippingDetails.email,
-      amount: cart.total * 100, // Paystack uses kobo
+      amount: Math.round(cart.total * 100), // Paystack uses kobo
       reference: `ORDER_${order._id}_${Date.now()}`,
       metadata: {
         orderId: order._id.toString(),
         userId: session.user.id,
       },
-      callback_url: `${process.env.NEXTAUTH_URL}/checkout/verify`,
+      callback_url: `${process.env.NEXTAUTH_URL}/store/checkout/verify`,
     });
 
     return NextResponse.json({
       authorizationUrl: paymentData.data.authorization_url,
     });
   } catch (error) {
+    console.log(error)
+    console.log('Registered models:', mongoose.modelNames());
+
     return NextResponse.json(
-      { error: 'Failed to initialize payment' },
+      { error: 'Failed to initialize payment' ,
+        message:error
+      },
       { status: 500 }
     );
   }

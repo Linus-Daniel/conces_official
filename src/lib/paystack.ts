@@ -16,12 +16,16 @@ export interface PaystackInitParams {
       body: JSON.stringify(params),
     });
   
+    const result = await response.json();
+  
     if (!response.ok) {
+      console.error("Paystack Init Error:", result); // 💥 log exact error
       throw new Error('Failed to initialize payment');
     }
   
-    return response.json();
+    return result;
   }
+  
   
   export async function verifyPayment(reference: string) {
     const response = await fetch(

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Product';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 import { getServerSession } from 'next-auth';
 
 export const dynamic = 'force-dynamic';

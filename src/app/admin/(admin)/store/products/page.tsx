@@ -6,10 +6,12 @@ import { getProducts } from '@/lib/actions/admin';
 export default async function AdminProductsPage({
   searchParams,
 }: {
-  searchParams: { page?: string; search?: string };
+  searchParams: Promise<{ page?: string; search?: string }>;
 }) {
-  const page = Number(searchParams.page) || 1;
-  const search = searchParams.search || '';
+  // Await the searchParams since it's now a Promise
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const search = params.search || '';
   const { products, totalPages } = await getProducts(page, search);
 
   return (
@@ -27,6 +29,10 @@ export default async function AdminProductsPage({
           page={page}
           totalPages={totalPages}
           search={search}
+          branch=''
+          categories={[]}
+          userRole=''
+          key={Math.random()}
         />
       </div>
     </div>

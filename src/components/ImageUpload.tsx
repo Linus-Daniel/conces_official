@@ -24,8 +24,8 @@ export default function ImageUpload({ onSuccess, folder, children }: ImageUpload
       options={{
         folder: folder || 'uploads',
         sources: ['local', 'url', 'camera'],
-        multiple: false,
-        maxFiles: 1,
+        multiple: true,
+        
       }}
       onSuccess={(result: any) => {
         if (result?.event === 'queues-start') {
@@ -46,17 +46,18 @@ export default function ImageUpload({ onSuccess, folder, children }: ImageUpload
       }}
       
     >
-      {({ open }) => (
-        <button
-          type="button"
-          aria-label="Upload image"
-          onClick={() => open()}
-          disabled={isUploading}
-          className="relative px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isUploading ? 'Uploading...' : children}
-        </button>
-      )}
+     {(options) => (
+  <button
+    type="button"
+    aria-label="Upload image"
+    onClick={() => options?.open?.()} // ✅ safer access
+    disabled={isUploading}
+    className="relative px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+  >
+    {isUploading ? 'Uploading...' : children}
+  </button>
+)}
+
     </CldUploadWidget>
   );
 }

@@ -3,13 +3,14 @@ import NextAuth from 'next-auth';
 declare module 'next-auth' {
   interface Session {
     user: {
-      branch: unknown;
+      branch: string;
         id:string
       name: string;
       email: string;
       role: string;
       institution:string;
-      phone:string
+      phone:string;
+      avatar:string
 
     };
   }
@@ -18,6 +19,9 @@ declare module 'next-auth' {
     role: string;
     phone:string;
     institution:string;
+    branch:string;
+    avatar:string
+
 
   }
 }

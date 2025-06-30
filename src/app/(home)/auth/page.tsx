@@ -1,10 +1,14 @@
-import AuthForm from '@/components/AuthForm'
-import React from 'react'
+import AuthForm from "@/components/AuthForm";
+import React, { Suspense } from "react";
 
 function page() {
   return (
-    <div><AuthForm /></div>
-  )
+    <div>
+      <Suspense>
+        <AuthForm />
+      </Suspense>
+    </div>
+  );
 }
 
-export default page
+export default page;

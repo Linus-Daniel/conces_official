@@ -3,7 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import Cart from '@/models/Cart';
 import Product from '@/models/Product';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,6 +124,49 @@ export async function DELETE(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to update cart' },
+      { status: 500 }
+    );
+  }
+}
+
+
+export async function PUT(request: Request) {
+  await dbConnect();
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { productId, quantity } = await request.json();
+
+    if (quantity < 1) {
+      return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 });
+    }
+
+    const cart = await Cart.findOne({ user: session.user.id });
+
+    if (!cart) {
+      return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+    }
+
+    const item = cart.items.find(
+      (item: any) => item.product.toString() === productId
+    );
+
+    if (!item) {
+      return NextResponse.json({ error: 'Product not in cart' }, { status: 404 });
+    }
+
+    item.quantity = quantity;
+    await cart.save();
+    await cart.populate('items.product');
+
+    return NextResponse.json(cart);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to update quantity' },
       { status: 500 }
     );
   }

@@ -1,11 +1,16 @@
 'use client';
 
-import { FaUser, FaSearch, FaHeart, FaBars } from 'react-icons/fa';
+import { FaUser, FaSearch, FaHeart, FaBars, FaUserAlt, FaUserCircle } from 'react-icons/fa';
 import Link from 'next/link';
 import SearchInput from './Search';
 import CartIcon from './CartIcon';
+import { useSession } from 'next-auth/react';
+import { User, User2 } from 'lucide-react';
 
 export default function Header() {
+  const {data} = useSession()
+  
+  const user = data?.user
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -16,9 +21,18 @@ export default function Header() {
             </p>
           </div>
           <div className="hidden md:flex space-x-4 text-sm">
-            <span className="flex items-center hover:text-royal-DEFAULT cursor-pointer">
+
+            { user?(<div className='flex items-center gap-3'>
+              <FaUserCircle size={25} className='text-royal-DEFAULT' />
+              <p>
+                {user?.name}
+              </p>
+            </div>):(
+
+              <span className="flex items-center hover:text-royal-DEFAULT cursor-pointer">
               <FaUser className="mr-1" /> Login / Register
-            </span>
+              </span>
+            )}
           </div>
         </div>
 

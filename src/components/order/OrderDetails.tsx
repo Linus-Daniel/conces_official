@@ -1,8 +1,8 @@
-import Header from './OrderHeader';
-import Footer from './Footer';
-import OrderStatus from './OrderStatus';
-import OrderSummary from './OrderSummary';
 import { Order } from '@/types';
+import Footer from './Footer';
+
+import OrderSummary from './OrderSummary';
+
 
 export default function OrderDetails({ order }: { order: Order }) {
   return (
@@ -10,17 +10,20 @@ export default function OrderDetails({ order }: { order: Order }) {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-royal-900 mb-2">Order #{order.orderNumber}</h1>
-            <p className="text-gray-600">Placed on {order.date}</p>
-          </div>
-
+            <h1 className="text-3xl font-bold text-royal-900 mb-2">Order #{order._id as string}</h1>
+            {new Date(order.createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })}          </div>
+{/* 
           <OrderStatus 
             status={order.status} 
-            progress={order.progress} 
+            progress={} 
             trackingNumber={order.trackingNumber} 
             carrier={order.carrier} 
             estimatedDelivery={order.estimatedDelivery} 
-          />
+          /> */}
 
           <OrderSummary order={order} />
 

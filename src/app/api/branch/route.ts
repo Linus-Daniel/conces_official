@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/next-auth";
 import { getServerSession } from "next-auth";
 import Branch from "@/models/Branch";
 import { NextRequest, NextResponse } from "next/server";

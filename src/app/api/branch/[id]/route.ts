@@ -1,10 +1,10 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/next-auth";
 import dbConnect from "@/lib/dbConnect";
 import Branch from "@/models/Branch";
 
-export async function GET(request: NextRequest,{params}:{params:{id:string}}) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
 
   const session = await getServerSession(authOptions);
@@ -18,7 +18,8 @@ export async function GET(request: NextRequest,{params}:{params:{id:string}}) {
     );
   }
 
-  const id = params.id;
+  // Await the params since it's now a Promise
+  const { id } = await params;
 
   if (!id) {
     console.log("Missing branch id");
@@ -52,9 +53,8 @@ export async function GET(request: NextRequest,{params}:{params:{id:string}}) {
   }
 }
 
-
 // UPDATE
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     await dbConnect();
   
     const session = await getServerSession(authOptions);
@@ -66,7 +66,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   
     try {
       const body = await request.json();
-      const branch = await Branch.findByIdAndUpdate(params.id, body, { new: true });
+      // Await the params since it's now a Promise
+      const { id } = await params;
+      const branch = await Branch.findByIdAndUpdate(id, body, { new: true });
   
       if (!branch) {
         return NextResponse.json({ error: "Branch not found" }, { status: 404 });
@@ -80,7 +82,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
   
   // DELETE
-  export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+  export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     await dbConnect();
   
     const session = await getServerSession(authOptions);
@@ -91,7 +93,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
   
     try {
-      const deleted = await Branch.findByIdAndDelete(params.id);
+      // Await the params since it's now a Promise
+      const { id } = await params;
+      const deleted = await Branch.findByIdAndDelete(id);
   
       if (!deleted) {
         return NextResponse.json({ error: "Branch not found" }, { status: 404 });

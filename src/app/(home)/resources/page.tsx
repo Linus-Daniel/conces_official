@@ -1,55 +1,13 @@
 import CategoryCard from "@/components/ui/CategoryCard";
 import ResourceCard from "@/components/ui/ResourceCard";
+import { categories } from "@/constant";
 import { Resources } from "@/types";
 import React from "react";
 import { FaBible, FaExternalLinkAlt, FaPhotoVideo, FaPray, FaSearch, FaTools } from "react-icons/fa";
 import { FaBars, FaBook, FaBookmark, FaBookOpen, FaBorderAll, FaBriefcase, FaDownload, FaEye, FaFileExcel, FaFilePdf, FaPlay, FaShare, FaUpload, FaUsers, FaVideo } from "react-icons/fa6";
 
 
-export const categories = [
-  {
-    name: 'Engineering Resources',
-    count: 54,
-    icon: FaTools,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-  },
-  {
-    name: 'Devotionals',
-    count: 37,
-    icon: FaBible,
-    bgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-  },
-  {
-    name: 'Career Resources',
-    count: 29,
-    icon: FaBriefcase,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600',
-  },
-  {
-    name: 'Seminars & Webinars',
-    count: 18,
-    icon: FaVideo,
-    bgColor: 'bg-red-100',
-    iconColor: 'text-red-600',
-  },
-  {
-    name: 'Community Content',
-    count: 42,
-    icon: FaUsers,
-    bgColor: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
-  },
-  {
-    name: 'Multimedia',
-    count: 23,
-    icon: FaPhotoVideo,
-    bgColor: 'bg-indigo-100',
-    iconColor: 'text-indigo-600',
-  },
-];
+
 
 
 

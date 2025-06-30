@@ -15,6 +15,8 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
+  FaShoppingCart,
+  FaShoppingBag,
 } from "react-icons/fa";
 
 import Link from "next/link";
@@ -32,28 +34,23 @@ const DashboardLayout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const navItems = [
-    { icon: <FaUser />, name: "Dashboard", link: "" },
-    { icon: <FaCalendarAlt />, name: "Events", link: "events" },
-    { icon: <FaBook />, name: "Resources", link: "resources" },
-    { icon: <FaChalkboardTeacher />, name: "Mentorship", link: "mentorship" },
-    { icon: <FaPrayingHands />, name: "Prayer Wall", link: "prayer" },
-    { icon: <FaNetworkWired />, name: "Alumni Network", link: "network" },
-    { icon: <FaBriefcase />, name: "Career Hub", link: "career" },
-    {
-      icon: <FaGraduationCap />,
-      name: "Certifications",
-      link: "certifications",
-    },
-    { icon: <FaTrophy />, name: "Competitions", link: "competitions" },
-    { icon: <FaHandsHelping />, name: "Community Service", link: "service" },
-    { icon: <FaComments />, name: "Forums", link: "forums" },
+    { icon: <FaUser />, name: "Dashboard", link: "/user/" },
+    { icon: <FaCalendarAlt />, name: "Events", link: "/user/events" },
+    { icon: <FaBook />, name: "Resources", link: "/user/resources" },
+    { icon: <FaChalkboardTeacher />, name: "Mentorship", link: "/user/mentorship" },
+    { icon: <FaPrayingHands />, name: "Prayer Wall", link: "/user/prayer" },
+    { icon: <FaBriefcase />, name: "Career Hub", link: "/user/career" },
+    { icon: <FaHandsHelping />, name: "Community Service", link: "/user/service" },
+    { icon: <FaShoppingCart />, name: "store", link: "/store" },
+    { icon: <FaShoppingBag />, name: "orders", link: "/user/orders" },
+
   ];
 
   const NavLink = ({ item }: { item: (typeof navItems)[0] }) => (
-    <Link key={item.name} href={`/user/${item.link}`}>
+    <Link key={item.name} href={item.link}>
       <div
         className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-conces-blue-dark transition-colors ${
-          pathname === `/user/${item.link}`
+          pathname === `${item.link}`
             ? "bg-conces-blue-dark text-white"
             : "text-gray-200"
         }`}

@@ -3,7 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import Resource from '@/models/Resources';
 import mongoose from 'mongoose';
 import { getServerSession } from "next-auth/next";  // or your auth method
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 
 async function getUserFromSession(req: NextRequest) {
   const session = await getServerSession( authOptions);
@@ -11,10 +11,11 @@ async function getUserFromSession(req: NextRequest) {
   return session.user; // assume it contains { id, role }
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
 
-  const { id } = params;
+  // Await the params since it's now a Promise
+  const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ error: 'Invalid resource ID' }, { status: 400 });
   }
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
 
   const user = await getUserFromSession(req);
@@ -38,7 +39,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = params;
+  // Await the params since it's now a Promise
+  const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ error: 'Invalid resource ID' }, { status: 400 });
   }
@@ -69,7 +71,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   await dbConnect();
 
   const user = await getUserFromSession(req);
@@ -77,7 +79,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id } = params;
+  // Await the params since it's now a Promise
+  const { id } = await params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json({ error: 'Invalid resource ID' }, { status: 400 });
   }

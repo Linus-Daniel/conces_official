@@ -20,7 +20,7 @@ interface AuthState {
   token: string | null;
   verificationStep: 'initial' | 'verification' | 'complete';
   verificationId: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<string>;
   logout: () => Promise<void>;
   register: (data: {
     fullName: string;

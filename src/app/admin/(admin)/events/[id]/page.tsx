@@ -2,22 +2,24 @@
 'use client';
 
 import EventForm from '@/components/admin/EventForm';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { extractPublicId } from '@/lib/cloudinary-client';
 
-export default function EditEventPage({ params }: { params: { id: string } }) {
+export default function EditEventPage() {
   const router = useRouter();
   const [event, setEvent] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const params = useParams();
+  const id = params.id as string
   const { data: session } = useSession();
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await fetch(`/api/events/${params.id}`);
+        const response = await fetch(`/api/events/${id}`);
         if (response.ok) {
           const data = await response.json();
           setEvent(data);
@@ -32,7 +34,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     };
 
     fetchEvent();
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);

@@ -2,16 +2,19 @@ import { NextResponse } from 'next/server';
 import Events from '@/models/Events';
 import dbConnect from '@/lib/dbConnect';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     
-    const event = await Events.findOne({ id: params.id });
+    // Await the params since it's now a Promise
+    const { id } = await params;
+    
+    const event = await Events.findOne({ id });
     if (!event) {
       return NextResponse.json(
         { message: 'Event not found' },
@@ -30,7 +33,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   
@@ -44,9 +47,12 @@ export async function PUT(
   try {
     await dbConnect();
     
+    // Await the params since it's now a Promise
+    const { id } = await params;
+    
     const body = await request.json();
     const updatedEvent = await Events.findOneAndUpdate(
-      { id: params.id },
+      { id },
       body,
       { new: true }
     );
@@ -69,7 +75,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   
@@ -83,7 +89,10 @@ export async function DELETE(
   try {
     await dbConnect();
     
-    const deletedEvent = await Events.findOneAndDelete({ id: params.id });
+    // Await the params since it's now a Promise
+    const { id } = await params;
+    
+    const deletedEvent = await Events.findOneAndDelete({ id });
     
     if (!deletedEvent) {
       return NextResponse.json(

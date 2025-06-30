@@ -7,23 +7,23 @@ export default function OrderSummary({ order }: { order: Order }) {
       <h2 className="text-xl font-bold text-royal-900 mb-6">Order Details</h2>
       
       <div className="space-y-6">
-        {order.products.map((product) => (
-          <div key={product.id} className="flex flex-col sm:flex-row gap-4 py-4 border-b border-gray-200">
+        {order.items.map((product) => (
+          <div key={product._id} className="flex flex-col sm:flex-row gap-4 py-4 border-b border-gray-200">
             <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-md overflow-hidden">
-              <Image 
-                src={product.image} 
+              {/* <Image 
+                src={product.image[0]} 
                 alt={product.name} 
                 width={96}
                 height={96}
                 className="w-full h-full object-cover"
-              />
+              /> */}
             </div>
             <div className="flex-1">
               <div className="flex justify-between">
-                <h3 className="text-lg font-medium text-royal-900">{product.name}</h3>
+                {/* <h3 className="text-lg font-medium text-royal-900">{product.name}</h3> */}
                 <p className="text-lg font-bold text-royal-900">${(product.price * product.quantity).toFixed(2)}</p>
               </div>
-              <p className="text-gray-600 mt-1">Color: {product.color}</p>
+              {/* <p className="text-gray-600 mt-1">Color: {product.color}</p> */}
               <p className="text-gray-600">Qty: {product.quantity}</p>
             </div>
           </div>
@@ -36,13 +36,13 @@ export default function OrderSummary({ order }: { order: Order }) {
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-2">Shipping Address</h4>
             <address className="not-italic text-gray-600 whitespace-pre-line">
-              {order.shipping.address}
+              {order.shippingDetails.address}
             </address>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-2">Shipping Method</h4>
-            <p className="text-gray-600">{order.shipping.method}</p>
-            <p className="text-gray-600">Estimated delivery: {order.estimatedDelivery}</p>
+            <p className="text-gray-600">Paystack</p>
+            <p className="text-gray-600">Estimated delivery: 10 days time</p>
           </div>
         </div>
       </div>
@@ -60,15 +60,14 @@ export default function OrderSummary({ order }: { order: Order }) {
                 </svg>
               </div>
               <div>
-                <p className="text-gray-600">{order.payment.method}</p>
-                <p className="text-xs text-gray-500">Paid on {order.payment.date}</p>
+                
               </div>
             </div>
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-2">Billing Address</h4>
             <address className="not-italic text-gray-600 whitespace-pre-line">
-              {order.payment.billingAddress}
+              {order.shippingDetails.country}
             </address>
           </div>
         </div>
@@ -79,16 +78,9 @@ export default function OrderSummary({ order }: { order: Order }) {
         <div className="space-y-4">
           <div className="flex justify-between">
             <span className="text-gray-600">Subtotal</span>
-            <span className="font-medium">${order.subtotal.toFixed(2)}</span>
+            <span className="font-medium">${order.total }</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Shipping</span>
-            <span className="font-medium">${order.shippingCost.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Tax</span>
-            <span className="font-medium">${order.tax.toFixed(2)}</span>
-          </div>
+         
           <div className="border-t border-gray-200 pt-4 flex justify-between">
             <span className="text-lg font-bold text-royal-900">Total</span>
             <span className="text-lg font-bold text-royal-900">${order.total.toFixed(2)}</span>

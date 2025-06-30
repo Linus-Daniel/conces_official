@@ -209,3 +209,5 @@ const ProfileContent = () => (
     </div>
   </div>
 );
+
+export default ProfileContent

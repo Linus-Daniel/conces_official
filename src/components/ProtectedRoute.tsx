@@ -1,7 +1,7 @@
 // app/protected/page.tsx or wherever your protected page is
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";// your NextAuth config
+import { authOptions } from "@/lib/next-auth";// your NextAuth config
 import { redirect } from "next/navigation";
 
 type ProtectedPageProps = {

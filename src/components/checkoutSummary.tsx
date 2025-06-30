@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { ICart } from '@/models/Cart';
-import { formatCurrency } from '@/lib/utils';
 
 export default function CartSummary({ cart }: { cart: ICart }) {
   return (
@@ -10,7 +9,7 @@ export default function CartSummary({ cart }: { cart: ICart }) {
       <div className="space-y-2 mb-6">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span>{formatCurrency(cart.total)}</span>
+          <span>{cart.total}</span>
         </div>
         <div className="flex justify-between">
           <span>Shipping</span>
@@ -18,11 +17,11 @@ export default function CartSummary({ cart }: { cart: ICart }) {
         </div>
         <div className="flex justify-between border-t pt-2 mt-2">
           <span className="font-semibold">Total</span>
-          <span className="font-semibold">{formatCurrency(cart.total)}</span>
+          <span className="font-semibold">{cart.total}</span>
         </div>
       </div>
 
-      <Button className="w-full" onClick={initiatePayment}>
+      <Button className="w-full" >
         Proceed to Payment
       </Button>
     </div>

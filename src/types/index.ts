@@ -113,8 +113,6 @@ export interface Prayer {
 
 
 
-export type OrderStatus = 'placed' | 'processed' | 'shipped' | 'delivered';
-
 export interface Products {
   id: string;
   name: string;
@@ -136,40 +134,44 @@ export interface PaymentInfo {
   billingAddress: string;
 }
 
-export interface Order {
-  id: string;
-  orderNumber: string;
-  date: string;
-  status: OrderStatus;
-  progress: number;
-  trackingNumber: string;
-  carrier: string;
-  estimatedDelivery: string;
-  products: Products[];
-  shipping: ShippingInfo;
-  payment: PaymentInfo;
-  subtotal: number;
-  shippingCost: number;
-  tax: number;
-  total: number;
-}
 
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'PAID';
 
-
-export interface OrderItem {
-  id: string;
-  name: string;
-  image: string;
+interface OrderItem {
+  _id: string;
+  product: {
+    _id: string;
+    name: string;
+    price: number;
+    images: string[];
+  };
   quantity: number;
   price: number;
 }
 
+interface ShippingDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+}
+
 export interface Order {
-  id: string;
-  number: string;
-  date: string;
-  status: OrderStatus;
+  _id: string;
+  user: {
+    _id: string;
+    fullName: string;
+    email: string;
+  };
   items: OrderItem[];
+  shippingDetails: ShippingDetails;
+  status: OrderStatus;
   total: number;
-  deliveryDate: string;
+  createdAt: string;
+  updatedAt: string;
 }

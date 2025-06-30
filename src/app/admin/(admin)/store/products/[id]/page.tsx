@@ -5,9 +5,12 @@ import { getCategories } from '../../../../../../lib/actions/admin';
 export default async function EditProductPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const product = await getProductById(params.id);
+  // Await the params since it's now a Promise
+  const { id } = await params;
+  
+  const product = await getProductById(id);
   const categories = await getCategories();
 
   return (
@@ -20,8 +23,9 @@ export default async function EditProductPage({
 
       <div className="bg-white rounded-lg shadow p-6">
         <ProductForm 
-          product={product} 
           categories={categories} 
+          userRole=''
+          branch=''
         />
       </div>
     </div>

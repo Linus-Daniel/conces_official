@@ -383,7 +383,7 @@ export default function ResourceForm() {
                         {previewMode ? "Edit Content" : "Preview"}
                       </button>
                     </div>
-                    {previewMode ? (
+                    {/* {previewMode ? (
                       <div
                         className="prose max-w-none p-4 border border-gray-300 rounded-md"
                         dangerouslySetInnerHTML={{ __html: resource.content }}
@@ -394,7 +394,7 @@ export default function ResourceForm() {
                         onChange={handleContentChange}
                         className="border border-gray-300 rounded-md min-h-[300px]"
                       />
-                    )}
+                    )} */}
                   </div>
                 )}
 
