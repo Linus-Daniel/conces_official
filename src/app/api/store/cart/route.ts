@@ -75,6 +75,7 @@ export async function POST(request: Request) {
       cart.items.push({
         product: productId,
         quantity,
+        branch:product.branch,
         price: product.price,
       });
     }
@@ -122,8 +123,11 @@ export async function DELETE(request: Request) {
     
     return NextResponse.json(cart);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
-      { error: 'Failed to update cart' },
+      { error: 'Failed to update cart',
+        message:error
+       },
       { status: 500 }
     );
   }

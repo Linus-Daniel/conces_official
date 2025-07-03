@@ -34,7 +34,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    console.log(cart.total)
     // Create order
     const order = new Order({
       user: session.user.id,
@@ -42,6 +41,7 @@ export async function POST(request: Request) {
         product: item.product._id,
         quantity: item.quantity,
         price: item.price,
+        branch:item.branch
       })),
       total: cart.total,
       shippingDetails:shippingDetails,

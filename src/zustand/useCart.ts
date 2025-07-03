@@ -14,6 +14,7 @@ interface CartItem {
   };
   quantity: number;
   price: number;
+  branch:string
 }
 
 interface Cart {

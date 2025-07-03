@@ -23,14 +23,17 @@ export interface Category {
 
 
 export interface Resources {
-  id: string;
+  _id: string;
   title: string;
   type: string;
+  featured:boolean;
   author: string;
   date: string;
   content?:string;
+  category:string;
   videoUrl?: string;
   duration?: string;
+  createdAt: string |Date
   description: string;
   thumbnail: string;
   fileUrl?: string;
@@ -40,20 +43,7 @@ export interface Resources {
   relatedResources?:string[];
 }
 
-export type Resource = {
-  id: string;
-  title: string;
-  type: 'devotional' | 'pdf' | 'video' | 'blog';
-  category: string;
-  description: string;
-  content?: string; // For blog/devotional
-  fileUrl?: string; // For PDF/video
-  author: string;
-  date: string;
-  views: number;
-  tags?: string[];
-  featured?: boolean;
-};
+
 
 export interface IEvent {
   id: string;

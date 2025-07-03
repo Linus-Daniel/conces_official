@@ -20,13 +20,17 @@ interface ProductFormProps {
   categories: Partial<ICategory>[];
   initialData?: any; // Add proper type for your product
   onSuccess?: () => void;
+  url:string,
+  branchId:string
 }
  function ProductForm({ 
   userRole, 
   branch, 
   categories, 
   initialData, 
-  onSuccess 
+  branchId,
+  onSuccess ,
+  url
 }: ProductFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +40,7 @@ interface ProductFormProps {
     price: 0,
     category: '',
     stock: 0,
-    branch: userRole === 'admin' ? 'national' : branch,
+    branch: branchId,
     featured: false,
     images: [] as string[],
   });
@@ -115,8 +119,8 @@ interface ProductFormProps {
     try {
       setIsLoading(true);
       const url = initialData 
-        ? `/api/admin/products/${initialData._id}`
-        : '/api/admin/products';
+        ? `/store/products/${initialData._id}`
+        : '/store/products';
       const method = initialData ? 'PUT' : 'POST';
 
       const response = await api({
@@ -130,7 +134,7 @@ interface ProductFormProps {
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push('/admin/store/products');
+        router.push(`/${url}/store/products`);
         router.refresh();
       }
     } catch (error) {

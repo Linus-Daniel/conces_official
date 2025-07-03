@@ -8,7 +8,6 @@ type FilterTabsProps = {
 const tabs = [
   { id: 'all', label: 'All Posts' },
   { id: 'discussion', label: 'Discussions' },
-  { id: 'prayer', label: 'Prayer Requests' },
   { id: 'project', label: 'Project Updates' },
   { id: 'announcement', label: 'Announcements' }
 ];

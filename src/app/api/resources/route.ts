@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     }
 
     const userRole = session.user.role;
-    const allowedRoles = ['admin', 'branch admin'];
+    const allowedRoles = ['admin', 'branch-admin', 'alumni'];
+    const branch =session?.user.branch
 
     if (!allowedRoles.includes(userRole)) {
       console.warn(`Forbidden access by user with role: ${userRole}`);
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const requiredFields = ['title', 'description', 'thumbnail', 'type', 'author', 'date'];
+    const requiredFields = ['title', 'description', 'thumbnail', 'type', 'author',];
     const missingFields = requiredFields.filter((field) => !body[field]);
 
     if (missingFields.length > 0) {
@@ -46,18 +47,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { title, description, thumbnail, type, tags = [], author, date } = body;
+    const { title, category,featured, description,fileUrl,videoUrl, thumbnail, type,content, tags = [], author, } = body;
+    
 
-    console.log('Creating resource:', { title, description, type, author, date });
-
+    console.log('Creating resource:', { title,featured, branch, description, type, author, fileUrl,videoUrl, category, content });
+    console.log(branch)
     const newResource = await Resource.create({
       title,
       description,
       thumbnail,
+      category,
+      branch,
       type,
       tags,
       author,
-      date,
+      fileUrl,
+      featured,
+      videoUrl,
+      content,
     });
 
     console.log('Resource created successfully:', newResource._id);

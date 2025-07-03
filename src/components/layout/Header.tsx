@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import useAuthStore from "@/zustand/authStore";
+import Image from "next/image";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -14,6 +15,8 @@ const navLinks = [
   { name: "Community", href: "/community" },
   { name: "Resources", href: "/resources" },
   { name: "Alumni", href: "/alumni" },
+  { name: "Testimony", href: "/testimony" },
+
 ];
 
 function Header() {
@@ -69,12 +72,13 @@ function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <div className="h-10 w-10 bg-primary-dark rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">C</span>
+            <div className="h-14 p-1 w-14 bg-primary-dark rounded-full flex items-center justify-center">
+            <Image src={"/images/logo.png"} alt="logo image" width={70} height={70}/>
             </div>
             <span className="ml-2 text-xl font-bold text-primary-dark">
               CONCES
             </span>
+
           </Link>
 
           {/* Desktop Nav */}

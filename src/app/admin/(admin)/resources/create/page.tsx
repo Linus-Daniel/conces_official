@@ -1,533 +1,410 @@
-"use client";
+"use client"
+import { useState } from 'react';
+import { FaUpload, FaTimes, FaPlus, FaMinus, FaSpinner, FaStar } from 'react-icons/fa';
+import FileUpload from '@/components/FileUpload'; // adjust path accordingly
+import ImageUpload from '@/components/ImageUpload';
+import axios from 'axios';
+import RichTextEditor from '@/components/EditText';
 
-import React, { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import {
-  FaSave,
-  FaUpload,
-  FaTimes,
-  FaTrash,
-  FaArrowLeft,
-} from "react-icons/fa";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import api from "@/lib/axiosInstance";
-import dynamic from "next/dynamic";
-import ImageUpload from "@/components/ImageUpload";
+// Type definitions
+type ResourceType = 'pdf' | 'devotional' | 'video' | 'article' | 'spreadsheet';
+type ResourceCategory = 'academic' | 'spiritual' | 'career' | 'media';
 
-const RichTextEditor = dynamic(() => import("@/components/EditText"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-64 bg-gray-100 rounded-md animate-pulse"></div>
-  ),
-});
-
-type ResourceType = "devotional" | "pdf" | "video" | "blog";
-type Resource = {
-  _id?: string;
+interface NewResource {
   title: string;
   type: ResourceType;
+  author: string;
   description: string;
-  content: string;
   thumbnail: string;
   tags: string[];
-  author: string;
-  date: string;
-  featured?: boolean;
+  category: ResourceCategory;
+  fileUrl?: string;
+  content?: string;
+  videoUrl?: string;
+  duration?: string;
+  featured: boolean;
+}
+
+const initialResourceState: NewResource = {
+  title: '',
+  type: 'pdf',
+  author: '',
+  description: '',
+  content: "",
+  thumbnail: '',
+  videoUrl: "",
+  fileUrl: "",
+  tags: [],
+  category: 'academic',
+  featured: false
 };
 
-export default function ResourceForm() {
-  const router = useRouter();
-  const params = useParams();
-  const resourceId = params?.id as string | undefined;
-
-  const [resource, setResource] = useState<Resource>({
-    title: "",
-    type: "devotional",
-    description: "",
-    content: "",
-    thumbnail: "",
-    tags: [],
-    author: "",
-    date: new Date().toISOString().split("T")[0],
-  });
-
-  const [tagInput, setTagInput] = useState("");
+const ResourceCreator = () => {
+  const [resource, setResource] = useState<NewResource>(initialResourceState);
+  const [newTag, setNewTag] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [thumbnailPreview, setThumbnailPreview] = useState("");
+  const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const [videoPreview, setVideoPreview] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  useEffect(() => {
-    if (resourceId) fetchResource();
-  }, [resourceId]);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setResource(prev => ({ ...prev, [name]: value }));
 
-  const fetchResource = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/resources/${resourceId}`);
-      if (!response.ok) throw new Error("Failed to fetch resource");
-      const data = await response.json();
-      setResource(data);
-      if (data.thumbnail) setThumbnailPreview(data.thumbnail);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load resource"
-      );
-      router.push("/resources");
-    } finally {
-      setIsLoading(false);
+    if (name === 'videoUrl') {
+      setVideoPreview(value);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
-    const checked =
-      type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
-
-    setResource((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setResource(prev => ({ ...prev, [name]: checked }));
   };
 
-  const handleContentChange = (content: string) => {
-    setResource((prev) => ({ ...prev, content }));
-  };
-
-  const handleAddTag = () => {
-    if (tagInput.trim() && !resource.tags.includes(tagInput.trim())) {
-      setResource((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
-      setTagInput("");
+  const handleTagAdd = () => {
+    if (newTag.trim() && !resource.tags.includes(newTag.trim())) {
+      setResource(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+      setNewTag('');
     }
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setResource((prev) => ({
+  const handleTagRemove = (tagToRemove: string) => {
+    setResource(prev => ({
       ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
+  };
+
+  const resetForm = () => {
+    setResource(initialResourceState);
+    setNewTag('');
+    setThumbnailPreview('');
+    setVideoPreview('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitSuccess(false);
+
     try {
-      const url = resourceId ? `/resources/${resourceId}` : "/resources";
-      const method = resourceId ? "put" : "post";
-      const response = await api({ method, url, data: resource });
-      const data = response.data;
-      toast.success(
-        resourceId
-          ? "Resource updated successfully!"
-          : "Resource created successfully!"
-      );
-      router.push(`/resources/${resourceId || data._id}`);
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to save resource";
-      toast.error(message);
+      const response = await axios.post('/api/resources', resource);
+      console.log('Submitted:', response.data);
+      setSubmitSuccess(true);
+      resetForm();
+    } catch (error) {
+      console.error('Error creating resource:', error);
+      alert('Failed to create resource');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (
-      !resourceId ||
-      !confirm("Are you sure you want to delete this resource?")
-    )
-      return;
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/resources/${resourceId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete resource");
-      toast.success("Resource deleted successfully!");
-      router.push("/resources");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete resource"
-      );
-    } finally {
-      setIsSubmitting(false);
+  const renderTypeSpecificFields = () => {
+    switch (resource.type) {
+      case 'pdf':
+      case 'spreadsheet':
+        return (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
+            <FileUpload
+              folder="resources/files"
+              allowedFormats={resource.type === 'pdf' ? ['pdf'] : ['xlsx,xls,csv']}
+              onSuccess={(info) => {
+                setResource(prev => ({ ...prev, fileUrl: info.secure_url }));
+              }}
+            >
+              <span className="flex items-center">
+                <FaUpload className="mr-2" />
+                Upload {resource.type.toUpperCase()}
+              </span>
+            </FileUpload>
+            {resource.fileUrl && (
+              <p className="mt-2 text-green-600 text-sm">File uploaded successfully!</p>
+            )}
+          </div>
+        );
+
+      case 'video':
+        return (
+          <div className="mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                <input
+                  type="url"
+                  name="videoUrl"
+                  value={resource.videoUrl || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  placeholder="https://youtube.com/embed/..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duration (HH:MM:SS)</label>
+                <input
+                  type="text"
+                  name="duration"
+                  value={resource.duration || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  placeholder="1:25:36"
+                />
+              </div>
+            </div>
+            {videoPreview && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Video Preview</label>
+                <div className="aspect-video w-full border rounded-md overflow-hidden bg-gray-100">
+                  <iframe
+                    src={videoPreview}
+                    className="w-full h-full"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+        case 'devotional':
+          case 'article':
+            return (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                <RichTextEditor
+                  value={resource.content || ''}
+                  onChange={(val) => setResource(prev => ({ ...prev, content: val }))}
+                  placeholder="Enter your content here (rich formatting supported)"
+                />
+                <input type="hidden" name="content" value={resource.content} />
+                <p className="text-xs text-gray-500 mt-1">Rich text supported (bold, italics, images, etc.)</p>
+              </div>
+            );
+
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-6">
-          <button
-            onClick={() => router.back()}
-            className="flex items-center text-royal-600 hover:text-royal-800 mr-4"
-          >
-            <FaArrowLeft className="mr-2" />
-            Back
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {resourceId ? "Edit Resource" : "Create New Resource"}
-          </h1>
-          {resourceId && (
-            <button
-              onClick={handleDelete}
-              disabled={isSubmitting}
-              className="ml-auto flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-            >
-              <FaTrash className="mr-2" />
-              Delete
-            </button>
-          )}
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Create New Resource</h1>
+
+      {submitSuccess && (
+        <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+          Resource created successfully!
         </div>
+      )}
 
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="p-6">
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="title"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Title*
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={resource.title}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                      required
-                    />
-                  </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title*</label>
+              <input
+                type="text"
+                name="title"
+                value={resource.title}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Resource title"
+                required
+              />
+            </div>
 
-                  <div>
-                    <label
-                      htmlFor="type"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Type*
-                    </label>
-                    <select
-                      id="type"
-                      name="type"
-                      value={resource.type}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                      required
-                    >
-                      <option value="devotional">Devotional</option>
-                      <option value="pdf">PDF Document</option>
-                      <option value="video">Video</option>
-                      <option value="blog">Blog Post</option>
-                    </select>
-                  </div>
-                </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Resource Type*</label>
+              <select
+                name="type"
+                value={resource.type}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                required
+              >
+                <option value="pdf">PDF Document</option>
+                <option value="devotional">Devotional</option>
+                <option value="video">Video</option>
+                <option value="article">Article</option>
+                <option value="spreadsheet">Spreadsheet</option>
+              </select>
+            </div>
 
-                <div>
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Description*
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    rows={3}
-                    value={resource.description}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                    required
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Author*</label>
+              <input
+                type="text"
+                name="author"
+                value={resource.author}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Author name"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category*</label>
+              <select
+                name="category"
+                value={resource.category}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                required
+              >
+                <option value="academic">Academic</option>
+                <option value="spiritual">Spiritual</option>
+                <option value="career">Career</option>
+                <option value="media">Media</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail Image</label>
+              <ImageUpload
+                onSuccess={(info) => {
+                  setResource(prev => ({ ...prev, thumbnail: info.secure_url }));
+                  setThumbnailPreview(info.secure_url);
+                }}
+                folder="resources/thumbnails"
+              >
+                <span className="flex items-center">
+                  <FaUpload className="mr-2" />
+                  Upload Thumbnail
+                </span>
+              </ImageUpload>
+              {thumbnailPreview && (
+                <div className="mt-2 relative inline-block">
+                  <img
+                    src={thumbnailPreview}
+                    alt="Thumbnail preview"
+                    className="h-12 w-12 object-cover rounded"
                   />
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor="author"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Author*
-                    </label>
-                    <input
-                      type="text"
-                      id="author"
-                      name="author"
-                      value={resource.author}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="date"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Date*
-                    </label>
-                    <input
-                      type="date"
-                      id="date"
-                      name="date"
-                      value={resource.date}
-                      onChange={handleChange}
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Thumbnail
-                  </label>
-                  <div className="mt-1 flex items-center">
-                    <div className="mt-1 flex items-center gap-4">
-                      <div className="mt-1 flex items-center gap-4">
-                        <ImageUpload
-                          onSuccess={(info) => {
-                            console.log("RECEIVED UPLOAD INFO:", info); // ✅ log the received info
-                            setResource((prev) => ({
-                              ...prev,
-                              thumbnail: info.secure_url,
-                            }));
-                            setThumbnailPreview(info.secure_url);
-                          }}
-                          folder="resources/"
-                        >
-                          <div className="flex items-center justify-center">
-                            <FaUpload className="mr-2" />
-                            {resource.thumbnail
-                              ? "Change Thumbnail"
-                              : "Thumbnail"}
-                          </div>
-                        </ImageUpload>
-
-                        {thumbnailPreview && (
-                          <div className="relative group">
-                            <img
-                              src={thumbnailPreview}
-                              alt="Thumbnail preview"
-                              className="h-16 w-16 object-cover rounded-md"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setThumbnailPreview("");
-                                setResource((prev) => ({
-                                  ...prev,
-                                  thumbnail: "",
-                                }));
-                              }}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <FaTimes size={10} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {thumbnailPreview && (
-                        <div className="relative group">
-                          <img
-                            src={thumbnailPreview}
-                            alt="Thumbnail preview"
-                            className="h-16 w-16 object-cover rounded-md"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setThumbnailPreview("");
-                              setResource((prev) => ({
-                                ...prev,
-                                thumbnail: "",
-                              }));
-                            }}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <FaTimes size={10} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {(resource.type === "devotional" ||
-                  resource.type === "blog") && (
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Content*
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setPreviewMode(!previewMode)}
-                        className="text-sm text-royal-600 hover:text-royal-800"
-                      >
-                        {previewMode ? "Edit Content" : "Preview"}
-                      </button>
-                    </div>
-                    {/* {previewMode ? (
-                      <div
-                        className="prose max-w-none p-4 border border-gray-300 rounded-md"
-                        dangerouslySetInnerHTML={{ __html: resource.content }}
-                      />
-                    ) : (
-                      <RichTextEditor
-                        value={resource.content}
-                        onChange={handleContentChange}
-                        className="border border-gray-300 rounded-md min-h-[300px]"
-                      />
-                    )} */}
-                  </div>
-                )}
-
-                {resource.type === "pdf" && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      PDF File*
-                    </label>
-                    <div className="mt-1 flex items-center">
-                      <label className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 cursor-pointer">
-                        <FaUpload className="mr-2" />
-                        Upload PDF
-                        <input
-                          type="file"
-                          accept="application/pdf"
-                          className="sr-only"
-                        />
-                      </label>
-                      {resource.thumbnail && (
-                        <span className="ml-4 text-sm text-gray-500">
-                          {resource.thumbnail}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {resource.type === "video" && (
-                  <div>
-                    <label
-                      htmlFor="content"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Video URL*
-                    </label>
-                    <input
-                      type="url"
-                      id="content"
-                      name="content"
-                      value={resource.content}
-                      onChange={handleChange}
-                      placeholder="https://youtube.com/embed/..."
-                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                      required
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label
-                    htmlFor="tags"
-                    className="block text-sm font-medium text-gray-700"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setThumbnailPreview('');
+                      setResource(prev => ({ ...prev, thumbnail: '' }));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600 transition"
                   >
-                    Tags
-                  </label>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        (e.preventDefault(), handleAddTag())
-                      }
-                      className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border border-gray-300 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
-                      placeholder="Add tags"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddTag}
-                      className="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-royal-500 focus:border-royal-500"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {resource.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-royal-100 text-royal-800"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(tag)}
-                          className="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full text-royal-400 hover:bg-royal-200 hover:text-royal-500"
-                        >
-                          <FaTimes size={10} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
+                    <FaTimes />
+                  </button>
                 </div>
+              )}
+            </div>
 
-                <div className="flex items-center">
-                  <input
-                    id="featured"
-                    name="featured"
-                    type="checkbox"
-                    checked={resource.featured || false}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-royal-600 focus:ring-royal-500 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor="featured"
-                    className="ml-2 block text-sm text-gray-700"
-                  >
-                    Featured Resource
-                  </label>
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-end space-x-3">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+              <div className="flex">
+                <input
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  placeholder="Add tag"
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleTagAdd())}
+                />
                 <button
                   type="button"
-                  onClick={() => router.back()}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500"
+                  onClick={handleTagAdd}
+                  className="bg-blue-500 text-white px-3 py-2 rounded-r-md hover:bg-blue-600 transition"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-royal-600 hover:bg-royal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 disabled:opacity-50"
-                >
-                  <FaSave className="mr-2" />
-                  {isSubmitting ? "Saving..." : "Save Resource"}
+                  <FaPlus />
                 </button>
               </div>
-            </form>
+              {resource.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {resource.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded-full"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => handleTagRemove(tag)}
+                        className="ml-1 text-gray-500 hover:text-red-500 transition"
+                      >
+                        <FaMinus size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="flex items-center cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    name="featured"
+                    checked={resource.featured}
+                    onChange={handleToggleChange}
+                    className="sr-only"
+                  />
+                  <div className={`block w-14 h-8 rounded-full ${resource.featured ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
+                  <div
+                    className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${
+                      resource.featured ? 'transform translate-x-6' : ''
+                    }`}
+                  ></div>
+                </div>
+                <div className="ml-3 text-gray-700 font-medium flex items-center">
+                  <FaStar className={`mr-1 ${resource.featured ? 'text-yellow-400' : 'text-gray-400'}`} />
+                  Featured Resource
+                </div>
+              </label>
+              <p className="text-xs text-gray-500 mt-1">Featured resources will be highlighted on the website</p>
+            </div>
           </div>
         </div>
-      </div>
+
+        {renderTypeSpecificFields()}
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+          <textarea
+            name="description"
+            value={resource.description}
+            onChange={handleInputChange}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder="Brief description of the resource..."
+            required
+          />
+        </div>
+
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={resetForm}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+            disabled={isSubmitting}
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400 transition flex items-center justify-center min-w-32"
+          >
+            {isSubmitting ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Creating...
+              </>
+            ) : (
+              'Create Resource'
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
-}
+};
+
+export default ResourceCreator;

@@ -6,11 +6,12 @@ export interface IProduct extends Document {
   price: number;
   images: string[];
   branch: string;
-  category: string; // Assuming it's a category ID or string name
+  category: string;
   stock: number;
   featured: boolean;
   createdAt: Date;
   updatedAt: Date;
+
 }
 
 const ProductSchema: Schema = new Schema(

@@ -3,6 +3,7 @@ import { FaPray, FaCommentDots, FaLightbulb, FaPlus } from "react-icons/fa";
 import api from "@/lib/axiosInstance";
 import { Loader2 } from "lucide-react";
 import { PrayerWallItem } from "../Community";
+import CreatePostButton from "../PostButton";
 
 type SidebarProps = {
   onCreatePost: () => void;
@@ -11,14 +12,8 @@ type SidebarProps = {
 export default function Sidebar({ onCreatePost }: SidebarProps) {
   return (
     <div className="w-full md:w-1/4 space-y-6">
-        <button
-        onClick={onCreatePost}
-        className="w-full bg-royal-DEFAULT text-white py-2 px-4 rounded-lg flex items-center justify-center space-x-2 hover:bg-royal-dark transition-colors"
-      >
-        <FaPlus />
-        <span>Create Post</span>
-      </button>
-   
+<CreatePostButton onCreatePost={() => console.log('Post modal opened')} />
+
 
       <PrayerWall />
       {/* <UpcomingEvents events={upcomingEvents} /> */}

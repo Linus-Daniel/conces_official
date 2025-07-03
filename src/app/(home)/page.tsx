@@ -9,6 +9,7 @@ import Sponsor from "@/components/home/Sponsor";
 import Head from "next/head";
 import React from "react";
 import Testimonial from "@/components/home/Testimonials";
+import Anthem from "@/components/Anthem";
 
 function page() {
   return (
@@ -21,6 +22,7 @@ function page() {
       <Hero />
       <About />
       <Features />
+      <Anthem />
 
       <Shop />
       <Donate />

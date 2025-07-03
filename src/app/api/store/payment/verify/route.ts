@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 import Cart from '@/models/Cart';
 import { verifyPayment } from '@/lib/paystack';
 import { getServerSession } from 'next-auth';
@@ -41,17 +42,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    // Update order status
+    // ✅ Deduct product stock
+    for (const item of order.items) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.stock = Math.max(0, product.stock - item.quantity);
+        await product.save();
+      }
+    }
+
+    // ✅ Update order status
     order.status = 'PAID';
     await order.save();
 
-    // Clear the user's cart
+    // ✅ Clear the user's cart
     await Cart.findOneAndUpdate(
       { user: userId },
       { $set: { items: [], total: 0 } }
     );
 
-    return NextResponse.json({ status: 'success', message: 'Payment verified, order updated, and cart cleared', order });
+    return NextResponse.json({
+      status: 'success',
+      message: 'Payment verified, order updated, stock deducted, and cart cleared',
+      order,
+    });
   } catch (error: any) {
     console.error('Payment verification error:', error?.response?.data || error);
     return NextResponse.json(

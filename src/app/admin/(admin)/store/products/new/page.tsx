@@ -8,6 +8,7 @@ import React from 'react'
 const  page = async () => {
     const session = await getServerSession(authOptions)
     const userRole = session?.user.role as string
+    const branchId = session?.user.branch as string
     let branchName;
     if (userRole == "branch-adming"){
       try{
@@ -44,7 +45,7 @@ const  page = async () => {
   
   return (
     <div>
-            <ProductForm categories={categories} userRole={userRole} branch={branchName} />
+            <ProductForm branchId={branchId} categories={categories} userRole={userRole} branch={branchName} url='admin' />
     </div>
   )
 }

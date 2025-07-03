@@ -63,29 +63,7 @@ function Posts({posts}:{posts:Post[]}) {
 
 
 
-  const upcomingEvents: EventItem[] = [
-    {
-      id: "1",
-      title: "Monthly Prayer Meeting",
-      date: "12 JUN",
-      time: "7:00 PM - 8:30 PM",
-      location: "Virtual (Zoom)",
-    },
-    {
-      id: "2",
-      title: "Tech Talk: Faith & AI",
-      date: "18 JUN",
-      time: "5:30 PM - 7:00 PM",
-      location: "Lagos Chapter Office",
-    },
-    {
-      id: "3",
-      title: "Mentorship Meetup",
-      date: "25 JUN",
-      time: "2:00 PM - 4:00 PM",
-      location: "Abuja Chapter Office",
-    },
-  ];
+ 
 
   const filteredPosts =
     activeTab === "all"

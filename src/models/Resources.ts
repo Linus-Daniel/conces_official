@@ -14,10 +14,26 @@ const ResourceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  content: {
+    type: String,
+    required: false
+  },
+  fileUrl: {
+    type: String,
+    required: false
+  },
+  videoUrl: {
+    type: String,
+    required: false
+  },
+  featured: {
+    type: Boolean,
+    required: true
+  },
   type: {
     type: String,
     required: true,
-    enum: ['devotional', 'pdf', 'video', 'Article', 'Other'] // Optional: limit to specific types
+    enum: ['devotional', 'pdf', 'video', 'article', 'other']
   },
   tags: {
     type: [String],
@@ -27,12 +43,20 @@ const ResourceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  date: {
-    type: String, // or Date if you're storing actual date objects
+  category: {
+    type: String,
+    required: true
+  },
+
+  // ✅ Add this line to link the resource to a branch
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Branch',
     required: true
   }
+
 }, {
-  timestamps: true // adds createdAt and updatedAt fields
+  timestamps: true
 });
 
 export default mongoose.models.Resource || mongoose.model("Resource", ResourceSchema);

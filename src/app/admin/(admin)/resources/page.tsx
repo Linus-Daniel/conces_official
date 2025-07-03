@@ -1,6 +1,7 @@
 "use client"
+import api from "@/lib/axiosInstance";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaSearch, FaEdit, FaTrash, FaPlus, FaBook, FaFilePdf, FaVideo } from "react-icons/fa";
 
 
@@ -16,31 +17,44 @@ export type User = {
 
 
 export type Content = {
-  id: string;
+  _id: string;
   title: string;
   type: 'devotional' | 'pdf' | 'video' | 'blog';
   category: string;
-  author?: User;
+  author?: string;
+  videoUrl:string;
+  content:string;
   date: string;
   views: number;
   fileUrl?: string;
 };
 
-const contents: Content[] = [
-    { id: '1', title: 'Daily Devotional - June 15', type: 'devotional', category: 'Spiritual',  date: '2023-06-15', views: 150 },
-    { id: '2', title: 'Engineering Ethics PDF', type: 'pdf', category: 'Professional', date: '2023-06-10', views: 85, fileUrl: '/ethics.pdf' },
-    { id: '3', title: 'Annual Conference Highlights', type: 'video', category: 'Events', date: '2023-05-28', views: 210, fileUrl: '/conference.mp4' }
-  ];
+
 
 export default function ContentManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
-  
-  const filteredContents = contents.filter(content => {
+  const [resources,setResources] = useState<Content[]>([])
+  const filteredContents = resources.filter(content => {
     const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || content.type === selectedType;
     return matchesSearch && matchesType;
   });
+
+  useEffect(()=>{
+    const getResourses = async ()=>{
+
+      try{
+        const response = await api.get("/resources")
+        console.log(response.data)
+        setResources(response.data)
+      }catch(error){
+        console.log(error)
+      }
+
+    }
+    getResourses()
+  },[])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -108,7 +122,7 @@ export default function ContentManagement() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredContents.map(content => (
-              <tr key={content.id}>
+              <tr key={content._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">

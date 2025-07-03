@@ -326,9 +326,9 @@ console.log(users)
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedUsers.map(user => (
+                {paginatedUsers.map((user,index) => (
                   <tr 
-                    key={user.id} 
+                    key={index} 
                     className={`hover:bg-gray-50 ${selectedRows.includes(user.id) ? 'bg-blue-50' : ''}`}
                   >
                     <td className="px-4 py-4 whitespace-nowrap">
@@ -540,9 +540,9 @@ console.log(users)
                       <h3 className="text-lg leading-6 font-medium text-gray-900">
                         {selectedUser.fullName}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      {/* <p className="text-sm text-gray-500">
                         {selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                   <button 
@@ -593,11 +593,11 @@ console.log(users)
 
                     <div>
                       <h4 className="text-sm font-medium text-gray-500 mb-2">Status</h4>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
+                      {/* <span className={`px-2 py-1 text-xs rounded-full ${
                         selectedUser.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {selectedUser.status.charAt(0).toUpperCase() + selectedUser.status.slice(1)}
-                      </span>
+                      </span> */}
                     </div>
 
                     <div>

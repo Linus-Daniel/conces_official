@@ -1,11 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Bell, Building, ChevronDown, Menu } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import api from '@/lib/axiosInstance';
+import { useEffect, useState } from "react";
+import { Bell, Building, ChevronDown, Menu } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import api from "@/lib/axiosInstance";
+import useAuthStore from "@/zustand/authStore";
+import { useRouter } from "next/navigation";
 
 interface Branch {
   _id: string;
@@ -15,9 +17,11 @@ interface Branch {
 }
 
 export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
+  const { logout } = useAuthStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [branch, setBranch] = useState<Branch | null>(null);
   const { data: session } = useSession();
+  const router = useRouter()
   const user = session?.user;
 
   useEffect(() => {
@@ -28,13 +32,13 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
       try {
         const response = await api.get(`/branch/${user.branch}`);
-        const branchusers = await api.get(`branch-users/branch?branch=default-branch`)
-        console.log(branchusers.data)
+        const branchusers = await api.get(`/branch/${user.branch}/members`);
+        console.log(branchusers.data);
         if (isMounted) {
           setBranch(response.data.branch); // Assumes response shape: { branch: {...} }
         }
       } catch (error) {
-        console.error('Error fetching branch:', error);
+        console.error("Error fetching branch:", error);
       }
     };
 
@@ -45,7 +49,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
     };
   }, [user?.branch]);
 
-  console.log(branch)
+  console.log(branch);
 
   return (
     <header className="bg-white shadow-sm p-4 flex items-center justify-between gap-4">
@@ -97,11 +101,11 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
               />
             </div>
             <span className="hidden md:inline text-sm font-medium text-gray-700">
-              {user?.name || 'Engr. Chinedu'}
+              {user?.name || "Engr. Chinedu"}
             </span>
             <ChevronDown
               className={`w-3 h-3 text-gray-500 transition-transform ${
-                isProfileOpen ? 'rotate-180' : ''
+                isProfileOpen ? "rotate-180" : ""
               }`}
             />
           </button>
@@ -109,15 +113,17 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
           {isProfileOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100">
               <div className="py-1">
-                {['Profile', 'Settings', 'Logout'].map((item) => (
-                  <Link
+                {["Logout"].map((item) => (
+                  <button
                     key={item}
-                    href={`/${item.toLowerCase()}`}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    onClick={() => setIsProfileOpen(false)}
+                    onClick={() => {
+                      logout();
+                    router.replace("/auth?mode=login")
+                    }}
                   >
                     {item}
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>

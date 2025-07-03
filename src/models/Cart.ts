@@ -6,6 +6,7 @@ export interface ICartItem {
   product: IProduct['_id'];
   quantity: number;
   price: number;
+  branch:string
 }
 
 export interface ICart extends Document {
@@ -23,6 +24,7 @@ const CartSchema: Schema = new Schema(
       {
         product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true, min: 1 },
+        branch:{type:String,required:true},
         price: { type: Number, required: true },
       },
     ],

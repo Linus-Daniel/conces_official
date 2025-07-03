@@ -1,3 +1,5 @@
+// models/Order.ts
+
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from './User';
 
@@ -12,6 +14,7 @@ export enum OrderStatus {
 
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
+  branch: string; 
   quantity: number;
   price: number;
 }
@@ -28,8 +31,6 @@ export interface IShippingDetails {
   phone: string;
 }
 
-
-
 export interface IOrder extends Document {
   user: IUser['_id'];
   items: IOrderItem[];
@@ -38,7 +39,7 @@ export interface IOrder extends Document {
   shippingDetails: IShippingDetails;
   createdAt: Date;
   updatedAt: Date;
-}  
+}
 
 const OrderSchema: Schema = new Schema(
   {
@@ -46,6 +47,7 @@ const OrderSchema: Schema = new Schema(
     items: [
       {
         product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+        branch: { type: String, required: true }, // NEW FIELD
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
       },
