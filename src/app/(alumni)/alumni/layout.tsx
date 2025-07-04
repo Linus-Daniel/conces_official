@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import "../../(home)/globals.css"
 import AlumniLayout from '@/components/alumni/AlumniLayout'
 import { Navigation } from '@/components/alumni/Navigation'
 import { cn } from '@/lib/utils'
 
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'CONCES Branch Dashboard',

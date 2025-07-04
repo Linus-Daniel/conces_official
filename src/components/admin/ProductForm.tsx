@@ -18,7 +18,7 @@ interface ProductFormProps {
   userRole: string;
   branch: string;
   categories: Partial<ICategory>[];
-  initialData?: any; // Add proper type for your product
+  initialData?: any; 
   onSuccess?: () => void;
   url:string,
   branchId:string

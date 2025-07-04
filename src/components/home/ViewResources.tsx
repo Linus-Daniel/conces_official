@@ -1,6 +1,6 @@
 "use client";
 import api from "@/lib/axiosInstance";
-import { Resources } from "@/types";
+import { Resource } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useState, useEffect } from "react";
@@ -13,13 +13,13 @@ import {
   FaShare,
 } from "react-icons/fa";
 
-const ResourcesViewPage = ({resources}:{resources:Resources}) => {
+const ResourcesViewPage = ({resources}:{resources:Resource}) => {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const [loading, setLoading] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [relatedResourcess, setRelatedResourcess] = useState<Resources[]>([]);
+  const [relatedResourcess, setRelatedResourcess] = useState<Resource[]>([]);
   const [showShareOptions, setShowShareOptions] = useState(false);
 
 

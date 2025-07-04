@@ -3,7 +3,6 @@
 import { FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import ProductCard from '../ui/ProductCard';
 import Link from 'next/link';
-import { productData } from '@/constant';
 import { IProduct } from '@/models/Product';
 
 

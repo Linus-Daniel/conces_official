@@ -11,10 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Resources } from "@/types";
+import { Resource } from "@/types";
 
 interface ResourceTableProps {
-  resources: Resources[];
+  resources: Resource[];
 }
 
 const getTypeIcon = (type: string) => {

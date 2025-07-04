@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Resource from '@/models/Resources';
 
-export async function GET(req: NextRequest, { params }: { params: { branchId: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ branchId: string }> }) {
   await dbConnect();
-  const { branchId } = params;
+  const { branchId } = await params;
 
   try {
     const resources = await Resource.find({ branch: branchId }).sort({ createdAt: -1 }).lean();

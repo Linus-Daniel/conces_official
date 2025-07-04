@@ -19,9 +19,10 @@ export default function EditResource() {
     // Simulate fetching resource
     const fetchResource = async () => {
       const mockResource: Resource = {
-        id,
+        _id:"",
         title: "Daily Devotional - June 15",
         type: "devotional",
+        thumbnail:"",
         category: "Spiritual",
         description: "Daily spiritual guidance for June 15",
         content: "Lorem ipsum dolor sit amet...",
@@ -30,6 +31,7 @@ export default function EditResource() {
         views: 150,
         tags: ["devotion", "daily"],
         featured: true,
+        createdAt:""
       }
       setResource(mockResource)
     }

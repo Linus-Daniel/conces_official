@@ -6,11 +6,11 @@ import User from "@/models/User";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
-    const { id: branchId } = params;
+    const { id: branchId } = await params;
     console.log(branchId);
 
     const users = await User.find({ branch: branchId }).lean();

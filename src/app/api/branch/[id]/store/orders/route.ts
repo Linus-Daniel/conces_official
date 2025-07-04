@@ -4,10 +4,10 @@ import Order from '@/models/Order';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await dbConnect();
-  const branchId = params.id;
+  const {id:branchId} = await params;
 
   try {
     // Fetch all orders with at least one product from this branch

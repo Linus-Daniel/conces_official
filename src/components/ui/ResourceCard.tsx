@@ -1,11 +1,11 @@
 "use client"
-import { Resources } from "@/types";
+import { Resource } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { FaBookmark, FaDownload, FaEye, FaRegBookmark, FaStar } from "react-icons/fa";
 
 type Props = {
-  resource: Resources;
+  resource: Resource;
   onBookmark?: (id: string) => void;
   isBookmarked?: boolean;
 };

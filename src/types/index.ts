@@ -22,7 +22,7 @@ export interface Category {
 }
 
 
-export interface Resources {
+export interface Resource {
   _id: string;
   title: string;
   type: string;

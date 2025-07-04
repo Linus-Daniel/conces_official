@@ -160,6 +160,8 @@ export function ProductTable({
             categories={categories}
             initialData={editingProduct || undefined}
             onSuccess={handleCloseModal}
+            url=''
+            branchId=''
           />
       </Modal>
     </div>

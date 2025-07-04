@@ -26,6 +26,8 @@ export default async function EditProductPage({
           categories={categories} 
           userRole=''
           branch=''
+          url=''
+          branchId=''
         />
       </div>
     </div>

@@ -8,13 +8,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id
-: string } }
+  { params }:{params:Promise<{ id: string }>}
 ) {
   await dbConnect();
 
   try {
-    const { id } = params;
+    const { id } = await params;
     console.log(id,"branch Id");
 
     const products = await Product.find({ branch: id })

@@ -1,12 +1,12 @@
 import CategoryCard from "@/components/ui/CategoryCard";
 import ResourceCard from "@/components/ui/ResourceCard";
 import { categories } from "@/constant";
-import { Resources } from "@/types";
+import { Resource } from "@/types";
 import Link from "next/link";
 import React from "react";
 import { FaPhotoVideo, FaPray, FaSearch } from "react-icons/fa";
 import { FaBars, FaBook, FaBookmark, FaBookOpen, FaBorderAll, FaBriefcase, FaDownload, FaEye, FaFileExcel, FaFilePdf, FaPlay, FaShare, FaUpload, FaUsers, FaVideo } from "react-icons/fa6";
- function ResourcePage({resources,userRole}:{resources:Resources[],userRole:string}) {
+ function ResourcePage({resources,userRole}:{resources:Resource[],userRole:string}) {
     const isStudent = userRole?.toLowerCase() === "student";
     console.log(isStudent,userRole)
 

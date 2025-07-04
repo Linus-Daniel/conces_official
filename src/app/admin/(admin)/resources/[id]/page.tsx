@@ -14,7 +14,7 @@ export default function ViewResource() {
     const fetchResource = async () => {
       // Replace with actual API call
       const mockResource: Resource = {
-        id: id as string,
+        _id: "",
         title: 'Daily Devotional - June 15',
         type: 'devotional',
         category: 'Spiritual',
@@ -25,7 +25,9 @@ export default function ViewResource() {
         views: 150,
         tags: ['devotion', 'daily'],
         featured: true,
-        fileUrl: '/devotional-june15.pdf'
+        fileUrl: '/devotional-june15.pdf',
+        createdAt:"",
+        thumbnail:""
       };
       setResource(mockResource);
     };

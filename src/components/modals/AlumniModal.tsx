@@ -12,6 +12,46 @@ type Props ={
     alumniId: number; // Assuming you pass the alumni ID to fetch their profile
 }
 
+
+export interface Alumni {
+  id: number;
+  name: string;
+  graduationYear: number;
+  currentRole: string;
+  specialization: string;
+  location: string;
+  avatar: string;
+  availableForMentorship: boolean;
+  bio: string;
+  contact: string;
+  linkedin?: string;
+  twitter?: string;
+  education: {
+    degree: string;
+    institution: string;
+    year: number;
+  }[];
+  experience: {
+    position: string;
+    company: string;
+    duration: string;
+    description: string;
+  }[];
+  mentorshipDetails: {
+    availability: string;
+    areas: string[];
+    style: string;
+    commitment: string;
+  };
+  testimonials: {
+    name: string;
+    role: string;
+    text: string;
+    date: string;
+  }[];
+}
+
+
 const AlumniProfileModal = ({ isOpen, onClose, alumniId }:Props) => {
   const [alumni, setAlumni] = useState<Alumni>();
   const [isLoading, setIsLoading] = useState(true);
