@@ -99,7 +99,7 @@ function Header() {
           </nav>
 
           {/* Desktop Auth Buttons or User Info */}
-          <div className="hidden md:flex items-center space-x-3">
+          <div className="hidden lg:flex items-center space-x-3">
             {user ? (
               <div className="flex items-center space-x-2 user-dropdown">
                 <div className="relative">

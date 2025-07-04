@@ -264,7 +264,7 @@ const AuthForm = () => {
           router.push("/branch");
           break;
         case "alumni":
-          router.push("/alumni");
+          router.push("/alumni/dashboard");
           break;
         case "student":
           router.push("/user");

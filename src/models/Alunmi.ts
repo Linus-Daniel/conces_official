@@ -1,31 +1,60 @@
-// models/Alumni.ts
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Model } from 'mongoose';
 
-export interface IAlumni extends Document {
-  userId: mongoose.Types.ObjectId; // reference to User
+interface SocialLinks {
+  linkedIn?: string;
+  twitter?: string;
+  github?: string;
+  website:string
+}
+
+export interface IAlumniProfile extends Document {
+  userId: mongoose.Types.ObjectId;
   graduationYear: number;
-  currentRole: string;
-  company: string;
+  education:{
+    schoolName:string;
+    course:string
+    graduationYear:string
+  }[];
+  experience:{
+    title:string;
+    organization:string;
+    duration:string;
+    description:string
+
+  }[];
   specialization: string;
-  bio: string;
+  currentRole: string;
+  bio?: string;
   availableForMentorship: boolean;
-  expertise: string[];
+  isMentor:boolean
+  skills: string[];
+  socialLinks: SocialLinks;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const AlumniSchema = new Schema<IAlumni>(
-  {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-    graduationYear: { type: Number, required: true },
-    currentRole: { type: String, required: true },
-    company: { type: String, required: true },
-    specialization: { type: String, required: true },
-    bio: { type: String, required: true },
-    availableForMentorship: { type: Boolean, default: false },
-    expertise: [{ type: String }],
-  },
-  { timestamps: true }
-);
+const SocialLinksSchema: Schema = new Schema({
+  linkedIn: { type: String },
+  twitter: { type: String },
+  github: { type: String },
+  wbsite:{type:String}
+}, { _id: false });
 
-export default mongoose.models.Alumni || mongoose.model<IAlumni>('Alumni', AlumniSchema);
+const AlumniProfileSchema: Schema<IAlumniProfile> = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  graduationYear: { type: Number, required: true },
+  specialization: { type: String, required: true },
+  isMentor:{type:Boolean,required:false},
+  currentRole: { type: String, required: true },
+  bio: { type: String },
+  availableForMentorship: { type: Boolean, default: false },
+  skills: [{ type: String }],
+  socialLinks: SocialLinksSchema,
+}, {
+  timestamps: true,
+});
+
+const AlumniProfile: Model<IAlumniProfile> =
+  mongoose.models.AlumniProfile || mongoose.model<IAlumniProfile>('AlumniProfile', AlumniProfileSchema);
+
+export default AlumniProfile;

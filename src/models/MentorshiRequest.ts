@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMentorshipApplication extends Document {
   mentorshipId: mongoose.Types.ObjectId; // reference to Mentorship
+  mentorId:string
   studentId: mongoose.Types.ObjectId; // reference to User
   message: string;
   status: 'pending' | 'accepted' | 'rejected';
@@ -12,6 +13,7 @@ export interface IMentorshipApplication extends Document {
 const MentorshipApplicationSchema = new Schema<IMentorshipApplication>(
   {
     mentorshipId: { type: Schema.Types.ObjectId, ref: 'Mentorship', required: true },
+    mentorId:{type:String, required:true},
     studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     message: { type: String, required: true },
     status: {
