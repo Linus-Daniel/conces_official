@@ -1,6 +1,5 @@
 import { AlumniFormData } from '@/types/alumni';
 import { Globe, Linkedin, Twitter, Github } from 'lucide-react';
-
 export default function Step5SocialReview({ 
   formData,
   updateFormData 
@@ -8,18 +7,26 @@ export default function Step5SocialReview({
   formData: AlumniFormData,
   updateFormData: (field: keyof AlumniFormData, value: any) => void 
 }) {
+  const updateSocialLink = (key: keyof typeof formData.socialLinks, value: string) => {
+    updateFormData('socialLinks', {
+      ...formData.socialLinks,
+      [key]: value,
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect & Review</h2>
         <p className="text-gray-500">Add your social profiles and review your information</p>
       </div>
-      
+
       <div className="space-y-6">
         {/* Social Links Section */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {/* LinkedIn */}
           <div className="space-y-1">
-            <label className=" text-sm font-medium text-gray-700 flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
               <Linkedin className="h-4 w-4 text-[#0077B5]" />
               LinkedIn
             </label>
@@ -29,14 +36,15 @@ export default function Step5SocialReview({
               </span>
               <input
                 type="text"
-                value={formData.linkedIn}
-                onChange={(e) => updateFormData('linkedIn', e.target.value)}
+                value={formData.socialLinks.linkedIn}
+                onChange={(e) => updateSocialLink('linkedIn', e.target.value)}
                 className="block flex-1 border-0 bg-transparent py-2 px-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                 placeholder="yourusername"
               />
             </div>
           </div>
 
+          {/* Twitter */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
               <Twitter className="h-4 w-4 text-[#1DA1F2]" />
@@ -48,14 +56,15 @@ export default function Step5SocialReview({
               </span>
               <input
                 type="text"
-                value={formData.twitter}
-                onChange={(e) => updateFormData('twitter', e.target.value)}
+                value={formData.socialLinks.twitter}
+                onChange={(e) => updateSocialLink('twitter', e.target.value)}
                 className="block flex-1 border-0 bg-transparent py-2 px-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                 placeholder="yourhandle"
               />
             </div>
           </div>
 
+          {/* GitHub */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
               <Github className="h-4 w-4 text-gray-800" />
@@ -67,14 +76,15 @@ export default function Step5SocialReview({
               </span>
               <input
                 type="text"
-                value={formData.github}
-                onChange={(e) => updateFormData('github', e.target.value)}
+                value={formData.socialLinks.github}
+                onChange={(e) => updateSocialLink('github', e.target.value)}
                 className="block flex-1 border-0 bg-transparent py-2 px-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                 placeholder="yourusername"
               />
             </div>
           </div>
 
+          {/* Personal Website */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
               <Globe className="h-4 w-4 text-gray-500" />
@@ -86,8 +96,8 @@ export default function Step5SocialReview({
               </span>
               <input
                 type="text"
-                value={formData.website}
-                onChange={(e) => updateFormData('website', e.target.value)}
+                value={formData.socialLinks.website}
+                onChange={(e) => updateSocialLink('website', e.target.value)}
                 className="block flex-1 border-0 bg-transparent py-2 px-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                 placeholder="yourwebsite.com"
               />

@@ -1,20 +1,15 @@
+import React, { ReactNode } from "react";
+import Wrapper from "./LayoutWrapper";
+import ProtectedPage from "../ProtectedRoute";
+import { ToastContainer } from "react-toastify";
 
-
-import React, { ReactNode } from 'react'
-import Wrapper from './LayoutWrapper'
-import ProtectedPage from '../ProtectedRoute'
-
-function AlumniLayout(
-    {children}:{children:ReactNode}
-) {
+function AlumniLayout({ children }: { children: ReactNode }) {
   return (
-    <ProtectedPage expectedRole='alumni'>
-
-    <Wrapper>
-        {children}
-    </Wrapper>
+    <ProtectedPage expectedRole="alumni">
+      <ToastContainer />
+      <Wrapper>{children}</Wrapper>
     </ProtectedPage>
-  )
+  );
 }
 
-export default AlumniLayout
+export default AlumniLayout;

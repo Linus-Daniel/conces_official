@@ -1,10 +1,8 @@
 // app/layout.tsx
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import '@/app/(home)/globals.css';
 import StoreLayoutWrapper from '@/components/store/Wrapper';
 
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'CONCES - Christian E-Commerce Store',

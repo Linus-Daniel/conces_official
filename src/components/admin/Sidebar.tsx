@@ -40,6 +40,8 @@ const menuItems = [
   },
   { link: "/admin/branches", label: "Branches", icon: FaMapMarkerAlt },
   { link: "/admin/resources", label: "Resources", icon: FaBook },
+  { link: "/admin/mentorship", label: "Mentorship", icon: FaBook },
+
   { link: "/admin/events", label: "Events", icon: FaCalendarAlt },
   { link: "/admin/settings", label: "Settings", icon: FaCog },
 ];

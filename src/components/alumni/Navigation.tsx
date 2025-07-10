@@ -10,7 +10,6 @@ import {
   MessageSquare,
   Briefcase,
   Calendar,
-  BookOpen,
   Settings,
   Menu,
   X,

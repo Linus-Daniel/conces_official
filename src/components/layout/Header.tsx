@@ -60,6 +60,7 @@ function Header() {
   const getDashboardUrl = (role?: string) => {
     switch(role) {
       case 'admin': return '/admin/';
+      case 'alumni': return '/alumni/dashboard';
       case 'branch-admin': return '/branch';
       case 'student': return '/member/dashboard';
       default: return '/';

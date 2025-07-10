@@ -25,7 +25,7 @@ type Testimonial = {
   date: string;
 };
 
-type Alumni = {
+export type Alumni = {
   id: number;
   name: string;
   graduationYear: number;
@@ -46,6 +46,42 @@ type Alumni = {
 
 
 // types.ts
+
+
+interface SocialLinks {
+  linkedIn?: string;
+  twitter?: string;
+  github?: string;
+  website: string;
+}
+
+export interface IAlumniProfile extends Document {
+  userId:string;
+  graduationYear: number;
+  education: {
+    schoolName: string;
+    course: string;
+    graduationYear: string;
+  }[];
+  workExperience: {
+    title: string;
+    organization: string;
+    duration: string;
+    description: string;
+  }[];
+  specialization: string;
+  currentRole: string;
+  bio?: string;
+  availableForMentorship: boolean;
+  isMentor: boolean;
+  skills: string[];
+  socialLinks: SocialLinks;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// types.ts
+
 export interface EducationEntry {
   schoolName: string;
   course: string;
@@ -62,28 +98,21 @@ export interface WorkExperienceEntry {
 }
 
 export interface AlumniFormData {
-  // Step 1
   graduationYear: string;
   specialization: string;
   currentRole: string;
   bio: string;
   
-  // Step 2
   education: EducationEntry[];
   
-  // Step 3
   workExperience: WorkExperienceEntry[];
   
-  // Step 4
   isMentor: boolean;
   availableForMentorship: boolean;
   skills: string[];
   
   // Step 5
-  linkedIn: string;
-  twitter: string;
-  github: string;
-  website:string;
+socialLinks:SocialLinks
 }
 
 export const initialFormData: AlumniFormData = {
@@ -96,8 +125,10 @@ export const initialFormData: AlumniFormData = {
   isMentor: false,
   availableForMentorship: false,
   skills: [],
-  linkedIn: '',
-  website:"",
-  twitter: '',
-  github: ''
+  socialLinks:{
+    linkedIn:"",
+    website:"",
+    github:"",
+    twitter:""
+  }
 };

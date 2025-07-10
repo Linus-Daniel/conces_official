@@ -8,7 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ bran
 
   try {
     const resources = await Resource.find({ branch: branchId }).sort({ createdAt: -1 }).lean();
-    return NextResponse.json(resources, { status: 200 });
+    return NextResponse.json(resources, { status: 201 });
   } catch (error) {
     console.error('Failed to fetch branch resources:', error);
     return NextResponse.json({ message: 'Error fetching branch resources' }, { status: 500 });

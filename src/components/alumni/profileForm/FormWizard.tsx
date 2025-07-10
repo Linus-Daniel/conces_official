@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,6 +18,7 @@ import Step2Education from "./Education";
 import Step3WorkExperience from "./WorkExperience";
 import Step4MentorshipSkills from "./MentorshipSkills";
 import Step5SocialReview from "./Review";
+import api from "@/lib/axiosInstance";
 
 const steps = [
   "Personal Details",
@@ -31,6 +32,21 @@ export default function AlumniFormWizard() {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<AlumniFormData>(initialFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data } = await api.get('/alumni/profile');
+        setFormData(data.profile); // You may need to match the shape
+        setIsEditMode(true);
+      } catch (error) {
+        console.error("No existing profile found, fallback to creation mode");
+      }
+    };
+  
+    fetchProfile();
+  }, []);
+  
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
@@ -78,26 +94,18 @@ export default function AlumniFormWizard() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/alumni/profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        toast.success("Profile saved successfully!");
-        // optionally reset or redirect
-      } else {
-        throw new Error("Failed to save profile");
-      }
+      const endpoint = isEditMode ? "/alumni/profile" : "/alumni/profile";
+      const method = isEditMode ? api.patch : api.post;
+  
+      await method(endpoint, formData);
+      toast.success(isEditMode ? "Profile updated!" : "Profile created!");
     } catch (error) {
       toast.error("Error saving profile");
     } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   const updateFormData = (field: keyof AlumniFormData, value: any) => {
     setFormData((prev) => ({
