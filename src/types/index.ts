@@ -74,8 +74,7 @@ export interface User {
   email: string;
   role: 'admin' | 'branch-admin' | 'student' | 'alumni';
   branch?: string;
-  status: 'active' | 'inactive';
-  joinDate: string;
+
 }
 
 export interface Branch {

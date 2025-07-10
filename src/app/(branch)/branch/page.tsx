@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { FaFileArrowDown, FaFileArrowUp, FaFilePdf, FaFileWord } from 'react-icons/fa6'
+import { FaFileArrowUp, FaFilePdf, FaFileWord } from 'react-icons/fa6'
 import { FaFilePowerpoint } from 'react-icons/fa'
 import { Download, ImageIcon, Upload } from 'lucide-react'
 

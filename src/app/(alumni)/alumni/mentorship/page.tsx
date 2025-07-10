@@ -1,10 +1,15 @@
 import MentorshipPage from "@/components/alumni/Mentorship";
 import api from "@/lib/axiosInstance";
+import { authOptions } from "@/lib/next-auth";
+import { User } from "@/types";
 import { AlumniFormData } from "@/types/alumni";
+import { getServerSession } from "next-auth";
 import { cookies } from "next/headers";
 import React from "react";
 
 async function page() {
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
   const getAlumni = async () => {
     const cookieStore = await cookies();
     const cookieString =  cookieStore.toString();
@@ -20,7 +25,7 @@ async function page() {
   const alumni = await getAlumni() as AlumniFormData;
 
   return (
-    <MentorshipPage  alumni={alumni} />
+    <MentorshipPage user={user as User} alumni={alumni} />
   );
 }
 

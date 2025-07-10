@@ -1,11 +1,9 @@
 "use client";
-
 import { useState } from "react";
 import Sidebar from "./BranchSideBar";
 import MobileSidebar from "./MobileNav";
 import Header from "./BranchHeader";
 import { SessionProvider } from "next-auth/react";
-import ProtectedPage from "../ProtectedRoute";
 
 export default function BranchLayout({
   children,
@@ -15,7 +13,6 @@ export default function BranchLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <ProtectedPage expectedRole="branch-admin">
       <SessionProvider>
         <div className="flex h-screen overflow-hidden">
           <div className="hidden md:flex md:flex-shrink-0 h-full w-64">
@@ -33,6 +30,5 @@ export default function BranchLayout({
           </div>
         </div>
       </SessionProvider>
-    </ProtectedPage>
   );
 }

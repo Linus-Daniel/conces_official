@@ -1,5 +1,18 @@
-
-  import { Book, Calendar, Cog, Folder, Gauge, GraduationCap, Lightbulb, Package, Receipt, ShoppingBag, ShoppingCart, User, Users } from "lucide-react";
+import {
+  Book,
+  Calendar,
+  Cog,
+  Folder,
+  Gauge,
+  GraduationCap,
+  Lightbulb,
+  Package,
+  Receipt,
+  ShoppingBag,
+  ShoppingCart,
+  User,
+  Users,
+} from "lucide-react";
 import { JSX } from "react";
 import { Product } from "./types";
 
@@ -28,84 +41,73 @@ type Products = {
   discountPercentage?: number;
 };
 
-
-
-
-  interface SidebarLink {
-    name:string;
-    href:string;
-    icon:JSX.ElementType;
-    dropdown?:{
-      name:string;
-      href:string;
-      icon:JSX.ElementType;
-    }[]
-  }
+interface SidebarLink {
+  name: string;
+  href: string;
+  icon: JSX.ElementType;
+  dropdown?: {
+    name: string;
+    href: string;
+    icon: JSX.ElementType;
+  }[];
+}
 
 export const sidebarLinks: SidebarLink[] = [
-    {
-      name: 'Dashboard Overview',
-      href: '/branch',
-      icon: Gauge,
-    },
-    {
-      name: 'Manage Members',
-      href: '/branch/members',
-      icon: Users,
-    },
-    {
-      name: 'Events',
-      href: '/branch/events',
-      icon: Calendar,
-    },
-    {
-      name: 'Mentorship',
-      href: '/branch/mentorship',
-      icon: User, // using FontAwesome faHandsHelping
-    },
-    {
-      name: 'Resources Hub',
-      href: '/branch/resources',
-      icon: Folder,
-    },
-    {
-      name: 'Alumni',
-      href: '/branch/alumni',
-      icon: GraduationCap,
-    },
-    {
-      name: 'Store',
-      href:"",
-      icon: ShoppingCart,
-      dropdown: [
-        { name: 'Products', href: '/branch/store/products', icon: Package },
-        { name: 'Orders', href: '/branch/store/orders', icon: Receipt },
-      ],
-    },
-    
-    {
-      name: 'Settings & Profile',
-      href: '/branch/settings',
-      icon: Cog,
-    },
- 
-  ];
-  
+  {
+    name: "Dashboard Overview",
+    href: "/branch",
+    icon: Gauge,
+  },
+  {
+    name: "Manage Members",
+    href: "/branch/members",
+    icon: Users,
+  },
+  {
+    name: "Events",
+    href: "/branch/events",
+    icon: Calendar,
+  },
+  {
+    name: "Mentorship",
+    href: "/branch/mentorship",
+    icon: User, // using FontAwesome faHandsHelping
+  },
+  {
+    name: "Resources Hub",
+    href: "/branch/resources",
+    icon: Folder,
+  },
+  {
+    name: "Alumni",
+    href: "/branch/alumni",
+    icon: GraduationCap,
+  },
+  {
+    name: "Store",
+    href: "",
+    icon: ShoppingCart,
+    dropdown: [
+      { name: "Products", href: "/branch/store/products", icon: Package },
+      { name: "Orders", href: "/branch/store/orders", icon: Receipt },
+    ],
+  },
 
-  // @/constant/index.ts
-
+  {
+    name: "Settings & Profile",
+    href: "/branch/settings",
+    icon: Cog,
+  },
+];
 
 export const product: Products[] = [
   {
     id: 1,
     name: "Classic CONCES T-Shirt",
-    description: "Premium cotton t-shirt for Christian engineers. Show your faith and pride in style.",
+    description:
+      "Premium cotton t-shirt for Christian engineers. Show your faith and pride in style.",
     price: 7500,
-    images: [
-      "/images/shirt.png",
-      "/images/shirt.png",
-      "/images/shirt.png"
-    ],
+    images: ["/images/shirt.png", "/images/shirt.png", "/images/shirt.png"],
     stock: 100,
     variants: [
       {
@@ -115,15 +117,25 @@ export const product: Products[] = [
           { value: "M", label: "Medium", stock: 30 },
           { value: "L", label: "Large", stock: 25 },
           { value: "XL", label: "Extra Large", stock: 15 },
-        ]
+        ],
       },
       {
         name: "Color",
         options: [
-          { value: "white", label: "White", stock: 30, image: "/images/shirt.png" },
-          { value: "black", label: "Black", stock: 40, image: "/images/shirt.png" },
-        ]
-      }
+          {
+            value: "white",
+            label: "White",
+            stock: 30,
+            image: "/images/shirt.png",
+          },
+          {
+            value: "black",
+            label: "Black",
+            stock: 40,
+            image: "/images/shirt.png",
+          },
+        ],
+      },
     ],
     rating: 4.6,
     reviews: 87,
@@ -132,57 +144,51 @@ export const product: Products[] = [
   },
 ];
 
-
-
-import { Order } from '@/types';
+import { Order } from "@/types";
 import { FaBible, FaPhotoVideo, FaTools } from "react-icons/fa";
 import { FaBriefcase, FaUsers, FaVideo } from "react-icons/fa6";
 
-
-
-
-
 export const categories = [
   {
-    name: 'Engineering Resources',
+    name: "Engineering Resources",
     count: 54,
     icon: FaTools,
-    bgColor: 'bg-blue-100',
-    iconColor: 'text-blue-600',
+    bgColor: "bg-blue-100",
+    iconColor: "text-blue-600",
   },
   {
-    name: 'Devotionals',
+    name: "Devotionals",
     count: 37,
     icon: FaBible,
-    bgColor: 'bg-purple-100',
-    iconColor: 'text-purple-600',
+    bgColor: "bg-purple-100",
+    iconColor: "text-purple-600",
   },
   {
-    name: 'Career Resources',
+    name: "Career Resources",
     count: 29,
     icon: FaBriefcase,
-    bgColor: 'bg-green-100',
-    iconColor: 'text-green-600',
+    bgColor: "bg-green-100",
+    iconColor: "text-green-600",
   },
   {
-    name: 'Seminars & Webinars',
+    name: "Seminars & Webinars",
     count: 18,
     icon: FaVideo,
-    bgColor: 'bg-red-100',
-    iconColor: 'text-red-600',
+    bgColor: "bg-red-100",
+    iconColor: "text-red-600",
   },
   {
-    name: 'Community Content',
+    name: "Community Content",
     count: 42,
     icon: FaUsers,
-    bgColor: 'bg-yellow-100',
-    iconColor: 'text-yellow-600',
+    bgColor: "bg-yellow-100",
+    iconColor: "text-yellow-600",
   },
   {
-    name: 'Multimedia',
+    name: "Multimedia",
     count: 23,
     icon: FaPhotoVideo,
-    bgColor: 'bg-indigo-100',
-    iconColor: 'text-indigo-600',
+    bgColor: "bg-indigo-100",
+    iconColor: "text-indigo-600",
   },
 ];

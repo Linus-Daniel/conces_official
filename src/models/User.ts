@@ -32,7 +32,6 @@ const UserSchema = new Schema<IUser>({
 UserSchema.index({ email: 1, branch: 1 }, { unique: true });
 
 UserSchema.methods.comparePassword = async function(candidatePassword: string) {
-  // Password compare logic here
 };
 
 const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
