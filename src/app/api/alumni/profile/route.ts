@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import AlumniProfile from '@/models/Alunmi'; 
+import AlumniProfile from '@/models/Alumni'; 
 import Connection from '@/models/Connect';
 import dbConnect from '@/lib/dbConnect';
 import { getServerSession } from 'next-auth';

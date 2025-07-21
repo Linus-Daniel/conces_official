@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/next-auth';
 import dbConnect from '@/lib/dbConnect';
 
-import MentorshipRequest from '@/models/MentorshipRequest';
+import MentorshipApplication from '@/models/MentorshipApplication';
 
 export async function POST(req: NextRequest, { params }: {params:  Promise<{ id: string }> }) {
   await dbConnect();
@@ -15,8 +15,8 @@ export async function POST(req: NextRequest, { params }: {params:  Promise<{ id:
 
   try {
     const { message, mentorId } = await req.json();
-    const application = await MentorshipRequest.create({
-      mentorshipId: (await params).id,
+    const application = await MentorshipApplication.create({
+      mentorship: (await params).id,
       studentId: session.user.id,
       mentorId,
       message,
@@ -27,4 +27,24 @@ export async function POST(req: NextRequest, { params }: {params:  Promise<{ id:
     return NextResponse.json({ error: 'Application failed', message:error }, { status: 500 });
   }
 }
+export async function GET(req:NextRequest, { params }: {params:  Promise<{ id: string }> }) {
+  await dbConnect();
+  const session = await getServerSession(authOptions);
+  // if (!session || !session?.user) {
+  //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // }
+
+  try {
+    const applications = await MentorshipApplication.find({ mentorship: (await params).id })
+      .populate('mentorId', 'name expertise')
+      .populate('studentId', 'name email');
+
+    return NextResponse.json(applications);
+  } catch (error) {
+    console.error('Error fetching mentorship applications:', error);
+    return NextResponse.json({ error: 'Failed to fetch applications' }, { status: 500 });
+  }
+  
+}
+
 

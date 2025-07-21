@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/next-auth';
 import dbConnect from '@/lib/dbConnect';
 import MentorRequest from '@/models/MentorRequest';
-import AlumniProfile from '@/models/Alunmi';
+import AlumniProfile from '@/models/Alumni';
 
 export async function PATCH(
   request: Request,

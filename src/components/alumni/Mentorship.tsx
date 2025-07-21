@@ -19,11 +19,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Calendar, Clock, Link, BookOpen } from "lucide-react";
+import { Plus, Calendar, Clock, LinkIcon, BookOpen } from "lucide-react";
 import api from "@/lib/axiosInstance";
 import { AlumniFormData } from "@/types/alumni";
 import { IUser } from "@/models/User";
 import { User } from "@/types";
+import Link from "next/link";
 
 export default function MentorshipSection({
   alumni,
@@ -34,7 +35,8 @@ export default function MentorshipSection({
 }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    mentorId: user.id,
+    mentorId: alumni._id,
+    name: user.name, // <-- new field
     description: "",
     topics: [] as string[],
     schedule: {
@@ -44,7 +46,7 @@ export default function MentorshipSection({
       additionalNotes: "",
     },
   });
-console.log(user)
+  
   const [currentTopic, setCurrentTopic] = useState("");
 
   const daysOfWeek = [
@@ -98,10 +100,11 @@ console.log(user)
   };
 
   const handleSubmit = async () => {
-    if (!form.mentorId || !form.description || form.topics.length === 0) {
+    if (!form.mentorId || !form.name || !form.description || form.topics.length === 0) {
       toast.error("Please fill all required fields");
       return;
     }
+    
 
     try {
       await api.post("/mentorships", form);
@@ -110,6 +113,7 @@ console.log(user)
       // Reset form
       setForm({
         mentorId: "",
+        name:"",
         description: "",
         topics: [],
         schedule: {
@@ -135,6 +139,8 @@ console.log(user)
             Manage mentorship relationships and create new pairings
           </p>
         </div>
+        <div className="flex gap-4">
+
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -158,7 +164,15 @@ console.log(user)
                   {user.email}
                 </p>
               </div>
-
+              <div className="space-y-2">
+  <Label htmlFor="name">Name of Mentorship Program*</Label>
+  <Input
+    id="name"
+    value={form.name}
+    onChange={(e) => handleChange("name", e.target.value)}
+    placeholder="Enter mentorship title or your full name"
+  />
+</div>
               {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
@@ -168,7 +182,7 @@ console.log(user)
                   onChange={(e) => handleChange("description", e.target.value)}
                   placeholder="Describe the purpose of this mentorship"
                   className="min-h-[100px]"
-                />
+                  />
               </div>
 
               {/* Topics */}
@@ -180,7 +194,7 @@ console.log(user)
                     onChange={(e) => setCurrentTopic(e.target.value)}
                     placeholder="Add a topic"
                     onKeyDown={(e) => e.key === "Enter" && addTopic()}
-                  />
+                    />
                   <Button variant="outline" onClick={addTopic}>
                     Add
                   </Button>
@@ -189,14 +203,14 @@ console.log(user)
                   <div className="flex flex-wrap gap-2 mt-2">
                     {form.topics.map((topic) => (
                       <div
-                        key={topic}
-                        className="flex items-center gap-1 px-3 py-1 bg-secondary rounded-full text-sm"
+                      key={topic}
+                      className="flex items-center gap-1 px-3 py-1 bg-secondary rounded-full text-sm"
                       >
                         {topic}
                         <button
                           onClick={() => removeTopic(topic)}
                           className="text-muted-foreground hover:text-foreground"
-                        >
+                          >
                           ×
                         </button>
                       </div>
@@ -218,14 +232,14 @@ console.log(user)
                   <div className="flex flex-wrap gap-2">
                     {daysOfWeek.map((day) => (
                       <Button
-                        key={day}
-                        variant={
-                          form.schedule.days.includes(day)
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        onClick={() => toggleDay(day)}
+                      key={day}
+                      variant={
+                        form.schedule.days.includes(day)
+                        ? "default"
+                        : "outline"
+                      }
+                      size="sm"
+                      onClick={() => toggleDay(day)}
                       >
                         {day.slice(0, 3)}
                       </Button>
@@ -245,22 +259,22 @@ console.log(user)
                         handleScheduleChange("time", e.target.value)
                       }
                       className="w-[150px]"
-                    />
+                      />
                   </div>
                 </div>
 
-                {/* Meeting Link */}
+                {/* Meeting LinkIcon */}
                 <div className="space-y-2">
-                  <Label>Meeting Link</Label>
+                  <Label>Meeting LinkIcon</Label>
                   <div className="flex items-center gap-2">
-                    <Link className="h-4 w-4 text-muted-foreground" />
+                    <LinkIcon className="h-4 w-4 text-muted-foreground" />
                     <Input
                       value={form.schedule.meetingLink}
                       onChange={(e) =>
                         handleScheduleChange("meetingLink", e.target.value)
                       }
                       placeholder="Zoom, Google Meet, etc."
-                    />
+                      />
                   </div>
                 </div>
 
@@ -276,7 +290,7 @@ console.log(user)
                       }
                       placeholder="Any special instructions"
                       className="min-h-[80px]"
-                    />
+                      />
                   </div>
                 </div>
               </div>
@@ -289,7 +303,11 @@ console.log(user)
             </div>
           </DialogContent>
         </Dialog>
+        <Link href="/alumni/mentorship/applications">
+                      Applications
+            </Link>
       </div>
+                      </div>
 
       {/* Mentorship List */}
       <div className="rounded-lg border bg-card">

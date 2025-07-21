@@ -26,7 +26,7 @@ type Testimonial = {
 };
 
 export type Alumni = {
-  id: number;
+  _id:string;
   name: string;
   graduationYear: number;
   currentRole: string;
@@ -56,6 +56,7 @@ interface SocialLinks {
 }
 
 export interface IAlumniProfile extends Document {
+  _id:string;
   userId:string;
   graduationYear: number;
   education: {
@@ -98,6 +99,7 @@ export interface WorkExperienceEntry {
 }
 
 export interface AlumniFormData {
+  _id?:string;
   graduationYear: string;
   specialization: string;
   currentRole: string;

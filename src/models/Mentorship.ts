@@ -9,6 +9,7 @@ interface Schedule {
 
 export interface IMentorship extends Document {
   mentorId: mongoose.Types.ObjectId;
+  name?: string;
   description: string;
   topics: string[];
   schedule?: Schedule;
@@ -29,9 +30,11 @@ const ScheduleSchema = new Schema<Schedule>(
 
 const MentorshipSchema = new Schema<IMentorship>(
   {
-    mentorId: { type: Schema.Types.ObjectId, ref: 'Alumni', required: true },
+    mentorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     description: { type: String, required: true },
+    name: { type: String, required: false },
     topics: [{ type: String }],
+    
     status: { type: String, enum: ['active', 'archived'], default: 'active' },
     schedule: ScheduleSchema,
   },

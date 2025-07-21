@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         .sort({ createdAt: -1 });
     } else {
       orders = await Order.find({ user: session.user.id })
-        .populate('items.product', 'name price')
+        .populate('items.product', 'name price images')
         .sort({ createdAt: -1 });
     }
 

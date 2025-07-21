@@ -6,6 +6,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import useAuthStore from "@/zustand/authStore";
 import Image from "next/image";
+import { User as UserInfo } from "next-auth";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -16,54 +17,63 @@ const navLinks = [
   { name: "Resources", href: "/resources" },
   { name: "Alumni", href: "/alumni" },
   { name: "Testimony", href: "/testimony" },
-
+  { name: "Gallery", href: "/gallery" },
+  { name: "Executives", href: "/executives" },
 ];
 
-function Header() {
+function Header({ user }: { user: UserInfo | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
   const pathname = usePathname();
   const { logout } = useAuthStore();
   const session = useSession();
-  const user = session.data?.user;
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
         setMobileMenuOpen(false);
       }
     };
-    
+
     if (mobileMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [mobileMenuOpen]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (openDropdown && !(event.target as Element).closest('.user-dropdown')) {
+      if (
+        openDropdown &&
+        !(event.target as Element).closest(".user-dropdown")
+      ) {
         setOpenDropdown(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openDropdown]);
 
   const getDashboardUrl = (role?: string) => {
-    switch(role) {
-      case 'admin': return '/admin/';
-      case 'alumni': return '/alumni/dashboard';
-      case 'branch-admin': return '/branch';
-      case 'student': return '/member/dashboard';
-      default: return '/';
+    switch (role) {
+      case "admin":
+        return "/admin/";
+      case "alumni":
+        return "/alumni/dashboard";
+      case "branch-admin":
+        return "/branch";
+      case "student":
+        return "/user/";
+      default:
+        return "/";
     }
   };
 
@@ -74,12 +84,16 @@ function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="h-14 p-1 w-14 bg-primary-dark rounded-full flex items-center justify-center">
-            <Image src={"/images/logo.png"} alt="logo image" width={70} height={70}/>
+              <Image
+                src={"/images/logo.png"}
+                alt="logo image"
+                width={70}
+                height={70}
+              />
             </div>
             <span className="ml-2 text-xl font-bold text-primary-dark">
               CONCES
             </span>
-
           </Link>
 
           {/* Desktop Nav */}
@@ -113,14 +127,16 @@ function Header() {
                   {openDropdown && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                       <div className="px-4 py-2 border-b">
-                        <p className="text-sm text-blue-500 font-medium">{user.name}</p>
+                        <p className="text-sm text-blue-500 font-medium">
+                          {user.name}
+                        </p>
                         <p className="text-xs text-gray-500">{user.email}</p>
                       </div>
                       <Link
                         href={getDashboardUrl(user.role)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        Dashboard
+                        Profile
                       </Link>
                       <button
                         onClick={logout}
@@ -165,12 +181,16 @@ function Header() {
         <div
           ref={mobileMenuRef}
           className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform ${
-            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform duration-300 ease-in-out z-50`}
         >
           <div className="flex flex-col h-full p-4 overflow-y-auto">
             <div className="mb-8 flex justify-between items-center">
-              <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+              <Link
+                href="/"
+                className="flex items-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
                 <div className="h-10 w-10 bg-primary-dark rounded-full flex items-center justify-center">
                   <span className="text-white font-bold">C</span>
                 </div>
@@ -220,7 +240,7 @@ function Header() {
                     className="block w-full text-center px-4 py-2 mt-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Dashboard
+                    Profile
                   </Link>
                   <button
                     onClick={() => {
@@ -256,7 +276,7 @@ function Header() {
 
         {/* Overlay when mobile menu is open */}
         {mobileMenuOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 backdrop-blur-[1px] bg-opacity-50 z-40 lg:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />

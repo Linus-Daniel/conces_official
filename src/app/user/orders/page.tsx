@@ -9,7 +9,7 @@ export default async function OrdersPage() {
 
     const response = await api.get("/store/orders", {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: cookieStore.toString(), 
       },
       withCredentials: true,
     });

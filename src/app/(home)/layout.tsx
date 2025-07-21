@@ -1,24 +1,29 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Footer from "@/components/home/Footer";
-import Header from "@/components/layout/Header";
-import { SocketProvider } from "../../context/SocketContext";
-import { SessionProvider } from "next-auth/react";
 import HomeLayout from "@/components/HomeLayout";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/next-auth";
+import type { ReactNode } from "react";
+import type { User } from "next-auth";
+
 export const metadata: Metadata = {
   title: "Conces",
   description: "faithful and committed to the cause of Christ",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface RootLayoutProps {
+  children: ReactNode;
+}
+
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const session = await getServerSession(authOptions);
+  const user: User | null = session?.user ?? null;
+
   return (
-    <html>
+    <html lang="en">
       <body className="antialiased">
-        <HomeLayout>
+        <HomeLayout user={user}>
           {children}
         </HomeLayout>
       </body>

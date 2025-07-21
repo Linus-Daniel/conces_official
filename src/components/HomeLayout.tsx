@@ -2,14 +2,15 @@
 import { SocketProvider } from "@/context/SocketContext";
 import { SessionProvider } from "next-auth/react";
 import React, { ReactNode } from "react";
-import Header from "./layout/Header";
+import Header from "./home/Header";
 import Footer from "./home/Footer";
+import { User } from "next-auth";
 
-function HomeLayout({ children }: { children: ReactNode }) {
+function HomeLayout({ children,user }: { children: ReactNode;user:User | null}) {
   return (
     <SessionProvider>
       <SocketProvider>
-        <Header />
+        <Header user={user} />
         <main>{children}</main>
         <Footer />
       </SocketProvider>

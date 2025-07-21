@@ -2,27 +2,30 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaShoppingCart } from "react-icons/fa";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaStar,
+  FaRegStar,
+  FaShoppingCart,
+} from "react-icons/fa";
 import { Product } from "@/types";
 import { IProduct } from "@/models/Product";
 import { FaPlus } from "react-icons/fa6";
 import useCart from "@/zustand/useCart";
 
-
-export default function ProductCard({ product }:{product:IProduct}) {
-  const {addToCart} = useCart()
-  const handleAddToCart = async ()=>{
-
-    try{
-      const response = await addToCart(product?._id as string)
-
+export default function ProductCard({ product }: { product: IProduct }) {
+  const { addToCart } = useCart();
+  const handleAddToCart = async () => {
+    if(product.stock === 0) {
+      console.log("Product is out of stock");
+      return;}
+    try {
+      const response = await addToCart(product?._id as string);
+    } catch (error) {
+      console.log(error);
     }
-    catch(error){
-      console.log(error)
-    }
-
-
-  }
+  };
   const rating = 4; // Replace with actual product rating
   const reviewCount = 18; // Replace with actual review count
   const isWishlisted = false; // Replace with actual wishlist state
@@ -41,8 +44,8 @@ export default function ProductCard({ product }:{product:IProduct}) {
             alt={product.name}
           />
         </Link>
-        
-        <button 
+
+        <button
           className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-rose-50 hover:text-rose-500 transition-colors"
           aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
@@ -66,13 +69,13 @@ export default function ProductCard({ product }:{product:IProduct}) {
         {/* Rating and Reviews */}
         <div className="flex items-center gap-1">
           <div className="flex text-amber-400">
-            {[...Array(5)].map((_, i) => (
+            {[...Array(5)].map((_, i) =>
               i < Math.floor(rating) ? (
                 <FaStar key={i} className="w-3 h-3" />
               ) : (
                 <FaRegStar key={i} className="w-3 h-3" />
               )
-            ))}
+            )}
           </div>
           <span className="text-xs text-gray-500">({reviewCount})</span>
         </div>
@@ -80,20 +83,25 @@ export default function ProductCard({ product }:{product:IProduct}) {
         {/* Price and Add to Cart */}
         <div className="flex items-center justify-between pt-2">
           <div className="space-y-1">
-          
-              <span className="font-bold text-lg text-royal-DEFAULT">
-                ${product.price.toFixed(2)}
-              </span>
-          
+            <span className="font-bold text-lg text-royal-DEFAULT">
+              ${product.price.toFixed(2)}
+            </span>
           </div>
 
-          <button 
-          onClick={handleAddToCart}
+          <button
+            onClick={()=>{handleAddToCart()}}
             className="p-2 flex items-center gap-1  rounded-full bg-royal-DEFAULT  text-white hover:bg-royal-detext-royal-DEFAULT-dark transition-colors"
             aria-label="Add to cart"
+            disabled={product.stock === 0}
           >
-            <FaShoppingCart className="w-4 h-4" />
-            <FaPlus size={10} />
+            {product.stock === 0 ? (
+              <span className="text-red-500 text-xs">Out of Stock</span>
+            ) : (
+              <>
+                <FaShoppingCart className="w-4 h-4" />
+                <FaPlus size={10} />
+              </>
+            )}
           </button>
         </div>
       </div>

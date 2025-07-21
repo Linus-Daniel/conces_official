@@ -39,8 +39,7 @@ const DashboardLayout = ({ children }: LayoutProps) => {
     { icon: <FaBook />, name: "Resources", link: "/user/resources" },
     { icon: <FaChalkboardTeacher />, name: "Mentorship", link: "/user/mentorship" },
     { icon: <FaPrayingHands />, name: "Prayer Wall", link: "/user/prayer" },
-    { icon: <FaBriefcase />, name: "Career Hub", link: "/user/career" },
-    { icon: <FaHandsHelping />, name: "Community Service", link: "/user/service" },
+    { icon: <FaHandsHelping />, name: "Community", link: "/community" },
     { icon: <FaShoppingCart />, name: "store", link: "/store" },
     { icon: <FaShoppingBag />, name: "orders", link: "/user/orders" },
 
@@ -131,7 +130,7 @@ const DashboardLayout = ({ children }: LayoutProps) => {
 
       {/* Content */}
       <main className="flex-1 overflow-y-auto p-1 pt-20 lg:pt-6">
-        <div className="bg-white text-gray-900 shadow p-4 rounded-lg min-h-[300px]">
+        <div className=" text-gray-900 shadow p-4 rounded-lg min-h-[300px]">
           <SessionProvider>
             <SocketProvider>{children}</SocketProvider>
           </SessionProvider>

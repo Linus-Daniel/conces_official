@@ -192,3 +192,138 @@ export const categories = [
     iconColor: "text-indigo-600",
   },
 ];
+
+
+export const executives = [
+  {
+    id: 1,
+    name: "Alex Johnson",
+    role: "Executive Director",
+    image: "/images/executives/alex.jpg",
+    bio: "Visionary leader with 10+ years of experience in nonprofit management and social impact initiatives.",
+    social: {
+      twitter: "#",
+      linkedin: "#",
+    },
+  },
+  {
+    id: 2,
+    name: "Maria Garcia",
+    role: "Program Director",
+    image: "/images/executives/maria.jpg",
+    bio: "Passionate about youth development and creating scalable programs that drive meaningful change.",
+    social: {
+      twitter: "#",
+      linkedin: "#",
+    },
+  },
+  {
+    id: 3,
+    name: "James Chen",
+    role: "Technology Lead",
+    image: "/images/executives/james.jpg",
+    bio: "Tech innovator focused on leveraging technology to solve social challenges and empower communities.",
+    social: {
+      twitter: "#",
+      linkedin: "#",
+    },
+  },
+  {
+    id: 4,
+    name: "Sarah Williams",
+    role: "Partnership Manager",
+    image: "/images/executives/sarah.jpg",
+    bio: "Expert in building strategic partnerships that amplify impact and create sustainable solutions.",
+    social: {
+      twitter: "#",
+      linkedin: "#",
+    },
+  },
+];
+
+export const gallery = [
+  {
+    id: 1,
+    title: "Aji",
+    image: "/images/aji.jpg",
+    description: "Fellowship member contributing to community projects",
+    date: "January 2023",
+  },
+  {
+    id: 2,
+    title: "Ant",
+    image: "/images/ant.jpg",
+    description: "Leading our tech innovation workshop",
+    date: "February 2023",
+  },
+  {
+    id: 3,
+    title: "Chidi",
+    image: "/images/chidi.jpg",
+    description: "Speaking at our annual leadership conference",
+    date: "March 2023",
+  },
+  {
+    id: 4,
+    title: "Dave",
+    image: "/images/dave.jpg",
+    description: "Organizing local community outreach",
+    date: "April 2023",
+  },
+  {
+    id: 5,
+    title: "Dog",
+    image: "/images/dog.jpg",
+    description: "Our fellowship mascot at charity event",
+    date: "May 2023",
+  },
+  {
+    id: 6,
+    title: "Happy",
+    image: "/images/happy.jpg",
+    description: "Celebrating successful project completion",
+    date: "June 2023",
+  },
+  {
+    id: 7,
+    title: "Joel",
+    image: "/images/joel.jpg",
+    description: "Mentoring new fellowship members",
+    date: "July 2023",
+  },
+  {
+    id: 8,
+    title: "Julius",
+    image: "/images/julius.jpg",
+    description: "Presenting research findings",
+    date: "August 2023",
+  },
+  {
+    id: 9,
+    title: "Nansoh",
+    image: "/images/nansoh.jpg",
+    description: "Coordinating international partnership",
+    date: "September 2023",
+  },
+  {
+    id: 10,
+    title: "Prince",
+    image: "/images/prince.jpg",
+    description: "Leading fundraising initiative",
+    date: "October 2023",
+  },
+  {
+    id: 11,
+    title: "Tima",
+    image: "/images/tima.jpg",
+    description: "Facilitating skills development workshop",
+    date: "November 2023",
+  },
+  {
+    id: 12,
+    title: "Yohny",
+    image: "/images/yohny.jpg",
+    description: "Receiving community service award",
+    date: "December 2023",
+  },
+];

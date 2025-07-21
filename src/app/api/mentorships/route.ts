@@ -13,11 +13,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { description, topics } = await req.json();
+    const data = await req.json();
+    console.log(data, "data")
     const mentorship = await Mentorship.create({
-      mentorId: session.user.id,
-      description,
-      topics,
+      ...data
     });
     return NextResponse.json(mentorship);
   } catch (error) {
@@ -32,12 +31,9 @@ export async function GET(req: NextRequest) {
   await dbConnect();
 
   const session = await getServerSession(authOptions);
-  // if (!session || session.user.role === 'student') {
-  //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  // }
 
   try {
-    const mentorships = await Mentorship.find({})
+    const mentorships = await Mentorship.find({});
 
     return NextResponse.json(mentorships);
   } catch (error) {
