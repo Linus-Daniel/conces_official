@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 // ✅ Replace 'conces' with your actual database name
-const MONGODB_URI = 'mongodb://127.0.0.1:27017/conces';
+const MONGODB_URI = process.env.NODE_ENV === "production"?"mongodb+srv://ld604068:zfyOhBow2nmL1L8Z@cluster0.wipjjmc.mongodb.net/":"mongodb://127.0.0.1:27017/conces";
 
 if (!MONGODB_URI || (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://'))) {
   throw new Error('❌ Invalid MongoDB URI');

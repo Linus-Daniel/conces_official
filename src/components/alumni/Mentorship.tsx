@@ -303,7 +303,7 @@ export default function MentorshipSection({
             </div>
           </DialogContent>
         </Dialog>
-        <Link href="/alumni/mentorship/applications">
+        <Link href="/alumni/mentorship/applications" className=" flex items-center justify-center text-royal-500 px-2 py-1 border-royal-700 hover:bg-royal-700 hover:text-white transition-all duration-150 border-[2px] rounded-sm ">
                       Applications
             </Link>
       </div>
@@ -333,7 +333,6 @@ export default function MentorshipSection({
           </div>
 
           <div className="grid gap-4">
-            {/* Example mentorship cards - in a real app these would be mapped from data */}
             <div className="flex items-center gap-4 p-4 border rounded-lg">
               <div className="flex-1">
                 <div className="font-medium">Dr. Sarah Johnson → Alex Chen</div>
