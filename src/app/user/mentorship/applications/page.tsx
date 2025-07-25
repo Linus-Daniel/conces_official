@@ -1,5 +1,4 @@
 import MentorshipApplicationsPage from '@/components/ApplicationsTable';
-import ApplicationsTable from '@/components/user/ApplicationsTable';
 import api from '@/lib/axiosInstance';
 import { r } from 'framer-motion/dist/types.d-CQt5spQA';
 import { cookies } from 'next/headers';
