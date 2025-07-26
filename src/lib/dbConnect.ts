@@ -1,10 +1,17 @@
-import mongoose from 'mongoose';
+// lib/dbConnect.ts
+import mongoose from "mongoose";
 
-// ✅ Replace 'conces' with your actual database name
-const MONGODB_URI = process.env.NODE_ENV === "production"?"mongodb+srv://ld604068:zfyOhBow2nmL1L8Z@cluster0.wipjjmc.mongodb.net/":"mongodb://127.0.0.1:27017/conces";
+const MONGODB_URI =
+  process.env.NODE_ENV === "production"
+    ? process.env.MONGODB_URI_PROD
+    : process.env.MONGODB_URI_DEV;
 
-if (!MONGODB_URI || (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://'))) {
-  throw new Error('❌ Invalid MongoDB URI');
+if (
+  !MONGODB_URI ||
+  (!MONGODB_URI.startsWith("mongodb://") &&
+    !MONGODB_URI.startsWith("mongodb+srv://"))
+) {
+  throw new Error("❌ Invalid MongoDB URI");
 }
 
 let cached = (global as any).mongoose;
@@ -18,11 +25,14 @@ async function dbConnect(): Promise<typeof mongoose> {
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI, {
+      .connect(MONGODB_URI as string, {
         bufferCommands: false,
+        dbName: "conces",
       })
-      .then((mongoose) => mongoose);
-      console.log('🔗 Connected to MongoDB');
+      .then((mongoose) => {
+        console.log("🔗 Connected to MongoDB");
+        return mongoose;
+      });
   }
 
   cached.conn = await cached.promise;

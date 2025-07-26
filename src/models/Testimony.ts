@@ -16,4 +16,6 @@ const TestimonySchema = new Schema({
   }
 }, { timestamps: true });
 
-export default models.Testimony || model('Testimony', TestimonySchema);
+const Testimony = models.Testimony || model('Testimony', TestimonySchema);
+
+export default Testimony;

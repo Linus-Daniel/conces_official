@@ -58,5 +58,5 @@ const ResourceSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
-export default mongoose.models.Resource || mongoose.model("Resource", ResourceSchema);
+const Resource = mongoose.models.Resource || mongoose.model('Resource', ResourceSchema);
+export default Resource
