@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import { getSession, signIn, signOut } from 'next-auth/react';
+import api from '@/lib/axiosInstance';
 
 interface User {
   id: string;
@@ -79,7 +80,7 @@ const useAuthStore = create<AuthState>((set) => ({
 
   register: async ({ fullName, email, phone, institution, role, password }) => {
     try {
-      const res = await axios.post('/api/auth/register', {
+      const res = await api.post('/auth/register', {
         fullName,
         email,
         phone,
@@ -107,7 +108,7 @@ const useAuthStore = create<AuthState>((set) => ({
       });
       localStorage.setItem('authToken', data.token);
     } catch (error: any) {
-      console.error('Register error:', error.response?.data?.error || error.message);
+      console.error('Register error:', error.response?.data?.message || error.message);
       throw error;
     }
   },

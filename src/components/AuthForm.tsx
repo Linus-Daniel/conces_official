@@ -13,11 +13,12 @@ import {
   FaMicrosoft,
   FaBell,
 } from "react-icons/fa6";
-import {FaSpinner } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
 import useAuthStore from "@/zustand/authStore";
 import { useRouter } from "next/navigation";
-import { User } from "@/types";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AuthForm = () => {
   const [activeTab, setActiveTab] = useState("signup");
@@ -78,9 +79,14 @@ const AuthForm = () => {
     "",
     "",
   ]);
-  const [passwordStrength, setPasswordStrength] = useState("weak");
+  const [passwordStrength, setPasswordStrength] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Phone validation regex (basic international format)
+  const phoneRegex = /^\+?[0-9\s\-]+$/;
 
   // Handle verification code input
   const handleVerificationCodeChange = (index: number, value: string) => {
@@ -95,23 +101,74 @@ const AuthForm = () => {
     }
   };
 
+  // Validate form fields
+  const validateSignupForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.fullname.trim()) {
+      newErrors.fullname = "Full name is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (!formData.terms) {
+      newErrors.terms = "You must agree to the terms and conditions";
+    }
+
+    if (!formData.captcha) {
+      newErrors.captcha = "Please verify you're not a robot";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Validate login form
+  const validateLoginForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!loginFormData.email.trim()) {
+      newErrors.loginEmail = "Email is required";
+    } else if (!emailRegex.test(loginFormData.email)) {
+      newErrors.loginEmail = "Please enter a valid email address";
+    }
+
+    if (!loginFormData.password) {
+      newErrors.loginPassword = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Handle signup submission
   const handleSignupSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!validateSignupForm()) return;
+
     setIsLoading(true);
-    setError("");
+    setErrors({});
 
     try {
-      if (formData.password !== formData.confirmPassword) {
-        throw new Error("Passwords don't match!");
-      }
-      if (!formData.terms) {
-        throw new Error("You must agree to the terms and conditions");
-      }
-      if (!formData.captcha) {
-        throw new Error("Please verify you're not a robot");
-      }
-
       const userData = {
         fullName: formData.fullname,
         email: formData.email,
@@ -122,11 +179,14 @@ const AuthForm = () => {
       };
 
       await register(userData);
-
-      // If we get here, verification was required
+      toast.success(
+        "Registration successful! Please check your email for verification code."
+      );
       setActiveTab("verification");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      const errorMessage =
+        err instanceof Error ? err.response.data.message : "Registration failed";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +196,7 @@ const AuthForm = () => {
   const handleVerificationSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setErrors({});
 
     try {
       if (!verificationId) {
@@ -147,6 +207,7 @@ const AuthForm = () => {
       if (code.length !== 6) {
         throw new Error("Please enter a complete 6-digit code");
       }
+
       const userData = {
         fullName: formData.fullname,
         email: formData.email,
@@ -157,12 +218,15 @@ const AuthForm = () => {
       };
 
       await verifyEmail(code, userData, verificationId);
+      toast.success("Email verified successfully!");
+
       if (userData.role === "student") {
         router.push("/student-dashboard");
       } else if (userData.role === "alumni") {
         router.push("/alumni-dashboard");
       }
 
+      // Reset form
       setFormData({
         fullname: "",
         email: "",
@@ -174,12 +238,12 @@ const AuthForm = () => {
         terms: false,
         captcha: false,
       });
-
       setVerificationCode(["", "", "", "", "", ""]);
-      // If we get here, verification was successful
     } catch (err) {
       setVerificationCode(["", "", "", "", "", ""]);
-      setError(err instanceof Error ? err.message : "Verification failed");
+      const errorMessage =
+        err instanceof Error ? err.message : "Verification failed";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -188,12 +252,15 @@ const AuthForm = () => {
   // Handle resend verification code
   const handleResendVerification = async () => {
     setIsLoading(true);
-    setError("");
+    setErrors({});
 
     try {
       await resendVerification(formData.email);
+      toast.success("Verification code resent successfully!");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to resend code");
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to resend code";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -201,6 +268,7 @@ const AuthForm = () => {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    setErrors({});
   };
 
   const handleInputChange = (
@@ -216,6 +284,15 @@ const AuthForm = () => {
           : value,
     }));
 
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
     if (name === "password") {
       calculatePasswordStrength(value);
     }
@@ -228,22 +305,52 @@ const AuthForm = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    // Clear error when user types
+    if (errors[`login${name.charAt(0).toUpperCase() + name.slice(1)}`]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[
+          `login${name.charAt(0).toUpperCase() + name.slice(1)}`
+        ];
+        return newErrors;
+      });
+    }
   };
 
   const calculatePasswordStrength = (password: string) => {
-    // Simple password strength calculation
     if (password.length === 0) {
       setPasswordStrength("");
-    } else if (password.length < 6) {
+      return;
+    }
+
+    let strength = 0;
+
+    // Length check
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+
+    // Complexity checks
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    if (strength <= 2) {
       setPasswordStrength("weak");
-    } else if (password.length < 10) {
+    } else if (strength <= 4) {
       setPasswordStrength("medium");
     } else {
       setPasswordStrength("strong");
     }
   };
+
   const handleLoginSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!validateLoginForm()) return;
+
+    setIsLoading(true);
+
     try {
       const userData = {
         email: loginFormData.email,
@@ -254,6 +361,8 @@ const AuthForm = () => {
         userData.email,
         userData.password
       )) as unknown as string;
+
+      toast.success("Login successful!");
 
       // Redirect based on role
       switch (role) {
@@ -270,12 +379,14 @@ const AuthForm = () => {
           router.push("/user");
           break;
         default:
-          console.warn("Unrecognized role");
-          console.log("User data:", role);
+          toast.warn("Unrecognized role, redirecting to home");
           router.push("/");
       }
     } catch (error) {
-      console.error("Verification error:", error);
+      console.error("Login error:", error);
+      toast.error("Invalid email or password");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -307,6 +418,19 @@ const AuthForm = () => {
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
       {/* Authentication Flow Tabs */}
       <div className="w-full max-w-4xl mx-auto mt-8 px-4">
         <div className="flex justify-center mb-8">
@@ -367,11 +491,20 @@ const AuthForm = () => {
                         name="fullname"
                         value={formData.fullname}
                         onChange={handleInputChange}
-                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        className={`pl-10 w-full rounded-md border ${
+                          errors.fullname
+                            ? "border-red-300"
+                            : "border-royal-300"
+                        } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                         placeholder="John Doe"
                         required
                       />
                     </div>
+                    {errors.fullname && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.fullname}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -391,11 +524,18 @@ const AuthForm = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        className={`pl-10 w-full rounded-md border ${
+                          errors.email ? "border-red-300" : "border-royal-300"
+                        } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                         placeholder="your@email.com"
                         required
                       />
                     </div>
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -415,10 +555,17 @@ const AuthForm = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        className={`pl-10 w-full rounded-md border ${
+                          errors.phone ? "border-red-300" : "border-royal-300"
+                        } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                         placeholder="+234 123 456 7890"
                       />
                     </div>
+                    {errors.phone && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.phone}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -499,7 +646,11 @@ const AuthForm = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        className={`pl-10 w-full rounded-md border ${
+                          errors.password
+                            ? "border-red-300"
+                            : "border-royal-300"
+                        } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                         placeholder="••••••••"
                         required
                       />
@@ -511,6 +662,11 @@ const AuthForm = () => {
                         <FaEye />
                       </button>
                     </div>
+                    {errors.password && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.password}
+                      </p>
+                    )}
                     {passwordStrength && (
                       <div className="mt-1">
                         <div className="flex items-center mt-1">
@@ -562,7 +718,11 @@ const AuthForm = () => {
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                        className={`pl-10 w-full rounded-md border ${
+                          errors.confirmPassword
+                            ? "border-red-300"
+                            : "border-royal-300"
+                        } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                         placeholder="••••••••"
                         required
                       />
@@ -576,6 +736,11 @@ const AuthForm = () => {
                         <FaEye />
                       </button>
                     </div>
+                    {errors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.confirmPassword}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -587,7 +752,9 @@ const AuthForm = () => {
                       name="terms"
                       checked={formData.terms}
                       onChange={handleInputChange}
-                      className="h-4 w-4 text-gold-600 border-royal-300 rounded focus:ring-gold-500"
+                      className={`h-4 w-4 text-gold-600 ${
+                        errors.terms ? "border-red-300" : "border-royal-300"
+                      } rounded focus:ring-gold-500`}
                     />
                     <label
                       htmlFor="terms"
@@ -603,6 +770,9 @@ const AuthForm = () => {
                       </span>
                     </label>
                   </div>
+                  {errors.terms && (
+                    <p className="mt-1 text-sm text-red-600">{errors.terms}</p>
+                  )}
                 </div>
 
                 <div className="mb-6">
@@ -611,7 +781,11 @@ const AuthForm = () => {
                       <p className="text-center text-sm text-gray-800 mb-2">
                         Please verify you're human
                       </p>
-                      <div className="border border-royal-300 rounded-md bg-white p-3 flex items-center">
+                      <div
+                        className={`border ${
+                          errors.captcha ? "border-red-300" : "border-royal-300"
+                        } rounded-md bg-white p-3 flex items-center`}
+                      >
                         <input
                           type="checkbox"
                           id="captcha"
@@ -629,6 +803,11 @@ const AuthForm = () => {
                           className="h-8 ml-auto"
                         />
                       </div>
+                      {errors.captcha && (
+                        <p className="mt-1 text-sm text-red-600 text-center">
+                          {errors.captcha}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -636,9 +815,17 @@ const AuthForm = () => {
                 <div>
                   <button
                     type="submit"
-                    className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
+                    disabled={isLoading}
+                    className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Create Account
+                    {isLoading ? (
+                      <>
+                        <FaSpinner className="animate-spin mr-2" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </button>
                   <p className="mt-4 text-center text-sm text-royal-600">
                     Already have an account?{" "}
@@ -684,11 +871,20 @@ const AuthForm = () => {
                       name="email"
                       value={loginFormData.email}
                       onChange={handleLoginInputChange}
-                      className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                      className={`pl-10 w-full rounded-md border ${
+                        errors.loginEmail
+                          ? "border-red-300"
+                          : "border-royal-300"
+                      } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                       placeholder="your@email.com"
                       required
                     />
                   </div>
+                  {errors.loginEmail && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.loginEmail}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -713,7 +909,11 @@ const AuthForm = () => {
                       name="password"
                       value={loginFormData.password}
                       onChange={handleLoginInputChange}
-                      className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
+                      className={`pl-10 w-full rounded-md border ${
+                        errors.loginPassword
+                          ? "border-red-300"
+                          : "border-royal-300"
+                      } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
                       placeholder="••••••••"
                       required
                     />
@@ -725,6 +925,11 @@ const AuthForm = () => {
                       <FaEye />
                     </button>
                   </div>
+                  {errors.loginPassword && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.loginPassword}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mb-6">
@@ -749,9 +954,17 @@ const AuthForm = () => {
                 <div className="mb-6">
                   <button
                     type="submit"
-                    className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
+                    disabled={isLoading}
+                    className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Log In
+                    {isLoading ? (
+                      <>
+                        <FaSpinner className="animate-spin mr-2" />
+                        Logging In...
+                      </>
+                    ) : (
+                      "Log In"
+                    )}
                   </button>
                 </div>
 
@@ -806,12 +1019,6 @@ const AuthForm = () => {
                 <span className="font-medium">{formData.email}</span>.
               </p>
 
-              {error && (
-                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                  {error}
-                </div>
-              )}
-
               <form onSubmit={handleVerificationSubmit}>
                 <div className="mb-6">
                   <p className="text-royal-600 mb-2">Enter the 6-digit code:</p>
@@ -840,7 +1047,7 @@ const AuthForm = () => {
                 <button
                   type="submit"
                   disabled={isLoading || verificationCode.join("").length !== 6}
-                  className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 mb-4 flex items-center justify-center"
+                  className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 mb-4 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
@@ -858,7 +1065,7 @@ const AuthForm = () => {
                     type="button"
                     onClick={handleResendVerification}
                     disabled={isLoading}
-                    className="text-gold-600 hover:text-gold-700 font-medium"
+                    className="text-gold-600 hover:text-gold-700 font-medium disabled:opacity-50"
                   >
                     Resend
                   </button>
@@ -866,40 +1073,6 @@ const AuthForm = () => {
               </form>
             </div>
           )}
-
-          {/* {activeTab === 'alumni-pending' && (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaClock className="text-yellow-600 text-2xl" />
-              </div>
-              <h2 className="text-2xl font-bold text-conces-blue mb-2">Alumni Verification Pending</h2>
-              <p className="text-royal-600 mb-6">Thank you for registering as a Branch Alumni. Your application is currently under review by our administrators.</p>
-              
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 text-left">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <FaInfoCircle className="text-yellow-400" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-yellow-700">
-                      You will receive an email notification once your alumni status has been verified. This process typically takes 1-2 business days.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <button
-                onClick={() => setActiveTab('student-dashboard')}
-                className="w-full bg-royal-600 hover:bg-royal-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 mb-4"
-              >
-                Continue as Student
-              </button>
-              
-              <p className="text-royal-600">
-                Need help? <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">Contact Support</span>
-              </p>
-            </div>
-          )} */}
         </div>
       </div>
 
