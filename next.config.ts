@@ -5,6 +5,7 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA({
+    productionBrowserSourceMaps: true,
   
     images:{
       domains:["storage.googleapis.com","api.dicebear.com","res.cloudinary.com","randomuser.me",'via.placeholder.com']
