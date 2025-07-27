@@ -1,15 +1,22 @@
-// app/store/orders/page.tsx
 import { cookies } from "next/headers";
 import OrdersList from "@/components/order/OrderList";
 import api from "@/lib/axiosInstance";
 
+// Required to avoid static rendering issues since cookies are used
+export const dynamic = "force-dynamic";
+
 export default async function OrdersPage() {
   try {
-    const cookieStore = cookies();
+    // ✅ Grab all cookies and format them into a valid header string
+    const cookieStore = await cookies();
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join("; ");
 
     const response = await api.get("/store/orders", {
       headers: {
-        Cookie: cookieStore.toString(), 
+        Cookie: cookieHeader, // ✅ Correct format
       },
       withCredentials: true,
     });

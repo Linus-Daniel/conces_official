@@ -3,13 +3,16 @@ import { cookies } from "next/headers";
 import OrdersList from "@/components/order/OrderList";
 import api from "@/lib/axiosInstance";
 
+export const dynamic = "force-dynamic"; // Because cookies are used
+
 export default async function OrdersPage() {
   try {
-    const cookieStore = cookies();
+    const cookieStore =await  cookies(); // ✅ Get cookies properly
+    const sessionToken = cookieStore.get("session")?.value || "";
 
     const response = await api.get("/store/orders", {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `session=${sessionToken}`, // ✅ Use string format
       },
       withCredentials: true,
     });
