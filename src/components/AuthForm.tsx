@@ -183,9 +183,9 @@ const AuthForm = () => {
         "Registration successful! Please check your email for verification code."
       );
       setActiveTab("verification");
-    } catch (err) {
+    } catch (err:any ) {
       const errorMessage =
-        err instanceof Error ? err.response.data.message : "Registration failed";
+        err  ? err.response.data.message : "Registration failed";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);

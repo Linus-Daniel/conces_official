@@ -248,6 +248,8 @@ export const gallery = [
     image: "/images/aji.jpg",
     description: "Fellowship member contributing to community projects",
     date: "January 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 2,
@@ -255,6 +257,8 @@ export const gallery = [
     image: "/images/ant.jpg",
     description: "Leading our tech innovation workshop",
     date: "February 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 3,
@@ -262,6 +266,8 @@ export const gallery = [
     image: "/images/chidi.jpg",
     description: "Speaking at our annual leadership conference",
     date: "March 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 4,
@@ -269,6 +275,8 @@ export const gallery = [
     image: "/images/dave.jpg",
     description: "Organizing local community outreach",
     date: "April 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 5,
@@ -276,6 +284,8 @@ export const gallery = [
     image: "/images/dog.jpg",
     description: "Our fellowship mascot at charity event",
     date: "May 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 6,
@@ -283,6 +293,8 @@ export const gallery = [
     image: "/images/happy.jpg",
     description: "Celebrating successful project completion",
     date: "June 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 7,
@@ -290,6 +302,8 @@ export const gallery = [
     image: "/images/joel.jpg",
     description: "Mentoring new fellowship members",
     date: "July 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 8,
@@ -297,6 +311,8 @@ export const gallery = [
     image: "/images/julius.jpg",
     description: "Presenting research findings",
     date: "August 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 9,
@@ -304,6 +320,8 @@ export const gallery = [
     image: "/images/nansoh.jpg",
     description: "Coordinating international partnership",
     date: "September 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 10,
@@ -311,6 +329,8 @@ export const gallery = [
     image: "/images/prince.jpg",
     description: "Leading fundraising initiative",
     date: "October 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 11,
@@ -318,6 +338,8 @@ export const gallery = [
     image: "/images/tima.jpg",
     description: "Facilitating skills development workshop",
     date: "November 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
   {
     id: 12,
@@ -325,5 +347,7 @@ export const gallery = [
     image: "/images/yohny.jpg",
     description: "Receiving community service award",
     date: "December 2023",
+    tags: ["community", "projects", "fellowship"],
+    chapter: "Community Outreach",
   },
 ];
