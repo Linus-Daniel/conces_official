@@ -19,6 +19,19 @@ import useAuthStore from "@/zustand/authStore";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axiosInstance from "@/lib/axiosInstance";
+import api from "@/lib/axiosInstance";
+
+interface IBranch {
+  _id: string;
+  branchName: string;
+  branchLocation: string;
+  motto: string;
+  socialLinks?: { name: string; url: string }[];
+  banner: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 const AuthForm = () => {
   const [activeTab, setActiveTab] = useState("signup");
@@ -39,6 +52,10 @@ const AuthForm = () => {
   const params = useSearchParams();
   const mode = params.get("mode");
 
+  // Branch state
+  const [branches, setBranches] = useState<IBranch[]>([]);
+  const [loadingBranches, setLoadingBranches] = useState(true);
+
   useEffect(() => {
     if (mode === "login") {
       setActiveTab("login");
@@ -53,6 +70,24 @@ const AuthForm = () => {
     }
   }, [mode]);
 
+  // Fetch branches on component mount
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await api.get("/branch");
+        console.log(response)
+        setBranches(response.data);
+      } catch (error) {
+        console.error("Failed to fetch branches:", error);
+        toast.error("Failed to load branches. Please try again later.");
+      } finally {
+        setLoadingBranches(false);
+      }
+    };
+
+    fetchBranches();
+  }, []);
+
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -63,6 +98,7 @@ const AuthForm = () => {
     confirmPassword: "",
     terms: false,
     captcha: false,
+    branch: "",
   });
 
   const [loginFormData, setLoginFormData] = useState({
@@ -129,6 +165,10 @@ const AuthForm = () => {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
+    if (!formData.branch) {
+      newErrors.branch = "Please select a branch";
+    }
+
     if (!formData.terms) {
       newErrors.terms = "You must agree to the terms and conditions";
     }
@@ -176,6 +216,7 @@ const AuthForm = () => {
         institution: formData.institution,
         role: formData.role,
         password: formData.password,
+        branch: formData.branch,
       };
 
       await register(userData);
@@ -183,9 +224,8 @@ const AuthForm = () => {
         "Registration successful! Please check your email for verification code."
       );
       setActiveTab("verification");
-    } catch (err:any ) {
-      const errorMessage =
-        err  ? err.response.data.message : "Registration failed";
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Registration failed";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -215,6 +255,7 @@ const AuthForm = () => {
         institution: formData.institution,
         role: formData.role,
         password: formData.password,
+        branch: formData.branch,
       };
 
       await verifyEmail(code, userData, verificationId);
@@ -237,6 +278,7 @@ const AuthForm = () => {
         confirmPassword: "",
         terms: false,
         captcha: false,
+        branch: "",
       });
       setVerificationCode(["", "", "", "", "", ""]);
     } catch (err) {
@@ -626,6 +668,47 @@ const AuthForm = () => {
                       mentorship, and devotionals.
                     </p>
                   </div>
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    className="block text-sm font-medium text-gray-800 mb-1"
+                    htmlFor="branch"
+                  >
+                    Select Your Branch
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                      <FaBuildingColumns />
+                    </div>
+                    {loadingBranches ? (
+                      <div className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900">
+                        Loading branches...
+                      </div>
+                    ) : (
+                      <select
+                        id="branch"
+                        name="branch"
+                        value={formData.branch}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
+                        required
+                      >
+                        <option value="">Select a branch</option>
+                        {branches.map((branch) => (
+                          <option key={branch._id} value={branch._id}>
+                            {branch.branchName} - {branch.branchLocation}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
+                      <FaChevronDown />
+                    </div>
+                  </div>
+                  {!formData.branch && errors.branch && (
+                    <p className="mt-1 text-sm text-red-600">{errors.branch}</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">

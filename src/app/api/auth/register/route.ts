@@ -1,114 +1,225 @@
 // app/api/register/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/models/User';
-import { hashPassword } from '@/lib/hash';
-import crypto from 'crypto';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/next-auth';
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import User from "@/models/User";
+import { hashPassword } from "@/lib/hash";
+import crypto from "crypto";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/next-auth";
+import { z } from "zod";
+import api from "@/lib/axiosInstance";
 
-const verificationCodes = new Map<string, { email: string; code: string; expiresAt: number }>();
+// Use Redis or database for production instead of in-memory Map
+const verificationCodes = new Map<
+  string,
+  {
+    email: string;
+    code: string;
+    expiresAt: number;
+    attempts: number;
+  }
+>();
+
+// Validation schemas
+const baseUserSchema = z.object({
+  fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
+  email: z.string().email("Invalid email format").toLowerCase(),
+  phone: z.string().optional(),
+  institution: z.string().optional(),
+  role: z.enum(["student", "branch-admin", "admin", "alumni"]),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+const adminUserSchema = baseUserSchema.extend({
+  branch: z.string().min(1, "Branch is required for admin registration"),
+});
+
+const verificationSchema = z.object({
+  verificationCode: z.string().length(6, "Verification code must be 6 digits"),
+  verificationId: z.string().uuid("Invalid verification ID"),
+});
 
 function generateVerificationCode(): string {
   return crypto.randomInt(100000, 999999).toString();
 }
 
-export async function POST(req: NextRequest) {
-  await dbConnect();
-
-  const session = await getServerSession(authOptions);
-  const isAdmin = session?.user?.role === 'admin';
-
-  const body = await req.json();
-  const { verificationCode, verificationId } = body;
-
-  if (isAdmin) {
-    // Bypass OTP verification for admin
-    return handleAdminRegistration(body);
-  }
-
-  if (verificationCode && verificationId) {
-    return handleVerification({ verificationCode, verificationId, userData: body });
-  }
-
-  return handleInitialRegistration(body);
+function sanitizeEmail(email: string): string {
+  return email.toLowerCase().trim();
 }
 
-async function handleInitialRegistration(body: any) {
-  const { fullName, email, phone, institution, role, password,branch } = body;
+function isValidRole(role: string, isAdmin: boolean): boolean {
+  const allowedRoles = ["student", "branch-admin", "alumni"];
+  if (isAdmin) allowedRoles.push("admin");
+  return allowedRoles.includes(role);
+}
 
-  // Basic validation
-  if (!fullName || !email || !password || !role) {
-    console.log(fullName,email,password,role,branch)
-    return NextResponse.json(
-      { message: 'Please fill all required fields' },
-      { status: 400 }
-    );
-  }
-
-  if (!['student', 'branch-admin', 'admin','alumni'].includes(role)) {
-    console.log(role)
-    return NextResponse.json(
-      { message: 'Invalid role selected' },
-      { status: 400 }
-    );
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    const existingUser = await User.findOne({ email });
+    await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    const isAdmin = session?.user?.role === "admin";
+
+    const body = await req.json();
+    const { verificationCode, verificationId } = body;
+
+    const clientIP = req.headers.get("x-forwarded-for") || "unknown";
+
+    if (isAdmin) {
+      return handleAdminRegistration(body);
+    }
+
+    if (verificationCode && verificationId) {
+      return handleVerification({
+        verificationCode,
+        verificationId,
+        userData: body,
+      });
+    }
+
+    return handleInitialRegistration(body, clientIP);
+  } catch (error) {
+    console.error("Registration route error:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleInitialRegistration(body: any, clientIP: string) {
+  try {
+    // Validate input
+    const validatedData = baseUserSchema.parse(body);
+    const { fullName, email, phone, institution, role, password } =
+      validatedData;
+
+    // Additional role validation
+    if (!isValidRole(role, false)) {
+      return NextResponse.json(
+        { message: "Invalid role selected" },
+        { status: 400 }
+      );
+    }
+
+    // Check for existing user
+    const existingUser = await User.findOne({ email: sanitizeEmail(email) });
     if (existingUser) {
       return NextResponse.json(
-        { message: 'Email is already registered' },
+        { message: "Email is already registered" },
         { status: 409 }
       );
     }
+
+    // Clean up expired verification codes
+    cleanupExpiredCodes();
 
     const verificationId = crypto.randomUUID();
     const code = generateVerificationCode();
 
     verificationCodes.set(verificationId, {
-      email,
+      email: sanitizeEmail(email),
       code,
-      expiresAt: Date.now() + 15 * 60 * 1000,
+      expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes
+      attempts: 0,
     });
 
-    const emailResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/send-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+async function sendVerificationEmail() {
+  try {
+    const emailResponse = await api.post(
+      `${process.env.NEXTAUTH_URL}/api/send-email`,
+      {
         to: email,
-        subject: 'Your Verification Code',
+        subject: "Email Verification - Your Account Registration",
         content: {
-          type: 'html',
+          type: "html",
           body: `
-            <h2>Email Verification</h2>
-            <p>Your verification code is: <strong>${code}</strong></p>
-            <p>This code will expire in 15 minutes.</p>
+           " <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <title>Email Verification</title>
+              </head>
+              <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+                  <h2 style="color: #333; text-align: center;">Email Verification</h2>
+                  <p style="color: #666; font-size: 16px;">Hello ${fullName},</p>
+                  <p style="color: #666; font-size: 16px;">Please use the following verification code to complete your registration:</p>
+                  <div style="background-color: #007bff; color: white; padding: 15px; text-align: center; border-radius: 5px; margin: 20px 0;">
+                    <h1 style="margin: 0; font-size: 32px; letter-spacing: 5px;">${code}</h1>
+                  </div>
+                  <p style="color: #666; font-size: 14px;">
+                    <strong>Important:</strong> This code will expire in 15 minutes for security reasons.
+                  </p>
+                  <p style="color: #666; font-size: 14px;">
+                    If you didn't request this verification, please ignore this email.
+                  </p>
+                </div>
+              </body>
+            </html>"
           `,
         },
-      }),
-    });
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json", // Explicitly request JSON response
+        },
+      }
+    );
+    return emailResponse.data;
+  } catch (error: any) {
+    console.error(
+      "Error sending verification email:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to send verification email");
+  }
+}
 
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      console.error('Email API error:', errorData);
-      throw new Error('Failed to send verification email');
+  const emailResponse = await sendVerificationEmail().catch((error) => {
+    verificationCodes.delete(verificationId); // Clean up on email failure
+    throw error;
+  });
+
+    if (!emailResponse) {
+      const errorData = await emailResponse;
+
+      console.error("Email API error:", errorData);
+      verificationCodes.delete(verificationId); // Clean up on email failure
+      throw new Error("Failed to send verification email");
     }
 
     return NextResponse.json(
       {
-        message: 'Verification code sent to your email',
+        message: "Verification code sent to your email",
         requiresVerification: true,
         verificationId,
+        expiresAt: Date.now() + 15 * 60 * 1000,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Registration error:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          message: "Validation error",
+          errors: error.errors.map((err) => ({
+            field: err.path.join("."),
+            message: err.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error("Initial registration error:", error);
     return NextResponse.json(
       {
-        message: error instanceof Error ? error.message : 'Failed to send verification code',
-        details: process.env.NODE_ENV === 'development' ? error : undefined,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to send verification code",
       },
       { status: 500 }
     );
@@ -120,93 +231,146 @@ async function handleVerification(params: {
   verificationId: string;
   userData: any;
 }) {
-  const { verificationCode, verificationId, userData } = params;
-  const { fullName, email, phone, institution, role, password } = userData;
-
   try {
+    const { verificationCode, verificationId, userData } = params;
+
+    // Validate verification data
+    const verificationData = verificationSchema.parse({
+      verificationCode,
+      verificationId,
+    });
+    const validatedUserData = baseUserSchema.parse(userData);
+
+    const { fullName, email, phone, institution, role, password } =
+      validatedUserData;
+
     const verification = verificationCodes.get(verificationId);
 
     if (!verification) {
       return NextResponse.json(
-        { message: 'Invalid verification request' },
+        { message: "Invalid or expired verification request" },
         { status: 400 }
       );
     }
 
+    // Check expiration
     if (Date.now() > verification.expiresAt) {
       verificationCodes.delete(verificationId);
       return NextResponse.json(
-        { message: 'Verification code has expired' },
+        { message: "Verification code has expired. Please request a new one." },
         { status: 400 }
       );
     }
 
-    if (verification.email !== email || verification.code !== verificationCode) {
+    // Check attempt limit
+    if (verification.attempts >= 3) {
+      verificationCodes.delete(verificationId);
       return NextResponse.json(
         {
-          message: `Invalid verification code or email mismatch`,
-          debug: process.env.NODE_ENV === 'development' ? {
-            expectedEmail: verification.email,
-            expectedCode: verification.code,
-            receivedEmail: email,
-            receivedCode: verificationCode,
-          } : undefined
+          message: "Too many verification attempts. Please request a new code.",
+        },
+        { status: 429 }
+      );
+    }
+
+    // Verify code and email
+    if (
+      verification.email !== sanitizeEmail(email) ||
+      verification.code !== verificationCode
+    ) {
+      verification.attempts += 1;
+      verificationCodes.set(verificationId, verification);
+
+      return NextResponse.json(
+        {
+          message: "Invalid verification code or email mismatch",
+          attemptsRemaining: 3 - verification.attempts,
         },
         { status: 400 }
       );
     }
 
+    // Check if user was created while verification was pending
+    const existingUser = await User.findOne({ email: sanitizeEmail(email) });
+    if (existingUser) {
+      verificationCodes.delete(verificationId);
+      return NextResponse.json(
+        { message: "Email is already registered" },
+        { status: 409 }
+      );
+    }
+
+    // Create user
     const hashedPassword = await hashPassword(password);
 
     const newUser = new User({
-      fullName,
-      email,
-      phone,
-      institution,
+      fullName: fullName.trim(),
+      email: sanitizeEmail(email),
+      phone: phone?.trim(),
+      institution: institution?.trim(),
       role,
       password: hashedPassword,
       emailVerified: true,
+      createdAt: new Date(),
     });
 
     await newUser.save();
     verificationCodes.delete(verificationId);
 
     return NextResponse.json(
-      { message: 'User registered successfully' },
+      {
+        message: "Registration completed successfully!",
+        user: {
+          id: newUser._id,
+          fullName: newUser.fullName,
+          email: newUser.email,
+          role: newUser.role,
+        },
+      },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Verification error:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          message: "Validation error",
+          errors: error.errors.map((err) => ({
+            field: err.path.join("."),
+            message: err.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error("Verification error:", error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: "Internal server error during verification" },
       { status: 500 }
     );
   }
 }
 
 async function handleAdminRegistration(body: any) {
-  const { fullName, email, phone, institution, role, password,branch } = body;
-
-  // Basic validation
-  if (!fullName || !email || !password || !role || !branch) {
-    return NextResponse.json(
-      { message: 'Please fill all required fields' },
-      { status: 400 }
-    );
-  }
-
-  if (!['student', 'branch-admin', 'admin'].includes(role)) {
-    return NextResponse.json(
-      { message: 'Invalid role selected' },
-      { status: 400 }
-    );
-  }
-
   try {
-    const existingUser = await User.findOne({ email });
+    // Validate admin registration data
+    const validatedData = adminUserSchema.parse(body);
+    const { fullName, email, phone, institution, role, password, branch } =
+      validatedData;
+
+    // Additional role validation for admin
+    if (!isValidRole(role, true)) {
+      return NextResponse.json(
+        { message: "Invalid role selected" },
+        { status: 400 }
+      );
+    }
+
+    // Check for existing user
+    const existingUser = await User.findOne({ email: sanitizeEmail(email) });
     if (existingUser) {
       return NextResponse.json(
-        { message: 'Email is already registered' },
+        { message: "Email is already registered" },
         { status: 409 }
       );
     }
@@ -214,34 +378,82 @@ async function handleAdminRegistration(body: any) {
     const hashedPassword = await hashPassword(password);
 
     const newUser = new User({
-      fullName,
-      email,
-      phone,
-      institution,
+      fullName: fullName.trim(),
+      email: sanitizeEmail(email),
+      phone: phone?.trim(),
+      institution: institution?.trim(),
       role,
       password: hashedPassword,
-      branch,
+      branch: branch.trim(),
       emailVerified: true,
+      createdAt: new Date(),
     });
 
     await newUser.save();
 
     return NextResponse.json(
-      { message: 'User registered successfully (admin bypass)' },
+      {
+        message: "User registered successfully (admin bypass)",
+        user: {
+          id: newUser._id,
+          fullName: newUser.fullName,
+          email: newUser.email,
+          role: newUser.role,
+          branch: newUser.branch,
+        },
+      },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Admin registration error:', error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          message: "Validation error",
+          errors: error.errors.map((err) => ({
+            field: err.path.join("."),
+            message: err.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    console.error("Admin registration error:", error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: "Internal server error during admin registration" },
       { status: 500 }
     );
   }
 }
 
+// Utility function to clean up expired verification codes
+function cleanupExpiredCodes() {
+  const now = Date.now();
+  for (const [id, verification] of verificationCodes.entries()) {
+    if (now > verification.expiresAt) {
+      verificationCodes.delete(id);
+    }
+  }
+}
+
+// Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
-    { message: 'Method not allowed, use POST' },
+    { message: "Method not allowed. Use POST for registration." },
+    { status: 405 }
+  );
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { message: "Method not allowed. Use POST for registration." },
+    { status: 405 }
+  );
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { message: "Method not allowed. Use POST for registration." },
     { status: 405 }
   );
 }

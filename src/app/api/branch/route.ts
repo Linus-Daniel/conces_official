@@ -19,10 +19,10 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     const userRole = session?.user?.role;
 
-    if (userRole !== "admin" && userRole !== "branch-admin") {
-      console.log("You are not authorized to make this request");
-      return NextResponse.json({ error: "Not authorized" }, { status: 401 });
-    }
+    // if (userRole !== "admin" && userRole !== "branch-admin") {
+    //   console.log("You are not authorized to make this request");
+    //   return NextResponse.json({ error: "Not authorized" }, { status: 401 });
+    // }
 
     const branches = await Branch.find().sort({ createdAt: -1 });
 
