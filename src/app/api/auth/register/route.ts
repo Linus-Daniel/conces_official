@@ -25,6 +25,7 @@ const baseUserSchema = z.object({
   fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email format").toLowerCase(),
   phone: z.string().optional(),
+  branch:z.string().min(1, "Branch is required"),
   institution: z.string().optional(),
   role: z.enum(["student", "branch-admin", "admin", "alumni"]),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -91,7 +92,7 @@ async function handleInitialRegistration(body: any, clientIP: string) {
   try {
     // Validate input
     const validatedData = baseUserSchema.parse(body);
-    const { fullName, email, phone, institution, role, password } =
+    const { fullName, email, phone, institution, role,branch, password } =
       validatedData;
 
     // Additional role validation
@@ -241,7 +242,7 @@ async function handleVerification(params: {
     });
     const validatedUserData = baseUserSchema.parse(userData);
 
-    const { fullName, email, phone, institution, role, password } =
+    const { fullName, email, phone,branch, institution, role, password } =
       validatedUserData;
 
     const verification = verificationCodes.get(verificationId);
@@ -309,6 +310,7 @@ async function handleVerification(params: {
       phone: phone?.trim(),
       institution: institution?.trim(),
       role,
+      branch,
       password: hashedPassword,
       emailVerified: true,
       createdAt: new Date(),

@@ -10,10 +10,23 @@ import Head from "next/head";
 import React from "react";
 import Testimonial from "@/components/home/Testimonials";
 import Anthem from "@/components/Anthem";
+import { ToastContainer } from "react-toastify";
 
 function page() {
   return (
     <div className="font-montserrat bg-gray-200 text-gray-800">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <Head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />

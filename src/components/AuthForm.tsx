@@ -19,7 +19,6 @@ import useAuthStore from "@/zustand/authStore";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axiosInstance from "@/lib/axiosInstance";
 import api from "@/lib/axiosInstance";
 
 interface IBranch {
@@ -33,8 +32,10 @@ interface IBranch {
   updatedAt: Date;
 }
 
-const AuthForm = () => {
-  const [activeTab, setActiveTab] = useState("signup");
+const AuthForm = ({branches}:{branches:IBranch[]}) => {
+  // Add hydration state
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [activeTab, setActiveTab] = useState("signup"); // Default state
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
@@ -53,10 +54,17 @@ const AuthForm = () => {
   const mode = params.get("mode");
 
   // Branch state
-  const [branches, setBranches] = useState<IBranch[]>([]);
   const [loadingBranches, setLoadingBranches] = useState(true);
 
+  // Handle hydration
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Handle URL parameters after hydration
+  useEffect(() => {
+    if (!isHydrated) return; // Wait for hydration
+
     if (mode === "login") {
       setActiveTab("login");
     } else if (mode === "signup") {
@@ -68,25 +76,8 @@ const AuthForm = () => {
     } else {
       setActiveTab("signup");
     }
-  }, [mode]);
+  }, [mode, isHydrated]);
 
-  // Fetch branches on component mount
-  useEffect(() => {
-    const fetchBranches = async () => {
-      try {
-        const response = await api.get("/branch");
-        console.log(response)
-        setBranches(response.data);
-      } catch (error) {
-        console.error("Failed to fetch branches:", error);
-        toast.error("Failed to load branches. Please try again later.");
-      } finally {
-        setLoadingBranches(false);
-      }
-    };
-
-    fetchBranches();
-  }, []);
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -262,9 +253,9 @@ const AuthForm = () => {
       toast.success("Email verified successfully!");
 
       if (userData.role === "student") {
-        router.push("/student-dashboard");
+        router.push("/user");
       } else if (userData.role === "alumni") {
-        router.push("/alumni-dashboard");
+        router.push("/alumni/dashboard");
       }
 
       // Reset form
@@ -297,7 +288,7 @@ const AuthForm = () => {
     setErrors({});
 
     try {
-      await resendVerification(formData.email);
+      // await resendVerification(formData.email);
       toast.success("Verification code resent successfully!");
     } catch (err) {
       const errorMessage =
@@ -457,6 +448,18 @@ const AuthForm = () => {
         return "";
     }
   };
+
+  // Don't render until hydrated to prevent mismatch
+  if (!isHydrated) {
+    return (
+      <div className="font-sans bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <FaSpinner className="animate-spin text-gold-600" />
+          <span className="text-gray-600">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
@@ -681,11 +684,7 @@ const AuthForm = () => {
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
                       <FaBuildingColumns />
                     </div>
-                    {loadingBranches ? (
-                      <div className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900">
-                        Loading branches...
-                      </div>
-                    ) : (
+                    
                       <select
                         id="branch"
                         name="branch"
@@ -701,7 +700,7 @@ const AuthForm = () => {
                           </option>
                         ))}
                       </select>
-                    )}
+                    
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
                       <FaChevronDown />
                     </div>
