@@ -11,6 +11,7 @@ import React from "react";
 import Testimonial from "@/components/home/Testimonials";
 import Anthem from "@/components/Anthem";
 import { ToastContainer } from "react-toastify";
+import StatementOfFaith from "@/components/home/Faith";
 
 function page() {
   return (
@@ -34,6 +35,7 @@ function page() {
       </Head>
       <Hero />
       <About />
+      <StatementOfFaith />
       <Features />
       <Anthem />
 
