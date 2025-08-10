@@ -27,20 +27,21 @@ const menuItems = [
   { link: "/admin", label: "Dashboard", icon: FaHome },
   { link: "/admin/users", label: "Users", icon: FaUsers },
   { link: "/admin/prayers", label: "Prayer Wall", icon: FaPray },
-  { 
-    label: "Store", 
+  {
+    label: "Store",
     icon: FaStore,
     subItems: [
       { link: "/admin/store/shop", label: "Shop" },
 
       { link: "/admin/store/products", label: "Products" },
       { link: "/admin/store/categories", label: "Categories" },
-      { link: "/admin/store/orders", label: "Orders" }
-    ]
+      { link: "/admin/store/orders", label: "Orders" },
+    ],
   },
   { link: "/admin/branches", label: "Branches", icon: FaMapMarkerAlt },
   { link: "/admin/resources", label: "Resources", icon: FaBook },
   { link: "/admin/mentorship", label: "Mentorship", icon: FaBook },
+  { link: "/admin/executives", label: "Executives", icon: FaBook },
 
   { link: "/admin/events", label: "Events", icon: FaCalendarAlt },
   { link: "/admin/settings", label: "Settings", icon: FaCog },
