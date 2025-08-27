@@ -1,4 +1,5 @@
 "use client"
+import useAuthStore from "@/zustand/authStore";
 import { useSession } from "next-auth/react";
 import React from "react";
 import { FaBars, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
@@ -15,6 +16,7 @@ export default function AdminHeader({
 
   const {data:session} = useSession()
   const user = session?.user
+  const {logout} = useAuthStore()
 
 
   return (
@@ -40,7 +42,7 @@ export default function AdminHeader({
               {/* <p className="text-sm text-gray-500">{user?.role}</p> */}
             </div>
           </div>
-          <button className="text-gray-500 hover:text-red-500">
+          <button onClick={logout} className="text-gray-500 hover:text-red-500">
             <FaSignOutAlt className="text-xl" />
           </button>
         </div>

@@ -1,7 +1,17 @@
 import { IPost } from "@/models/Post";
 import React, { useState } from "react";
-import { FaPray, FaHeart, FaComment, FaShareSquare } from "react-icons/fa";
-import { FaEllipsisVertical } from "react-icons/fa6";
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  MoreHorizontal,
+  Eye,
+  Clock,
+  Users,
+  Megaphone,
+  FolderOpen,
+  MessageSquare,
+} from "lucide-react";
 import CommentsSection from "./CommentSections";
 
 export type Post = {
@@ -29,7 +39,6 @@ type PostCardProps = {
 export default function PostCard({ post, featured = false }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
-  const [hasPrayed, setHasPrayed] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.comments);
 
@@ -38,112 +47,195 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
 
-  const handlePray = () => {
-    setHasPrayed(!hasPrayed);
-  };
-
   const handleCommentClick = () => {
     setShowComments(!showComments);
   };
 
-  const typeColors = {
-    discussion: { bg: "bg-indigo-100", text: "text-indigo-800" },
-    prayer: { bg: "bg-purple-100", text: "text-purple-800" },
-    project: { bg: "bg-green-100", text: "text-green-800" },
-    announcement: { bg: "bg-royal-DEFAULT", text: "text-white" },
+  const typeConfig = {
+    discussion: {
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+      icon: MessageSquare,
+      color: "#1a3a8f",
+    },
+    project: {
+      bg: "bg-green-50",
+      text: "text-green-700",
+      icon: FolderOpen,
+      color: "#10b981",
+    },
+    announcement: {
+      bg: "bg-gradient-to-r from-[#1a3a8f] to-[#3b6fcb]",
+      text: "text-white",
+      icon: Megaphone,
+      color: "#1a3a8f",
+    },
+  };
+
+  const TypeIcon = typeConfig[post.type].icon;
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+
+    if (diffHours < 1) return "Just now";
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffHours < 168) return `${Math.floor(diffHours / 24)}d ago`;
+    return date.toLocaleDateString();
   };
 
   return (
-    <div
-      className={`rounded-xl overflow-hidden ${
-        post.type=="announcement"
-          ? "bg-gradient-to-r from-royal-light to-royal-DEFAULT p-1"
-          : "bg-white shadow-sm border border-gray-200"
-      }`}
-    >
-      <div
-        className={`rounded-lg overflow-hidden ${post.type=="announcement" ? "bg-white" : ""}`}
-      >
-        <div className="p-4 md:p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 mb-6">
+      {/* Header */}
+      <div className="p-4 pb-3">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
               <img
                 src={post.author.avatar}
                 alt={post.author.name}
-                className="w-10 h-10 md:w-12 md:h-12 rounded-full mr-3"
+                className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
               />
-              <div>
-                <div className="flex items-center">
-                  <h3 className="font-semibold text-gray-800 text-sm md:text-base">
-                    {post.author.name}
-                  </h3>
-                  <span className="ml-2 px-2 py-0.5 bg-gold-light text-white text-xs rounded-full">
-                    {post.author.role}
-                  </span>
-                </div>
-                <p className="text-gray-500 text-xs md:text-sm">{post.date}</p>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="font-semibold text-gray-900 text-base">
+                  {post.author.name}
+                </h3>
+                <span
+                  className="px-2 py-1 text-xs font-medium rounded-full"
+                  style={{
+                    backgroundColor: "#e6c67b",
+                    color: "#1a3a8f",
+                  }}
+                >
+                  {post.author.role}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 text-gray-500 text-sm">
+                <Clock className="w-3 h-3" />
+                <span>{formatDate(post.date)}</span>
               </div>
             </div>
-            <span
-              className={`px-2 py-1 text-xs rounded-full ${
-                typeColors[post.type].bg
-              } ${typeColors[post.type].text}`}
-            >
-              {post.type.charAt(0).toUpperCase() + post.type.slice(1)}
-            </span>
           </div>
 
+          <div className="flex items-center space-x-2">
+            <div
+              className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium ${
+                post.type === "announcement"
+                  ? typeConfig[post.type].bg + " " + typeConfig[post.type].text
+                  : typeConfig[post.type].bg + " " + typeConfig[post.type].text
+              }`}
+            >
+              <TypeIcon className="w-4 h-4" />
+              <span className="capitalize">{post.type}</span>
+            </div>
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <MoreHorizontal className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-3">
           <h2
-            className={`text-lg md:text-xl font-bold mb-3 ${
-              featured ? "text-gold-DEFAULT" : "text-royal-DEFAULT"
+            className={`text-xl font-bold leading-tight ${
+              featured ? "text-[#e6c67b]" : "text-[#1a3a8f]"
             }`}
           >
             {post.title}
           </h2>
 
-          <p className="text-gray-700 mb-4 text-sm md:text-base">
-            {post.content}
-          </p>
+          <p className="text-gray-700 leading-relaxed">{post.content}</p>
+        </div>
+      </div>
 
-          {post.images && (
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              {post.images.map((img, index) => (
-                <img
-                  key={index}
-                  src={img}
-                  alt=""
-                  className="w-full h-32 md:h-40 object-cover rounded-lg"
-                />
-              ))}
+      {/* Images */}
+      {post.images && post.images.length > 0 && (
+        <div className="relative">
+          {post.images.length === 1 ? (
+            <div className="w-full">
+              <img
+                src={post.images[0]}
+                alt="Post image"
+                className="w-full h-80 object-contain bg-gray-50"
+              />
+            </div>
+          ) : (
+            <div className="relative">
+              <img
+                src={post.images[0]}
+                alt="Post image"
+                className="w-full h-80 object-contain bg-gray-50"
+              />
+              {post.images.length > 1 && (
+                <div className="absolute top-3 right-3">
+                  <div className="bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium flex items-center space-x-1 backdrop-blur-sm">
+                    <Eye className="w-4 h-4" />
+                    <span>+{post.images.length - 1}</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+        </div>
+      )}
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handleCommentClick}
-                className={`flex items-center ${
-                  showComments ? "text-royal-DEFAULT" : "text-gray-500"
-                } hover:text-royal-DEFAULT`}
-              >
-                <FaComment className="mr-1" />
-                <span className="text-sm">Comments: {commentsCount}</span>
-              </button>
-            </div>
+      {/* Actions */}
+      <div className="p-4 pt-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <button
+              onClick={handleLike}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 ${
+                isLiked
+                  ? "bg-red-50 text-red-600"
+                  : "hover:bg-gray-50 text-gray-600"
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+              <span className="text-sm font-medium">{likeCount}</span>
+            </button>
 
-            <button className="text-gray-500 hover:text-royal-DEFAULT">
-              <FaEllipsisVertical />
+            <button
+              onClick={handleCommentClick}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 ${
+                showComments
+                  ? "bg-[#1a3a8f]/10 text-[#1a3a8f]"
+                  : "hover:bg-gray-50 text-gray-600"
+              }`}
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span className="text-sm font-medium">{commentsCount}</span>
+            </button>
+
+            <button className="flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-50 text-gray-600 transition-all duration-200">
+              <Share2 className="w-5 h-5" />
+              <span className="text-sm font-medium">Share</span>
             </button>
           </div>
 
-          {showComments && (
+          {post.prayed && (
+            <div className="flex items-center space-x-1 text-[#e6c67b]">
+              <div className="w-2 h-2 bg-[#e6c67b] rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">{post.prayed} prayed</span>
+            </div>
+          )}
+        </div>
+
+        {/* Comments Section */}
+        {showComments && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
             <CommentsSection
               postId={post._id as string}
               initialCommentsCount={commentsCount}
               onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

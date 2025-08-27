@@ -19,6 +19,7 @@ export interface IEvent extends Document {
   registrationLink: string;
   contactEmail: string;
   contactPhone: string;
+  approved:boolean;
   requirements?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -33,7 +34,7 @@ const EventSchema: Schema<IEvent> = new Schema(
       enum: ['spiritual', 'academic', 'career', 'social'],
       required: true,
     },
-    branch: { type: String, required: false },
+branch: { type: Schema.Types.ObjectId, ref: "Branch" },
     date: { type: String, required: true }, // ISO date string
     time: { type: String, required: true }, // e.g., "10:00 AM - 4:00 PM"
     location: { type: String, required: true },
@@ -46,6 +47,7 @@ const EventSchema: Schema<IEvent> = new Schema(
     registrationLink: { type: String, required: true },
     contactEmail: { type: String, required: true },
     contactPhone: { type: String, required: true },
+    approved: { type: Boolean, default: false },  
     requirements: { type: String },
   },
   { timestamps: true }

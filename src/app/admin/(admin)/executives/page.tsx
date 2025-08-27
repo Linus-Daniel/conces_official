@@ -14,6 +14,7 @@ import {
 import { FaUpload, FaTimes } from "react-icons/fa";
 import ImageUpload from "@/components/ImageUpload";
 import { IExecutive } from "@/models/Executive";
+import Image from "next/image";
 
 export default function AdminExecutivesPage() {
   const [executives, setExecutives] = useState<IExecutive[]>([]);
@@ -432,7 +433,7 @@ export default function AdminExecutivesPage() {
                           </button>
                           <button
                             onClick={() =>
-                              handleDelete(executive.id, executive.name)
+                              handleDelete(executive?.id, executive.name)
                             }
                             className="text-red-600 hover:text-red-900 p-1"
                           >
@@ -463,8 +464,8 @@ export default function AdminExecutivesPage() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex  items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl  max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {editingExecutive ? "Edit Executive" : "Add New Executive"}
@@ -501,11 +502,12 @@ export default function AdminExecutivesPage() {
                 <label className="block text-sm font-medium mb-1">
                   Profile Photo
                 </label>
-                <div className="space-y-4">
+                <div className="space-y-4 flex items-center justify-between">
                  <ImageUpload
                                 onSuccess={(info) => handleImageUpload(info.secure_url)}
-                                folder="products/"
+                                folder="executives/"
                               >
+
                                 <div className="flex items-center justify-center p-4 border rounded-md cursor-pointer">
                                   <FaUpload className="mr-2" />
                                   Upload Images
@@ -514,8 +516,10 @@ export default function AdminExecutivesPage() {
 
                   {formData.avatar && (
                     <div className="relative group">
-                      <img
+                      <Image
                         src={formData.avatar}
+                        width={500}
+                        height={500}
                         alt="Executive preview"
                         className="rounded-md object-cover h-32 w-full"
                       />

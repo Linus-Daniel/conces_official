@@ -15,8 +15,11 @@ import {
   FaTimes,
   FaChevronDown,
   FaChevronUp,
+  FaCrown,
+  FaUserGraduate,
 } from "react-icons/fa";
 import { useSession } from "next-auth/react";
+import { IoLibrarySharp } from "react-icons/io5";
 
 type AdminSidebarProps = {
   sidebarOpen: boolean;
@@ -26,6 +29,8 @@ type AdminSidebarProps = {
 const menuItems = [
   { link: "/admin", label: "Dashboard", icon: FaHome },
   { link: "/admin/users", label: "Users", icon: FaUsers },
+  { link: "/admin/alumni", label: "Alumni", icon: FaUserGraduate },
+
   { link: "/admin/prayers", label: "Prayer Wall", icon: FaPray },
   {
     label: "Store",
@@ -38,16 +43,19 @@ const menuItems = [
       { link: "/admin/store/orders", label: "Orders" },
     ],
   },
-  { link: "/admin/branches", label: "Branches", icon: FaMapMarkerAlt },
-  { link: "/admin/resources", label: "Resources", icon: FaBook },
+  { link: "/admin/chapters", label: "Chapters", icon: FaMapMarkerAlt },
+  { link: "/admin/resources", label: "Resources", icon: IoLibrarySharp },
   { link: "/admin/mentorship", label: "Mentorship", icon: FaBook },
-  { link: "/admin/executives", label: "Executives", icon: FaBook },
+  { link: "/admin/executives", label: "Executives", icon: FaCrown },
 
   { link: "/admin/events", label: "Events", icon: FaCalendarAlt },
   { link: "/admin/settings", label: "Settings", icon: FaCog },
 ];
 
-export default function Sidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarProps) {
+export default function Sidebar({
+  sidebarOpen,
+  setSidebarOpen,
+}: AdminSidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
@@ -62,10 +70,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarPro
   };
 
   const isActive = (link: string) => pathname === link;
-  const isStoreActive = menuItems.find(item => 
-    item.link === "/admin/store" || 
-    (item.subItems && item.subItems.some(subItem => isActive(subItem.link))
-  ))
+  const isStoreActive = menuItems.find(
+    (item) =>
+      item.link === "/admin/store" ||
+      (item.subItems && item.subItems.some((subItem) => isActive(subItem.link)))
+  );
 
   if (!isClient) return null;
 
@@ -118,8 +127,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: AdminSidebarPro
               const Icon = item.icon;
               const hasSubItems = item.subItems && item.subItems.length > 0;
               const isCurrentOpen = openDropdown === item.label;
-              const isItemActive = item.link ? isActive(item.link) : 
-                (item.subItems && item.subItems.some(subItem => isActive(subItem.link)));
+              const isItemActive = item.link
+                ? isActive(item.link)
+                : item.subItems &&
+                  item.subItems.some((subItem) => isActive(subItem.link));
 
               if (hasSubItems) {
                 return (

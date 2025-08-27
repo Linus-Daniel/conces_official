@@ -5,17 +5,17 @@ type DashboardOverviewProps = {
   users: number;
   prayers: number;
   products: number;
-  branches: number;
+  chapters: number;
   events: number;
 };
 
-export default function DashboardOverview() {
+export default function DashboardOverview({users,prayers,products,chapters,events}: DashboardOverviewProps) {
   const stats = [
-    { id: 1, name: 'Total Users', value: 10, icon: <FaUsers className="text-2xl" />, change: '+12%', changeType: 'increase' },
-    { id: 2, name: 'Prayer Requests', value:54, icon: <FaPray className="text-2xl" />, change: '+5%', changeType: 'increase' },
-    { id: 3, name: 'Store Products', value: 21, icon: <FaStore className="text-2xl" />, change: '+3%', changeType: 'increase' },
-    { id: 4, name: 'Branches', value: 23, icon: <FaMapMarkerAlt className="text-2xl" />, change: '0%', changeType: 'neutral' },
-    { id: 5, name: 'Upcoming Events', value:21,  icon: <FaCalendarAlt className="text-2xl" />, change: '+2', changeType: 'increase' }
+    { id: 1, name: 'Total Users', value: users, icon: <FaUsers className="text-2xl" />, change: '+12%', changeType: 'increase' },
+    { id: 2, name: 'Prayer Requests', value:prayers, icon: <FaPray className="text-2xl" />, change: '+5%', changeType: 'increase' },
+    { id: 3, name: 'Store Products', value: products, icon: <FaStore className="text-2xl" />, change: '+3%', changeType: 'increase' },
+    { id: 4, name: 'Chapters', value: chapters, icon: <FaMapMarkerAlt className="text-2xl" />, change: '0%', changeType: 'neutral' },
+    { id: 5, name: 'Upcoming Events', value:events,  icon: <FaCalendarAlt className="text-2xl" />, change: '+2', changeType: 'increase' }
   ];
 
   return (

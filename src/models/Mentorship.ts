@@ -13,6 +13,7 @@ export interface IMentorship extends Document {
   description: string;
   topics: string[];
   schedule?: Schedule;
+  approved: boolean;
   status: 'active' | 'archived';
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +35,7 @@ const MentorshipSchema = new Schema<IMentorship>(
     description: { type: String, required: true },
     name: { type: String, required: false },
     topics: [{ type: String }],
+    approved: { type: Boolean, default: false },
     
     status: { type: String, enum: ['active', 'archived'], default: 'active' },
     schedule: ScheduleSchema,

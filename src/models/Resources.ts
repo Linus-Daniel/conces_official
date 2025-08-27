@@ -14,6 +14,10 @@ const ResourceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  approved:{
+    type: Boolean,
+    default: false
+  },
   content: {
     type: String,
     required: false
@@ -47,8 +51,6 @@ const ResourceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-
-  // ✅ Add this line to link the resource to a branch
   branch: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Branch',

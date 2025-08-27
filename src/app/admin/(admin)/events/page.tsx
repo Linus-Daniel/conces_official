@@ -2,11 +2,28 @@
 import Link from 'next/link';
 import EventTable from '@/components/admin/EventTable';
 import api from '@/lib/axiosInstance';
+import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/next-auth';
 
 export default async function AdminEventsPage() {
 
-  const response = await api.get('/events');
+  const cookieStore = await cookies()
+
+  const response = await api.get('/events',
+
+    {
+      headers:{
+        cookie: cookieStore.toString()
+      }
+    }
+
+
+
+  );
   const events = response.data;
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
 
   console.log('Fetched events:', events);
 
@@ -22,7 +39,7 @@ export default async function AdminEventsPage() {
           </Link>
         </div>
         
-        <EventTable events={events} />
+        <EventTable userRole={user?.role as string} events={events} />
       </div>
   );
 }

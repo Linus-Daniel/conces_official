@@ -6,10 +6,11 @@ import { CldUploadWidget } from 'next-cloudinary';
 interface ImageUploadProps {
   onSuccess: (result: any) => void;
   folder?: string;
+  className?: string;
   children: React.ReactNode;
 }
 
-export default function ImageUpload({ onSuccess, folder, children }: ImageUploadProps) {
+export default function ImageUpload({ onSuccess, folder, children,className }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
 
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -52,7 +53,7 @@ export default function ImageUpload({ onSuccess, folder, children }: ImageUpload
     aria-label="Upload image"
     onClick={() => options?.open?.()} // ✅ safer access
     disabled={isUploading}
-    className="relative px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+    className={`relative px-4 py-2 ${className}  bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50`}
   >
     {isUploading ? 'Uploading...' : children}
   </button>

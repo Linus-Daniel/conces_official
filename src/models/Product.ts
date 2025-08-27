@@ -9,6 +9,7 @@ export interface IProduct extends Document {
   category: string;
   stock: number;
   featured: boolean;
+  approved:boolean;
   createdAt: Date;
   updatedAt: Date;
 
@@ -21,6 +22,7 @@ const ProductSchema: Schema = new Schema(
     branch: { type: String, required: true },
     price: { type: Number, required: true },
     images: { type: [String], required: true },
+    approved: { type: Boolean, default: false },
     category: { type: String, required: true },
     stock: { type: Number, default: 0 },
     featured: { type: Boolean, default: false },

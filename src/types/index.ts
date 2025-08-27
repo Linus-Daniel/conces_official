@@ -15,8 +15,9 @@ import { IconType } from 'react-icons';
 
 export interface Category {
   name: string;
+  slug?: string;
+  icon: any;
   count: number;
-  icon: IconType;
   bgColor: string;
   iconColor: string;
 }

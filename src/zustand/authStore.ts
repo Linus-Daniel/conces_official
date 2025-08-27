@@ -105,10 +105,13 @@ const useAuthStore = create<AuthState>((set, get) => ({
         verificationId: null,
       });
 
-      // Clear any stored tokens
+      
       if (typeof window !== "undefined") {
         localStorage.removeItem("authToken");
+        window.location.reload()
       }
+
+
     } catch (error) {
       console.error("Logout error:", error);
       // Still clear local state even if signOut fails

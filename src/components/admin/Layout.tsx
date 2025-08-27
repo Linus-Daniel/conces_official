@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 import AdminHeader from "./Header";
 import { SessionProvider } from "next-auth/react";
+import { ToastContainer } from "react-toastify";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SessionProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light" // or "dark" or "colored"
+      />
       <div className="flex h-screen bg-gray-50 font-poppins">
         {/* Sidebar */}
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
