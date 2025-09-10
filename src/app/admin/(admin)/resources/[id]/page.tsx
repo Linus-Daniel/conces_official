@@ -294,17 +294,12 @@ const VideoPlayer = ({ url }: { url: string }) => {
         {" "}
         {/* 16:9 aspect ratio */}
         <ReactPlayer
-          url={url}
+          src={url}
           width="100%"
           height="100%"
           controls
           style={{ position: "absolute", top: 0, left: 0 }}
           config={{
-            file: {
-              attributes: {
-                controlsList: "nodownload",
-              },
-            },
           }}
         />
       </div>
@@ -493,7 +488,7 @@ export default function ViewResource() {
                     <h2 className="text-xl font-semibold text-royal-900 mb-4 pb-2 border-b border-royal-100">
                       Video Content
                     </h2>
-                    <VideoPlayer url={resource.fileUrl} />
+                    <VideoPlayer url={resource.videoUrl as string} />
                   </div>
                 )}
 
