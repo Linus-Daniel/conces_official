@@ -188,9 +188,9 @@ export default function ContentManagement() {
                       {getTypeIcon(content.type)}
                     </div>
                     <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
+                      <Link href={`/admin/resources/${content._id}`} className="text-sm font-medium text-gray-900">
                         {content.title}
-                      </div>
+                      </Link>
                       <div className="text-sm text-gray-500">
                         {content.date}
                       </div>

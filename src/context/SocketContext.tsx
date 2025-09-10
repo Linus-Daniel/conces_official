@@ -48,30 +48,30 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
-  useEffect(() => {
-    const socket = io("http://localhost:5000", {
-      path: "/api/socket",
-    });
+  // useEffect(() => {
+  //   const socket = io("http://localhost:5000", {
+  //     path: "/api/socket",
+  //   });
 
-    socketRef.current = socket;
+  //   socketRef.current = socket;
 
-    socket.on("connect", () => {
-      console.log("✅ Socket connected:", socket.id);
-      setSocketConnected(true);
-    });
+  //   socket.on("connect", () => {
+  //     console.log("✅ Socket connected:", socket.id);
+  //     setSocketConnected(true);
+  //   });
 
-    socket.on("disconnect", () => {
-      console.warn("⚠️ Socket disconnected");
-      setSocketConnected(false);
-    });
+  //   socket.on("disconnect", () => {
+  //     console.warn("⚠️ Socket disconnected");
+  //     setSocketConnected(false);
+  //   });
 
-    return () => {
-      collectionsToWatch.forEach((col) => {
-        socket.off(`${col}-change`);
-      });
-      socket.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     collectionsToWatch.forEach((col) => {
+  //       socket.off(`${col}-change`);
+  //     });
+  //     socket.disconnect();
+  //   };
+  // }, []);
 
   const onCollectionChange = (
     collection: CollectionName,

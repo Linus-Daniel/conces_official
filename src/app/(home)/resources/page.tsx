@@ -21,7 +21,7 @@ async function page() {
   
   return (
     <div>
-      <ResourcePage resources={resources} userRole={userRole} />
+      <ResourcePage branch='' resources={resources} userRole={userRole} />
     </div>
   )
 }

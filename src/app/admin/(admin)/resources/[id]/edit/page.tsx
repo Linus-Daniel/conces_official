@@ -20,6 +20,7 @@ export default function EditResource() {
     const fetchResource = async () => {
       const mockResource: Resource = {
         _id:"",
+        branch:"",
         title: "Daily Devotional - June 15",
         type: "devotional",
         thumbnail:"",

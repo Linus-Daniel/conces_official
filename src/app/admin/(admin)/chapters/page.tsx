@@ -34,6 +34,7 @@ const BranchOversight = () => {
       try {
         const response = await api.get("/branch?page=" + currentPage)
         setBranches(response.data.branches || [])
+        console.log(response.data.branches)
       } catch (error) {
         console.error(error)
       }

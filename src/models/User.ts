@@ -9,7 +9,10 @@ export interface IUser extends Document {
   password: string;
   avatar?: string;
   branch?: string;
-  location?: string; // Added location (optional)
+  verified: boolean;
+  verificationToken?: string;
+  verificationExpires?: Date;
+  location?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -29,13 +32,17 @@ const UserSchema = new Schema<IUser>(
     password: { type: String, required: true },
     avatar: { type: String },
     branch: { type: Schema.Types.ObjectId, ref: "Branch" },
-    location: { type: String }, // <-- Added here
+    location: { type: String },
+    verified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    verificationExpires: { type: Date },
   },
   {
     timestamps: true,
   }
 );
 
+UserSchema.index({ verificationToken: 1 });
 UserSchema.index({ email: 1, branch: 1 }, { unique: true });
 
 UserSchema.methods.comparePassword = async function (

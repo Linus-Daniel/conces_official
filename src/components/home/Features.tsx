@@ -119,12 +119,12 @@ const FeatureCard = ({ feature }: { feature: Feature }) => {
         <p className="text-gray-600  text-xs sm:text-sm md:text-base mb-3 md:mb-4 flex-grow">
           {feature.description}
         </p>
-        <div className="mt-auto">
+        {/* <div className="mt-auto">
           <span className="text-royal-600 font-medium hover:text-royal-800 flex items-center text-xs sm:text-sm cursor-pointer">
             Learn more
             <FaArrowRight className="ml-2" size={12} />
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );

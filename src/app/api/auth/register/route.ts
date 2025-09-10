@@ -9,23 +9,12 @@ import { authOptions } from "@/lib/next-auth";
 import { z } from "zod";
 import api from "@/lib/axiosInstance";
 
-// Use Redis or database for production instead of in-memory Map
-const verificationCodes = new Map<
-  string,
-  {
-    email: string;
-    code: string;
-    expiresAt: number;
-    attempts: number;
-  }
->();
-
 // Validation schemas
 const baseUserSchema = z.object({
   fullName: z.string().trim().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Invalid email format").toLowerCase(),
   phone: z.string().optional(),
-  branch:z.string().min(1, "Branch is required"),
+  branch: z.string().min(1, "Branch is required"),
   institution: z.string().optional(),
   role: z.enum(["student", "branch-admin", "admin", "alumni"]),
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -35,13 +24,8 @@ const adminUserSchema = baseUserSchema.extend({
   branch: z.string().min(1, "Branch is required for admin registration"),
 });
 
-const verificationSchema = z.object({
-  verificationCode: z.string().length(6, "Verification code must be 6 digits"),
-  verificationId: z.string().uuid("Invalid verification ID"),
-});
-
-function generateVerificationCode(): string {
-  return crypto.randomInt(100000, 999999).toString();
+function generateVerificationToken(): string {
+  return crypto.randomBytes(32).toString("hex");
 }
 
 function sanitizeEmail(email: string): string {
@@ -62,23 +46,13 @@ export async function POST(req: NextRequest) {
     const isAdmin = session?.user?.role === "admin";
 
     const body = await req.json();
-    const { verificationCode, verificationId } = body;
-
     const clientIP = req.headers.get("x-forwarded-for") || "unknown";
 
     if (isAdmin) {
       return handleAdminRegistration(body);
     }
 
-    if (verificationCode && verificationId) {
-      return handleVerification({
-        verificationCode,
-        verificationId,
-        userData: body,
-      });
-    }
-
-    return handleInitialRegistration(body, clientIP);
+    return handleUserRegistration(body, clientIP);
   } catch (error) {
     console.error("Registration route error:", error);
     return NextResponse.json(
@@ -88,11 +62,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleInitialRegistration(body: any, clientIP: string) {
+async function handleUserRegistration(body: any, clientIP: string) {
   try {
     // Validate input
     const validatedData = baseUserSchema.parse(body);
-    const { fullName, email, phone, institution, role,branch, password } =
+    const { fullName, email, phone, institution, role, branch, password } =
       validatedData;
 
     // Additional role validation
@@ -106,204 +80,25 @@ async function handleInitialRegistration(body: any, clientIP: string) {
     // Check for existing user
     const existingUser = await User.findOne({ email: sanitizeEmail(email) });
     if (existingUser) {
-      return NextResponse.json(
-        { message: "Email is already registered" },
-        { status: 409 }
-      );
-    }
-
-    // Clean up expired verification codes
-    cleanupExpiredCodes();
-
-    const verificationId = crypto.randomUUID();
-    const code = generateVerificationCode();
-
-    verificationCodes.set(verificationId, {
-      email: sanitizeEmail(email),
-      code,
-      expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes
-      attempts: 0,
-    });
-
-async function sendVerificationEmail() {
-  try {
-    const emailResponse = await api.post(
-      `${process.env.NEXTAUTH_URL}/api/send-email`,
-      {
-        to: email,
-        subject: "Email Verification - Your Account Registration",
-        content: {
-          type: "html",
-          body: `
-           " <!DOCTYPE html>
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <title>Email Verification</title>
-              </head>
-              <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
-                  <h2 style="color: #333; text-align: center;">Email Verification</h2>
-                  <p style="color: #666; font-size: 16px;">Hello ${fullName},</p>
-                  <p style="color: #666; font-size: 16px;">Please use the following verification code to complete your registration:</p>
-                  <div style="background-color: #007bff; color: white; padding: 15px; text-align: center; border-radius: 5px; margin: 20px 0;">
-                    <h1 style="margin: 0; font-size: 32px; letter-spacing: 5px;">${code}</h1>
-                  </div>
-                  <p style="color: #666; font-size: 14px;">
-                    <strong>Important:</strong> This code will expire in 15 minutes for security reasons.
-                  </p>
-                  <p style="color: #666; font-size: 14px;">
-                    If you didn't request this verification, please ignore this email.
-                  </p>
-                </div>
-              </body>
-            </html>"
-          `,
-        },
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json", // Explicitly request JSON response
-        },
+      if (existingUser.verified) {
+        return NextResponse.json(
+          { message: "Email is already registered and verified" },
+          { status: 409 }
+        );
+      } else {
+        // User exists but not verified, resend verification
+        return await resendVerificationLink(existingUser);
       }
-    );
-    return emailResponse.data;
-  } catch (error: any) {
-    console.error(
-      "Error sending verification email:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to send verification email");
-  }
-}
-
-  const emailResponse = await sendVerificationEmail().catch((error) => {
-    verificationCodes.delete(verificationId); // Clean up on email failure
-    throw error;
-  });
-
-    if (!emailResponse) {
-      const errorData = await emailResponse;
-
-      console.error("Email API error:", errorData);
-      verificationCodes.delete(verificationId); // Clean up on email failure
-      throw new Error("Failed to send verification email");
     }
 
-    return NextResponse.json(
-      {
-        message: "Verification code sent to your email",
-        requiresVerification: true,
-        verificationId,
-        expiresAt: Date.now() + 15 * 60 * 1000,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        {
-          message: "Validation error",
-          errors: error.errors.map((err) => ({
-            field: err.path.join("."),
-            message: err.message,
-          })),
-        },
-        { status: 400 }
-      );
-    }
-
-    console.error("Initial registration error:", error);
-    return NextResponse.json(
-      {
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to send verification code",
-      },
-      { status: 500 }
-    );
-  }
-}
-
-async function handleVerification(params: {
-  verificationCode: string;
-  verificationId: string;
-  userData: any;
-}) {
-  try {
-    const { verificationCode, verificationId, userData } = params;
-
-    // Validate verification data
-    const verificationData = verificationSchema.parse({
-      verificationCode,
-      verificationId,
-    });
-    const validatedUserData = baseUserSchema.parse(userData);
-
-    const { fullName, email, phone,branch, institution, role, password } =
-      validatedUserData;
-
-    const verification = verificationCodes.get(verificationId);
-
-    if (!verification) {
-      return NextResponse.json(
-        { message: "Invalid or expired verification request" },
-        { status: 400 }
-      );
-    }
-
-    // Check expiration
-    if (Date.now() > verification.expiresAt) {
-      verificationCodes.delete(verificationId);
-      return NextResponse.json(
-        { message: "Verification code has expired. Please request a new one." },
-        { status: 400 }
-      );
-    }
-
-    // Check attempt limit
-    if (verification.attempts >= 3) {
-      verificationCodes.delete(verificationId);
-      return NextResponse.json(
-        {
-          message: "Too many verification attempts. Please request a new code.",
-        },
-        { status: 429 }
-      );
-    }
-
-    // Verify code and email
-    if (
-      verification.email !== sanitizeEmail(email) ||
-      verification.code !== verificationCode
-    ) {
-      verification.attempts += 1;
-      verificationCodes.set(verificationId, verification);
-
-      return NextResponse.json(
-        {
-          message: "Invalid verification code or email mismatch",
-          attemptsRemaining: 3 - verification.attempts,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Check if user was created while verification was pending
-    const existingUser = await User.findOne({ email: sanitizeEmail(email) });
-    if (existingUser) {
-      verificationCodes.delete(verificationId);
-      return NextResponse.json(
-        { message: "Email is already registered" },
-        { status: 409 }
-      );
-    }
-
-    // Create user
+    // Hash password
     const hashedPassword = await hashPassword(password);
 
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Create user with verified: false
     const newUser = new User({
       fullName: fullName.trim(),
       email: sanitizeEmail(email),
@@ -312,22 +107,23 @@ async function handleVerification(params: {
       role,
       branch,
       password: hashedPassword,
-      emailVerified: true,
+      verified: false,
+      verificationToken,
+      verificationExpires,
       createdAt: new Date(),
     });
 
     await newUser.save();
-    verificationCodes.delete(verificationId);
+
+    // Send verification email
+    await sendVerificationEmail(newUser, verificationToken);
 
     return NextResponse.json(
       {
-        message: "Registration completed successfully!",
-        user: {
-          id: newUser._id,
-          fullName: newUser.fullName,
-          email: newUser.email,
-          role: newUser.role,
-        },
+        message:
+          "Registration successful! Please check your email to verify your account.",
+        requiresVerification: true,
+        userId: newUser._id,
       },
       { status: 201 }
     );
@@ -345,11 +141,115 @@ async function handleVerification(params: {
       );
     }
 
-    console.error("Verification error:", error);
+    console.error("User registration error:", error);
     return NextResponse.json(
-      { message: "Internal server error during verification" },
+      {
+        message: error instanceof Error ? error.message : "Registration failed",
+      },
       { status: 500 }
     );
+  }
+}
+
+async function resendVerificationLink(user: any) {
+  try {
+    // Generate new verification token
+    const verificationToken = generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Update user with new token
+    user.verificationToken = verificationToken;
+    user.verificationExpires = verificationExpires;
+    await user.save();
+
+    // Send verification email
+    await sendVerificationEmail(user, verificationToken);
+
+    return NextResponse.json(
+      {
+        message: "A new verification link has been sent to your email.",
+        requiresVerification: true,
+        userId: user._id,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    return NextResponse.json(
+      { message: "Failed to resend verification email" },
+      { status: 500 }
+    );
+  }
+}
+
+async function sendVerificationEmail(user: any, verificationToken: string) {
+  try {
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${verificationToken}`;
+
+    const emailResponse = await api.post(
+      `${process.env.NEXTAUTH_URL}/api/send-email`,
+      {
+        to: user.email,
+        subject: "Verify Your Email Address - Complete Registration",
+        content: {
+          type: "html",
+          body: `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <title>Email Verification</title>
+              </head>
+              <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background-color: #f8f9fa; padding: 30px; border-radius: 10px;">
+                  <h2 style="color: #333; text-align: center;">Email Verification</h2>
+                  <p style="color: #666; font-size: 16px;">Hello ${user.fullName},</p>
+                  <p style="color: #666; font-size: 16px;">
+                    Thank you for registering! To complete your account setup, please verify your email address by clicking the button below:
+                  </p>
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${verificationUrl}" 
+                       style="background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px; font-weight: bold;">
+                      Verify Email Address
+                    </a>
+                  </div>
+                  <p style="color: #666; font-size: 14px;">
+                    <strong>Important:</strong> This verification link will expire in 24 hours for security reasons.
+                  </p>
+                  <p style="color: #666; font-size: 14px;">
+                    If the button doesn't work, you can copy and paste this link into your browser:
+                  </p>
+                  <p style="color: #007bff; font-size: 14px; word-break: break-all;">
+                    ${verificationUrl}
+                  </p>
+                  <p style="color: #666; font-size: 14px;">
+                    If you didn't request this verification, please ignore this email.
+                  </p>
+                </div>
+              </body>
+            </html>
+          `,
+        },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!emailResponse.data) {
+      throw new Error("Failed to send verification email");
+    }
+
+    return emailResponse.data;
+  } catch (error: any) {
+    console.error(
+      "Error sending verification email:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to send verification email");
   }
 }
 
@@ -387,7 +287,7 @@ async function handleAdminRegistration(body: any) {
       role,
       password: hashedPassword,
       branch: branch.trim(),
-      emailVerified: true,
+      verified: true, // Admin-created users are automatically verified
       createdAt: new Date(),
     });
 
@@ -402,6 +302,7 @@ async function handleAdminRegistration(body: any) {
           email: newUser.email,
           role: newUser.role,
           branch: newUser.branch,
+          verified: newUser.verified,
         },
       },
       { status: 201 }
@@ -428,17 +329,6 @@ async function handleAdminRegistration(body: any) {
   }
 }
 
-// Utility function to clean up expired verification codes
-function cleanupExpiredCodes() {
-  const now = Date.now();
-  for (const [id, verification] of verificationCodes.entries()) {
-    if (now > verification.expiresAt) {
-      verificationCodes.delete(id);
-    }
-  }
-}
-
-// Handle unsupported methods
 export async function GET() {
   return NextResponse.json(
     { message: "Method not allowed. Use POST for registration." },

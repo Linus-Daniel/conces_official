@@ -16,7 +16,6 @@ export default function Sidebar({ onCreatePost }: SidebarProps) {
 
 
       <PrayerWall />
-      {/* <UpcomingEvents events={upcomingEvents} /> */}
       
       <div className="bg-gradient-to-r from-royal-DEFAULT to-royal-dark rounded-lg p-4 md:p-5 text-white">
         <h3 className="font-bold text-lg mb-2">Join Mentorship Program</h3>
@@ -72,14 +71,14 @@ return(
             <div className="flex items-center mb-2">
               <img
                 src={item.creator?.avatar}
-                alt={item.creator.fullName}
+                alt={item.creator?.fullName}
                 className="w-8 h-8 rounded-full mr-2"
               />
-              <p className="text-sm font-medium">{item.creator.fullName}</p>
+              <p className="text-sm font-medium">{item.creator?.fullName}</p>
             </div>
-            <p className="text-sm text-gray-600 mb-2">{item.content}</p>
+            <p className="text-sm text-gray-600 mb-2">{item?.content}</p>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">{item.createdAt}</span>
+              <span className="text-xs text-gray-500">{item?.createdAt}</span>
               <button className="text-xs text-royal-DEFAULT hover:underline">
                 I've prayed ({item.prayed})
               </button>
@@ -90,35 +89,3 @@ return(
     </div>
   );
 }
-
-// function UpcomingEvents({ events }) {
-//   return (
-//     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-//       <div className="bg-royal-DEFAULT text-white p-3 md:p-4 flex items-center justify-between">
-//         <h3 className="font-semibold">Upcoming Events</h3>
-//         <span className="text-gold-light text-sm hover:underline cursor-pointer">
-//           View All
-//         </span>
-//       </div>
-//       <div className="p-3 md:p-4 space-y-4">
-//         {events.map(event => (
-//           <div key={event.id} className="flex items-start">
-//             <div className="bg-gray-100 rounded-lg p-2 text-center mr-3 w-12 flex-shrink-0">
-//               <div className="text-lg font-semibold text-royal-DEFAULT">
-//                 {event.date.split(' ')[0]}
-//               </div>
-//               <div className="text-xs uppercase text-gray-500">{event.date.split(' ')[1]}</div>
-//             </div>
-//             <div>
-//               <h4 className="font-medium text-royal-DEFAULT text-sm md:text-base">
-//                 {event.title}
-//               </h4>
-//               <p className="text-sm text-gray-600">{event.time}</p>
-//               <p className="text-xs text-gray-500 mt-1">{event.location}</p>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }

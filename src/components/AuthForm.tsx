@@ -1,5 +1,5 @@
 "use client";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import {
   FaUser,
   FaEnvelope,
@@ -13,6 +13,7 @@ import {
   FaMicrosoft,
   FaBell,
 } from "react-icons/fa6";
+import { FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { FaSpinner } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
 import useAuthStore from "@/zustand/authStore";
@@ -32,52 +33,245 @@ interface IBranch {
   updatedAt: Date;
 }
 
-const AuthForm = ({branches}:{branches:IBranch[]}) => {
-  // Add hydration state
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [activeTab, setActiveTab] = useState("signup"); // Default state
+interface EmailVerificationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  email: string;
+  onResend: () => void;
+  isResending: boolean;
+}
+
+interface ForgotPasswordModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (email: string) => void;
+  isLoading: boolean;
+}
+
+const EmailVerificationModal = ({
+  isOpen,
+  onClose,
+  email,
+  onResend,
+  isResending,
+}: EmailVerificationModalProps) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-gray-900">Check Your Email</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FaCheckCircle className="text-green-600 text-2xl" />
+          </div>
+          <p className="text-gray-600 mb-2">
+            We&apos;ve sent a verification link to:
+          </p>
+          <p className="font-semibold text-gray-900 mb-4">{email}</p>
+          <p className="text-sm text-gray-500">
+            Click the link in your email to verify your account and complete
+            registration.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            onClick={onResend}
+            disabled={isResending}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            {isResending ? (
+              <>
+                <FaSpinner className="animate-spin mr-2" />
+                Resending...
+              </>
+            ) : (
+              "Resend Verification Email"
+            )}
+          </button>
+
+          <button
+            onClick={onClose}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
+          >
+            I&apos;ll Check My Email
+          </button>
+        </div>
+
+        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+          <div className="flex items-start">
+            <FaExclamationTriangle className="text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+            <div className="text-sm text-yellow-800">
+              <p className="font-medium">Can&apos;t find the email?</p>
+              <p>
+                Check your spam folder or try resending the verification email.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ForgotPasswordModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  isLoading,
+}: ForgotPasswordModalProps) => {
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+
+    setEmailError("");
+    onSubmit(email);
+  };
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (emailError) setEmailError("");
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <FaTimes />
+          </button>
+        </div>
+
+        <div className="mb-6">
+          <p className="text-gray-600 text-sm">
+            Enter your email address and we&apos;ll send you a link to reset
+            your password.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                <FaEnvelope />
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                className={`pl-10 w-full rounded-md border ${
+                  emailError ? "border-red-300" : "border-gray-300"
+                } py-2 px-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            {emailError && (
+              <p className="mt-1 text-sm text-red-600">{emailError}</p>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isLoading ? (
+                <>
+                  <FaSpinner className="animate-spin mr-2" />
+                  Sending Reset Link...
+                </>
+              ) : (
+                "Send Reset Link"
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+
+  const getBranches= async ()=>{
+    try{
+      const response = await api.get("/branch")
+      console.log(response.data)
+    }
+    catch(error){
+      console.log("Error Fetchin Branches");
+      console.log("Error")
+    }
+  }
+const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+
+  // Initialize activeTab based on URL params (works on both server and client)
+  const mode = searchParams.get("mode");
+  const initialTab =
+    mode === "login"
+      ? "login"
+      : mode === "alumni-dashboard"
+      ? "alumni-dashboard"
+      : "signup";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
+
+  // Modal states
+  const [showEmailVerificationModal, setShowEmailVerificationModal] =
+    useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [isResending, setIsResending] = useState(false);
 
   // Get auth store methods and state
-  const {
-    register,
-    login,
-    verifyEmail,
-    resendVerification,
-    verificationStep,
-    verificationId,
-  } = useAuthStore();
-
-  const params = useSearchParams();
-  const mode = params.get("mode");
-
-  // Branch state
-  const [loadingBranches, setLoadingBranches] = useState(true);
-
-  // Handle hydration
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  // Handle URL parameters after hydration
-  useEffect(() => {
-    if (!isHydrated) return; // Wait for hydration
-
-    if (mode === "login") {
-      setActiveTab("login");
-    } else if (mode === "signup") {
-      setActiveTab("signup");
-    } else if (mode === "verification") {
-      setActiveTab("verification");
-    } else if (mode === "alumni-dashboard") {
-      setActiveTab("alumni-dashboard");
-    } else {
-      setActiveTab("signup");
-    }
-  }, [mode, isHydrated]);
-
+  const { register, login } = useAuthStore();
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -98,14 +292,6 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
     rememberMe: false,
   });
 
-  const [verificationCode, setVerificationCode] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
   const [passwordStrength, setPasswordStrength] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -114,19 +300,6 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   // Phone validation regex (basic international format)
   const phoneRegex = /^\+?[0-9\s\-]+$/;
-
-  // Handle verification code input
-  const handleVerificationCodeChange = (index: number, value: string) => {
-    const newCode = [...verificationCode];
-    newCode[index] = value;
-    setVerificationCode(newCode);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`verification-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
 
   // Validate form fields
   const validateSignupForm = () => {
@@ -211,52 +384,8 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
       };
 
       await register(userData);
-      toast.success(
-        "Registration successful! Please check your email for verification code."
-      );
-      setActiveTab("verification");
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Registration failed";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle verification submission
-  const handleVerificationSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      if (!verificationId) {
-        throw new Error("Verification session expired. Please register again.");
-      }
-
-      const code = verificationCode.join("");
-      if (code.length !== 6) {
-        throw new Error("Please enter a complete 6-digit code");
-      }
-
-      const userData = {
-        fullName: formData.fullname,
-        email: formData.email,
-        phone: formData.phone,
-        institution: formData.institution,
-        role: formData.role,
-        password: formData.password,
-        branch: formData.branch,
-      };
-
-      await verifyEmail(code, userData, verificationId);
-      toast.success("Email verified successfully!");
-
-      if (userData.role === "student") {
-        router.push("/user");
-      } else if (userData.role === "alumni") {
-        router.push("/alumni/dashboard");
-      }
+      setVerificationEmail(formData.email);
+      setShowEmailVerificationModal(true);
 
       // Reset form
       setFormData({
@@ -271,28 +400,47 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
         captcha: false,
         branch: "",
       });
-      setVerificationCode(["", "", "", "", "", ""]);
-    } catch (err) {
-      setVerificationCode(["", "", "", "", "", ""]);
-      const errorMessage =
-        err instanceof Error ? err.message : "Verification failed";
+
+      toast.success(
+        "Registration successful! Please check your email to verify your account."
+      );
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || "Registration failed";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle resend verification code
+  // Handle resend verification
   const handleResendVerification = async () => {
-    setIsLoading(true);
-    setErrors({});
+    setIsResending(true);
 
     try {
-      // await resendVerification(formData.email);
-      toast.success("Verification code resent successfully!");
-    } catch (err) {
+      await api.post("/api/resend-verification", {
+        email: verificationEmail,
+      });
+      toast.success("Verification email resent successfully!");
+    } catch (err: any) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to resend code";
+        err.response?.data?.message || "Failed to resend verification email";
+      toast.error(errorMessage);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  // Handle forgot password
+  const handleForgotPassword = async (email: string) => {
+    setIsLoading(true);
+
+    try {
+      await api.post("/api/forgot-password", { email });
+      toast.success("Password reset link sent to your email!");
+      setShowForgotPasswordModal(false);
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "Failed to send reset link";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -350,6 +498,7 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
       });
     }
   };
+  console.log(!branches)
 
   const calculatePasswordStrength = (password: string) => {
     if (password.length === 0) {
@@ -449,18 +598,6 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
     }
   };
 
-  // Don't render until hydrated to prevent mismatch
-  if (!isHydrated) {
-    return (
-      <div className="font-sans bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <FaSpinner className="animate-spin text-gold-600" />
-          <span className="text-gray-600">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
       <ToastContainer
@@ -474,6 +611,22 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
         draggable
         pauseOnHover
         theme="colored"
+      />
+
+      {/* Modals */}
+      <EmailVerificationModal
+        isOpen={showEmailVerificationModal}
+        onClose={() => setShowEmailVerificationModal(false)}
+        email={verificationEmail}
+        onResend={handleResendVerification}
+        isResending={isResending}
+      />
+
+      <ForgotPasswordModal
+        isOpen={showForgotPasswordModal}
+        onClose={() => setShowForgotPasswordModal(false)}
+        onSubmit={handleForgotPassword}
+        isLoading={isLoading}
       />
 
       {/* Authentication Flow Tabs */}
@@ -512,13 +665,18 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                 <h2 className="text-2xl font-bold text-conces-blue">
                   Create Your Account
                 </h2>
+                {
+                  branches.map((_,index)=>(<p key={index}>{_.branchName}</p>))
+                }
                 <p className="text-royal-500 mt-2">
                   Join our community and access role-specific features
                 </p>
               </div>
 
               <form onSubmit={handleSignupSubmit}>
+                {/* Form fields remain the same... */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Keep all the form fields from original */}
                   <div>
                     <label
                       className="block text-sm font-medium text-gray-800 mb-1"
@@ -635,56 +793,55 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="mb-4">
-                  <label
-                    className="block text-sm font-medium text-gray-800 mb-1"
-                    htmlFor="role"
-                  >
-                    Select Your Role
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
-                      <FaUserTag />
-                    </div>
-                    <select
-                      id="role"
-                      name="role"
-                      value={formData.role}
-                      onChange={handleInputChange}
-                      className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
+                  <div className="mb-4">
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="role"
                     >
-                      <option value="student">student</option>
-                      <option value="alumni">alumni</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
-                      <FaChevronDown />
+                      Select Your Role
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaUserTag />
+                      </div>
+                      <select
+                        id="role"
+                        name="role"
+                        value={formData.role}
+                        onChange={handleInputChange}
+                        className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
+                      >
+                        <option value="student">student</option>
+                        <option value="alumni">alumni</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
+                        <FaChevronDown />
+                      </div>
+                    </div>
+                    <div
+                      id="role-description"
+                      className="mt-2 text-sm text-royal-500 italic"
+                    >
+                      <p>
+                        As a Student, you&apos;ll have access to courses,
+                        events, mentorship, and devotionals.
+                      </p>
                     </div>
                   </div>
-                  <div
-                    id="role-description"
-                    className="mt-2 text-sm text-royal-500 italic"
-                  >
-                    <p>
-                      As a Student, you'll have access to courses, events,
-                      mentorship, and devotionals.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="mb-4">
-                  <label
-                    className="block text-sm font-medium text-gray-800 mb-1"
-                    htmlFor="branch"
-                  >
-                    Select Your Branch
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
-                      <FaBuildingColumns />
-                    </div>
-                    
+                  <div className="mb-4">
+                    <label
+                      className="block text-sm font-medium text-gray-800 mb-1"
+                      htmlFor="branch"
+                    >
+                      Select Your Branch
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
+                        <FaBuildingColumns />
+                      </div>
+
                       <select
                         id="branch"
                         name="branch"
@@ -700,16 +857,20 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                           </option>
                         ))}
                       </select>
-                    
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
-                      <FaChevronDown />
+
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
+                        <FaChevronDown />
+                      </div>
                     </div>
+                    {!formData.branch && errors.branch && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.branch}
+                      </p>
+                    )}
                   </div>
-                  {!formData.branch && errors.branch && (
-                    <p className="mt-1 text-sm text-red-600">{errors.branch}</p>
-                  )}
                 </div>
 
+                {/* Password fields remain the same... */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label
@@ -826,6 +987,7 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                   </div>
                 </div>
 
+                {/* Terms and conditions */}
                 <div className="mb-6">
                   <div className="flex items-center">
                     <input
@@ -857,11 +1019,12 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                   )}
                 </div>
 
+                {/* Captcha */}
                 <div className="mb-6">
                   <div className="bg-gray-100 p-4 rounded-md flex items-center justify-center">
                     <div className="w-full max-w-xs">
                       <p className="text-center text-sm text-gray-800 mb-2">
-                        Please verify you're human
+                        Please verify you&apos;re human
                       </p>
                       <div
                         className={`border ${
@@ -877,7 +1040,7 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                           className="h-4 w-4 text-gold-600 border-royal-300 rounded focus:ring-gold-500"
                         />
                         <span className="ml-3 text-sm text-gray-800">
-                          I'm not a robot
+                          I&apos;m not a robot
                         </span>
                         <img
                           src="https://www.gstatic.com/recaptcha/api2/logo_48.png"
@@ -936,6 +1099,7 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
               </div>
 
               <form onSubmit={handleLoginSubmit}>
+                {/* Login form fields remain the same... */}
                 <div className="mb-4">
                   <label
                     className="block text-sm font-medium text-gray-800 mb-1"
@@ -977,9 +1141,13 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                     >
                       Password
                     </label>
-                    <span className="text-sm text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPasswordModal(true)}
+                      className="text-sm text-gold-600 hover:text-gold-700 font-medium"
+                    >
                       Forgot password?
-                    </span>
+                    </button>
                   </div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -1075,7 +1243,7 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
                 </div>
 
                 <p className="text-center text-sm text-royal-600">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <span
                     className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer"
                     onClick={() => handleTabChange("signup")}
@@ -1086,155 +1254,9 @@ const AuthForm = ({branches}:{branches:IBranch[]}) => {
               </form>
             </div>
           )}
-
-          {/* Email Verification */}
-          {activeTab === "verification" && (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <div className="w-16 h-16 bg-gold-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FaEnvelope className="text-gold-600 text-2xl" />
-              </div>
-              <h2 className="text-2xl font-bold text-conces-blue mb-2">
-                Verify Your Email
-              </h2>
-              <p className="text-royal-600 mb-6">
-                We've sent a 6-digit verification code to{" "}
-                <span className="font-medium">{formData.email}</span>.
-              </p>
-
-              <form onSubmit={handleVerificationSubmit}>
-                <div className="mb-6">
-                  <p className="text-royal-600 mb-2">Enter the 6-digit code:</p>
-                  <div className="flex justify-center space-x-2">
-                    {verificationCode.map((digit, index) => (
-                      <input
-                        key={index}
-                        id={`verification-${index}`}
-                        type="text"
-                        maxLength={1}
-                        value={digit}
-                        onChange={(e) =>
-                          handleVerificationCodeChange(
-                            index,
-                            e.target.value.replace(/\D/g, "")
-                          )
-                        }
-                        className="w-12 h-12 text-center border border-royal-300 rounded-md text-xl font-medium focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || verificationCode.join("").length !== 6}
-                  className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 mb-4 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <>
-                      <FaSpinner className="animate-spin mr-2" />
-                      Verifying...
-                    </>
-                  ) : (
-                    "Verify Email"
-                  )}
-                </button>
-
-                <p className="text-royal-600">
-                  Didn't receive the code?{" "}
-                  <button
-                    type="button"
-                    onClick={handleResendVerification}
-                    disabled={isLoading}
-                    className="text-gold-600 hover:text-gold-700 font-medium disabled:opacity-50"
-                  >
-                    Resend
-                  </button>
-                </p>
-              </form>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Alumni Dashboard */}
-      {activeTab === "alumni-dashboard" && (
-        <div>
-          <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-            <div className="flex items-center justify-between px-6 py-3">
-              <div className="flex items-center">
-                <div className="text-gold-600 text-2xl font-bold mr-8">
-                  CONCES
-                </div>
-                <nav className="hidden md:flex space-x-6">
-                  <span className="text-royal-900 font-medium hover:text-gold-600 transition-colors cursor-pointer">
-                    Home
-                  </span>
-                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
-                    Alumni Network
-                  </span>
-                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
-                    Guest Lectures
-                  </span>
-                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
-                    Mentorship
-                  </span>
-                  <span className="text-royal-500 hover:text-gold-600 transition-colors cursor-pointer">
-                    Job Board
-                  </span>
-                </nav>
-              </div>
-              <div className="flex items-center space-x-4">
-                <button className="text-royal-500 hover:text-gray-800">
-                  <FaBell />
-                </button>
-                <div className="relative">
-                  <button className="flex items-center text-gray-800 hover:text-royal-900">
-                    <img
-                      src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg"
-                      alt="User"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <span className="ml-2 font-medium hidden md:block">
-                      Robert Smith
-                    </span>
-                    <span className="ml-1 text-xs px-2 py-0.5 bg-gold-100 text-gold-700 rounded-full hidden md:block">
-                      Alumni
-                    </span>
-                    <FaChevronDown className="ml-1 text-xs" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 min-h-[calc(100vh-64px)]">
-            <div className="max-w-7xl mx-auto px-4 py-8">
-              <div className="bg-gradient-to-r from-gold-600 to-gold-800 rounded-lg p-6 mb-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
-                  <div>
-                    <h1 className="text-white text-2xl font-bold mb-2">
-                      Welcome back, Robert! 👋
-                    </h1>
-                    <p className="text-gold-100">
-                      Your alumni journey continues. Let's explore what's new
-                      today.
-                    </p>
-                  </div>
-                  <div className="mt-4 md:mt-0">
-                    <button className="bg-white text-gold-600 hover:bg-gold-50 px-4 py-2 rounded-md font-medium">
-                      View Your Network
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Alumni-specific content goes here */}
-            </div>
-          </div>
-        </div>
-      )}
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 py-6 mt-8">
         <div className="max-w-7xl mx-auto px-4 text-center">

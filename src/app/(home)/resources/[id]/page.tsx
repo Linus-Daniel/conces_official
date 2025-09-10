@@ -19,7 +19,7 @@ const getResourceById = async (id: string) => {
   }
 };
 
-export default async function ResourcePage({ params }: ResourcePageProps) {
+export default async function Resource({ params }: ResourcePageProps) {
   const { id } = await params;
   const resources = await getResourceById(id);
 

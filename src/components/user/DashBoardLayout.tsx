@@ -39,7 +39,6 @@ const DashboardLayout = ({ children }: LayoutProps) => {
     { icon: <FaBook />, name: "Resources", link: "/user/resources" },
     { icon: <FaChalkboardTeacher />, name: "Mentorship", link: "/user/mentorship" },
     { icon: <FaPrayingHands />, name: "Prayer Wall", link: "/user/prayer" },
-    { icon: <FaHandsHelping />, name: "Community", link: "/community" },
     { icon: <FaShoppingCart />, name: "store", link: "/store" },
     { icon: <FaShoppingBag />, name: "orders", link: "/user/orders" },
 

@@ -35,6 +35,7 @@ export interface Resource {
   videoUrl?: string;
   duration?: string;
   createdAt: string |Date
+  branch: string;
   description: string;
   thumbnail: string;
   fileUrl?: string;
