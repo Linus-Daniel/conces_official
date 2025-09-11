@@ -13,7 +13,7 @@ export async function GET(
     const { id: branchId } = await params;
     console.log(branchId);
 
-    const users = await User.find({ branch: branchId }).lean();
+    const users = await User.find({ branch: branchId }).lean().populate("branch","branchName");
     console.log(users, "Users from the branch");
 
     return NextResponse.json({

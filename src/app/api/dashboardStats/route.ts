@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/next-auth";
 import User from "@/models/User";
 import Product from "@/models/Product";
 import PrayerRequest from "@/models/PrayerRequest";
-import Branch from "@/models/Branch";
+import Branch from "@/models/Chapter";
 import Events from "@/models/Events";
 
 export async function GET(request: NextRequest) {

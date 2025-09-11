@@ -26,7 +26,7 @@ interface SocialLink {
 interface CreateBranchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (branch: any) => void;
+  onSuccess?: (chapter: any) => void;
 }
 
 const CreateBranchModal = ({
@@ -34,9 +34,9 @@ const CreateBranchModal = ({
   onClose,
   onSuccess,
 }: CreateBranchModalProps) => {
-  // Branch fields
-  const [branchName, setBranchName] = useState("");
-  const [branchLocation, setBranchLocation] = useState("");
+  // Chapter fields
+  const [chapterName, setBranchName] = useState("");
+  const [chapterLocation, setBranchLocation] = useState("");
   const [motto, setMotto] = useState("");
   const [banner, setBanner] = useState("");
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
@@ -50,19 +50,19 @@ const CreateBranchModal = ({
 
   // UI states
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"branch" | "admin">("branch");
+  const [activeTab, setActiveTab] = useState<"chapter" | "admin">("chapter");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Validation
   const validateBranchData = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!branchName.trim()) {
-      newErrors.branchName = "Branch name is required";
+    if (!chapterName.trim()) {
+      newErrors.chapterName = "Chapter name is required";
     }
 
-    if (!branchLocation.trim()) {
-      newErrors.branchLocation = "Branch location is required";
+    if (!chapterLocation.trim()) {
+      newErrors.chapterLocation = "Chapter location is required";
     }
 
     // Validate social links
@@ -114,95 +114,81 @@ const CreateBranchModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validate based on active tab
-    if (activeTab === "branch" && !validateBranchData()) {
-      return;
+  // Validate based on active tab
+  if (activeTab === "chapter" && !validateBranchData()) {
+    return;
+  }
+
+  if (activeTab === "admin" && !validateAdminData()) {
+    return;
+  }
+
+  // If on chapter tab, move to admin tab
+  if (activeTab === "chapter") {
+    setActiveTab("admin");
+    return;
+  }
+
+  // Final submission from admin tab
+  setLoading(true);
+  setErrors({});
+
+  try {
+    // Combine chapter + admin into one payload
+    const payload = {
+      branchName: chapterName.trim(),
+      branchLocation: chapterLocation.trim(),
+      motto: motto.trim() || undefined,
+      banner: banner.trim() || undefined,
+      socialLinks:
+        socialLinks.filter((link) => link.name && link.url).length > 0
+          ? socialLinks.filter((link) => link.name && link.url)
+          : undefined,
+
+      admin: {
+         adminFullName,
+         adminEmail,
+         adminPhone,
+         adminPassword,
+        role: "chapter-admin",
+      },
+    };
+
+    const response = await api.post("/chapters", payload);
+
+    if (!response.data || !response.data.branch) {
+      throw new Error("Failed to create branch & admin");
     }
 
-    if (activeTab === "admin" && !validateAdminData()) {
-      return;
+    // Success
+    toast.success("Branch and admin created successfully!");
+
+    // Call success callback
+    if (onSuccess) {
+      onSuccess(response.data.branch);
     }
 
-    // If on branch tab, move to admin tab
-    if (activeTab === "branch") {
-      setActiveTab("admin");
-      return;
-    }
+    // Reset form
+    resetForm();
 
-    // Final submission from admin tab
-    setLoading(true);
-    setErrors({});
+    // Close modal after short delay
+    setTimeout(() => {
+      onClose();
+    }, 1500);
+  } catch (err: any) {
+    console.error("Error creating branch:", err);
+    const errorMessage =
+      err.response?.data?.message || err.message || "Something went wrong";
+    toast.error(errorMessage);
+    setErrors({ submit: errorMessage });
+  } finally {
+    setLoading(false);
+  }
+};
 
-    try {
-      // 1. Create branch with all fields
-      const branchData = {
-        branchName: branchName.trim(),
-        branchLocation: branchLocation.trim(),
-        motto: motto.trim() || undefined,
-        banner: banner.trim() || undefined,
-        socialLinks:
-          socialLinks.filter((link) => link.name && link.url).length > 0
-            ? socialLinks.filter((link) => link.name && link.url)
-            : undefined,
-      };
-
-      const branchResponse = await api.post("/branches", branchData);
-
-      if (!branchResponse.data || !branchResponse.data.branch) {
-        throw new Error("Failed to create branch");
-      }
-
-      const branch = branchResponse.data.branch;
-
-      // 2. Create branch admin linked to the branch
-      const adminData = {
-        fullName: adminFullName.trim(),
-        email: adminEmail.trim(),
-        phone: adminPhone.trim(),
-        password: adminPassword,
-        role: "branch-admin",
-        branch: branch._id,
-      };
-
-      const adminResponse = await api.post("/auth/register", adminData);
-
-      if (!adminResponse.data) {
-        // If admin creation fails, we might want to delete the branch
-        // or handle this scenario appropriately
-        throw new Error("Branch created but failed to create admin");
-      }
-
-      // Success
-      toast.success("Branch and admin created successfully!");
-
-      // Call success callback with the created branch
-      if (onSuccess) {
-        onSuccess({
-          ...branch,
-          admin: adminResponse.data.user,
-        });
-      }
-
-      // Reset form
-      resetForm();
-
-      // Close modal after a short delay
-      setTimeout(() => {
-        onClose();
-      }, 1500);
-    } catch (err: any) {
-      console.error("Error creating branch:", err);
-      const errorMessage =
-        err.response?.data?.message || err.message || "Something went wrong";
-      toast.error(errorMessage);
-      setErrors({ submit: errorMessage });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const resetForm = () => {
     setBranchName("");
@@ -215,7 +201,7 @@ const CreateBranchModal = ({
     setAdminPhone("");
     setAdminPassword("");
     setConfirmPassword("");
-    setActiveTab("branch");
+    setActiveTab("chapter");
     setErrors({});
   };
 
@@ -253,11 +239,11 @@ const CreateBranchModal = ({
         <div className="flex justify-between items-center sticky top-0 bg-white p-4 border-b z-10">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Create New Branch
+              Create New Chapter
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Step {activeTab === "branch" ? "1" : "2"} of 2:{" "}
-              {activeTab === "branch" ? "Branch Details" : "Admin Account"}
+              Step {activeTab === "chapter" ? "1" : "2"} of 2:{" "}
+              {activeTab === "chapter" ? "Chapter Details" : "Admin Account"}
             </p>
           </div>
           <button
@@ -273,15 +259,15 @@ const CreateBranchModal = ({
         <div className="flex border-b">
           <button
             type="button"
-            onClick={() => setActiveTab("branch")}
+            onClick={() => setActiveTab("chapter")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === "branch"
+              activeTab === "chapter"
                 ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50"
                 : "text-gray-500 hover:text-gray-700"
             }`}
             disabled={loading}
           >
-            1. Branch Details
+            1. Chapter Details
           </button>
           <button
             type="button"
@@ -305,16 +291,16 @@ const CreateBranchModal = ({
           onSubmit={handleSubmit}
           className="p-6 space-y-6 overflow-y-auto max-h-[calc(90vh-180px)]"
         >
-          {/* Branch Details Tab */}
-          {activeTab === "branch" && (
+          {/* Chapter Details Tab */}
+          {activeTab === "chapter" && (
             <div className="space-y-4">
-              {/* Branch Name */}
+              {/* Chapter Name */}
               <div>
                 <label
-                  htmlFor="branchName"
+                  htmlFor="chapterName"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Branch Name <span className="text-red-500">*</span>
+                  Chapter Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -322,26 +308,26 @@ const CreateBranchModal = ({
                   </div>
                   <input
                     type="text"
-                    id="branchName"
-                    value={branchName}
+                    id="chapterName"
+                    value={chapterName}
                     onChange={(e) => {
                       setBranchName(e.target.value);
-                      if (errors.branchName) {
+                      if (errors.chapterName) {
                         const newErrors = { ...errors };
-                        delete newErrors.branchName;
+                        delete newErrors.chapterName;
                         setErrors(newErrors);
                       }
                     }}
                     className={`pl-10 w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border p-2 ${
-                      errors.branchName ? "border-red-300" : "border-gray-300"
+                      errors.chapterName ? "border-red-300" : "border-gray-300"
                     }`}
-                    placeholder="e.g. UNILAG Branch"
+                    placeholder="e.g. UNILAG Chapter"
                     disabled={loading}
                   />
                 </div>
-                {errors.branchName && (
+                {errors.chapterName && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.branchName}
+                    {errors.chapterName}
                   </p>
                 )}
               </div>
@@ -349,7 +335,7 @@ const CreateBranchModal = ({
               {/* Location */}
               <div>
                 <label
-                  htmlFor="branchLocation"
+                  htmlFor="chapterLocation"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Location <span className="text-red-500">*</span>
@@ -360,18 +346,18 @@ const CreateBranchModal = ({
                   </div>
                   <input
                     type="text"
-                    id="branchLocation"
-                    value={branchLocation}
+                    id="chapterLocation"
+                    value={chapterLocation}
                     onChange={(e) => {
                       setBranchLocation(e.target.value);
-                      if (errors.branchLocation) {
+                      if (errors.chapterLocation) {
                         const newErrors = { ...errors };
-                        delete newErrors.branchLocation;
+                        delete newErrors.chapterLocation;
                         setErrors(newErrors);
                       }
                     }}
                     className={`pl-10 w-full rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border p-2 ${
-                      errors.branchLocation
+                      errors.chapterLocation
                         ? "border-red-300"
                         : "border-gray-300"
                     }`}
@@ -379,9 +365,9 @@ const CreateBranchModal = ({
                     disabled={loading}
                   />
                 </div>
-                {errors.branchLocation && (
+                {errors.chapterLocation && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.branchLocation}
+                    {errors.chapterLocation}
                   </p>
                 )}
               </div>
@@ -722,7 +708,7 @@ const CreateBranchModal = ({
             type="button"
             onClick={() => {
               if (activeTab === "admin") {
-                setActiveTab("branch");
+                setActiveTab("chapter");
               } else {
                 onClose();
               }
@@ -743,10 +729,10 @@ const CreateBranchModal = ({
                 <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
                 Creating...
               </span>
-            ) : activeTab === "branch" ? (
+            ) : activeTab === "chapter" ? (
               "Next: Admin Details"
             ) : (
-              "Create Branch & Admin"
+              "Create Chapter & Admin"
             )}
           </button>
         </div>

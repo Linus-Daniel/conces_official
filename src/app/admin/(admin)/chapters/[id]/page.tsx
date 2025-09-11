@@ -1,121 +1,552 @@
-"use client"
-import { useParams, useRouter } from 'next/navigation';
-import Head from 'next/head';
-import { FiArrowLeft, FiUsers, FiCalendar, FiBox, FiFileText } from 'react-icons/fi';
+"use client";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import {
+  FiArrowLeft,
+  FiUsers,
+  FiCalendar,
+  FiBox,
+  FiFileText,
+  FiMapPin,
+  FiBook,
+  FiActivity,
+  FiShoppingBag,
+  FiUser,
+  FiAward,
+} from "react-icons/fi";
+import api from "@/lib/axiosInstance";
+
+interface Branch {
+  _id: string;
+  branchName: string;
+  status: string;
+  branchLocation: string;
+  institution: string;
+  leader: {
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  description: string;
+  lastActivity: string;
+}
+
+interface Stats {
+  members: number;
+  events: number;
+  products: number;
+  contents: number;
+}
+
+interface Resource {
+  _id: string;
+  title: string;
+  type: string;
+  createdAt: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  images: string[];
+  category: string;
+}
+
+interface Member {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  joinedAt: string;
+  avatar: string;
+}
 
 const BranchDetail = () => {
   const router = useRouter();
   const params = useParams();
-  const id =  params.id as string;
+  const id = params.id as string;
 
-  // Mock data - in a real app, you'd fetch this based on the id
-  const branch = {
-    id: id,
-    name: "UNILAG Branch",
-    status: "Active",
-    location: "University of Lagos, Lagos",
-    institution: "University of Lagos",
-    leader: {
-      name: "Sarah Okonkwo",
-      email: "sarahokonkwo@gmail.com",
-      avatar: "https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg",
+  const [branch, setBranch] = useState<Branch | null>(null);
+  const [stats, setStats] = useState<Stats>({
+    members: 0,
+    events: 0,
+    products: 0,
+    contents: 0,
+  });
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // console.log(products)
+  // console.log(members);
+  // console.log(resources);
+
+
+  useEffect(() => {
+    const fetchBranchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch branch details
+        const branchRes = await api.get(`/chapters/${id}`);
+        const branchData = branchRes.data;
+        setBranch(branchData.branch);
+
+        // Fetch resources
+        const resourcesRes = await api.get(`/chapters/${id}/resources`);
+     const resourcesData = resourcesRes.data;
+
+          setResources(resourcesData || []);
+          setStats((prev) => ({
+            ...prev,
+            contents: resourcesData.length || 0,
+          }));
+        
+
+        // Fetch members
+        const membersRes = await fetch(`/api/chapters/${id}/members`);
+        if (membersRes.ok) {
+          const membersData = await membersRes.json();
+          setMembers(membersData.members || []);
+          setStats((prev) => ({
+            ...prev,
+            members: membersData.members?.length || 0,
+          }));
+        }
+
+        // Fetch products
+        const productsRes = await api.get(`/chapters/${id}/store/products/`);
+       
+          const productsData = productsRes.data;
+          console.log(productsData)
+          setProducts(productsData || []);
+          setStats((prev) => ({
+            ...prev,
+            products: productsData?.length || 0,
+          }));
+        
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load branch data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchBranchData();
+    }
+  }, [id]);
+
+  const statCards = [
+    {
+      name: "Total Members",
+      value: stats.members,
+      icon: FiUsers,
+      color: "bg-blue-100 text-blue-600",
     },
-    members: 124,
-    events: 8,
-    products: 15,
-    contents: 23,
-    lastActivity: "2 hours ago",
-    description: "The UNILAG branch is one of our most active branches with regular events and a growing membership base."
-  };
-
-  const stats = [
-    { name: 'Total Users', value: branch.members, icon: FiUsers },
-    { name: 'Branch Products', value: branch.products, icon: FiBox },
-    { name: 'Contents', value: branch.contents, icon: FiFileText },
-    { name: 'Events', value: branch.events, icon: FiCalendar },
+    {
+      name: "Branch Products",
+      value: stats.products,
+      icon: FiShoppingBag,
+      color: "bg-amber-100 text-amber-600",
+    },
+    {
+      name: "Resources",
+      value: stats.contents,
+      icon: FiFileText,
+      color: "bg-emerald-100 text-emerald-600",
+    },
+    {
+      name: "Events",
+      value: stats.events,
+      icon: FiCalendar,
+      color: "bg-purple-100 text-purple-600",
+    },
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error || !branch) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Error Loading Branch
+          </h2>
+          <p className="text-gray-600 mb-4">{error || "Branch not found"}</p>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>{branch.name} | CONCES Admin</title>
+        <title>{branch.branchName} | CONCES Admin</title>
         <meta name="description" content="Branch details" />
       </Head>
 
-      <main className="flex-1 overflow-auto">
-        <div className="py-6 px-4 sm:px-6 lg:px-8">
-          <button 
-            onClick={() => router.back()} 
-            className="flex items-center text-blue-600 mb-4"
-          >
-            <FiArrowLeft className="mr-2" /> Back to branches
-          </button>
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{branch.name}</h1>
-            <p className="text-gray-600">{branch.location}</p>
-            <span className={`inline-block mt-2 px-3 py-1 text-sm rounded-full ${
-              branch.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
-              {branch.status}
-            </span>
+      <main className="flex-1 overflow-auto pb-20">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center">
+              <button
+                onClick={() => router.back()}
+                className="flex items-center text-blue-600 hover:text-blue-800 mr-4"
+              >
+                <FiArrowLeft className="mr-2" /> Back
+              </button>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {branch.branchName}
+              </h1>
+              <span
+                className={`ml-4 px-3 py-1 text-sm rounded-full ${
+                  branch.status === "Active"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {branch.status}
+              </span>
+            </div>
+            <div className="flex items-center mt-2 text-gray-600">
+              <FiMapPin className="mr-1" />
+              <span>{branch.branchLocation}</span>
+            </div>
           </div>
+        </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <div key={stat.name} className="bg-white p-4 rounded-lg shadow">
+        {/* Stats Cards */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((stat) => (
+              <div
+                key={stat.name}
+                className="bg-white rounded-xl shadow-sm p-4 border border-gray-100"
+              >
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-blue-50 text-blue-600">
+                  <div className={`p-3 rounded-full ${stat.color}`}>
                     <stat.icon className="h-6 w-6" />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                    <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+                    <p className="text-sm font-medium text-gray-500">
+                      {stat.name}
+                    </p>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {stat.value}
+                    </p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          {/* Branch Details */}
-          <div className="bg-white p-6 rounded-lg shadow mb-8">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Branch Information</h2>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Institution</p>
-                <p className="text-gray-900">{branch.institution}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Branch Leader</p>
-                <div className="flex items-center mt-1">
-                  <img 
-                    src={branch.leader.avatar} 
-                    alt={branch.leader.name} 
-                    className="h-8 w-8 rounded-full mr-2"
-                  />
+        {/* Tab Navigation */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 overflow-x-auto">
+              {["overview", "resources", "products", "members"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Branch Information */}
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                <h2 className="text-lg font-medium text-gray-900 mb-4">
+                  Branch Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <p className="text-gray-900">{branch.leader.name}</p>
-                    <p className="text-sm text-gray-500">{branch.leader.email}</p>
+                    <p className="text-sm text-gray-500">Institution</p>
+                    <p className="text-gray-900 font-medium">
+                      {branch.institution}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Branch Leader</p>
+                    <div className="flex items-center mt-1">
+                      <img
+                        src={branch.leader?.avatar}
+                        alt={branch.leader?.name}
+                        className="h-10 w-10 rounded-full mr-3"
+                      />
+                      <div>
+                        <p className="text-gray-900 font-medium">
+                          {branch.leader?.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {branch.leader?.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-gray-500">Description</p>
+                    <p className="text-gray-900 mt-1">{branch.description}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Last Activity</p>
+                    <p className="text-gray-900 font-medium">
+                      {branch.lastActivity}
+                    </p>
                   </div>
                 </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Description</p>
-                <p className="text-gray-900">{branch.description}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Last Activity</p>
-                <p className="text-gray-900">{branch.lastActivity}</p>
-              </div>
-            </div>
-          </div>
 
-          {/* Recent Activity Section */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
-            <p className="text-gray-500">Activity feed would go here...</p>
-          </div>
+              {/* Recent Resources */}
+              {resources.length > 0 && (
+                <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-medium text-gray-900">
+                      Recent Resources
+                    </h2>
+                    <button className="text-blue-600 text-sm font-medium">
+                      View all
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {resources.slice(0, 3).map((resource) => (
+                      <div
+                        key={resource._id}
+                        className="flex items-center p-3 bg-gray-50 rounded-lg"
+                      >
+                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                          <FiFileText className="h-5 w-5" />
+                        </div>
+                        <div className="ml-4">
+                          <p className="font-medium text-gray-900">
+                            {resource.title}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {resource.type} •{" "}
+                            {new Date(resource.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "resources" && (
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">
+                Branch Resources
+              </h2>
+              {resources.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resources.map((resource) => (
+                    <div
+                      key={resource._id}
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start">
+                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600 mr-3">
+                          <FiFileText className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">
+                            {resource.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            {resource.type}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {new Date(resource.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FiBook className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No resources
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Get started by uploading a new resource.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "products" && (
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">
+                Branch Products
+              </h2>
+              {products.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {products.map((product) => (
+                    <div
+                      key={product._id}
+                      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+                        {product.images ? (
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="object-cover w-full h-40"
+                          />
+                        ) : (
+                          <div className="w-full h-40 flex items-center justify-center bg-gray-100">
+                            <FiShoppingBag className="h-10 w-10 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium text-gray-900 truncate">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {product.category}
+                        </p>
+                        <p className="text-lg font-semibold text-blue-600 mt-2">
+                          ₦{product.price.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FiShoppingBag className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No products
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    No products are available for this branch.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "members" && (
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-lg font-medium text-gray-900 mb-4">
+                Branch Members
+              </h2>
+              {members.length > 0 ? (
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-300">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th
+                          scope="col"
+                          className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                        >
+                          Member
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Role
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Joined
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white">
+                      {members.map((member) => (
+                        <tr key={member._id}>
+                          <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 flex-shrink-0">
+                                <img
+                                  className="h-10 w-10 rounded-full"
+                                  src={member.avatar}
+                                  alt={member.name}
+                                />
+                              </div>
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">
+                                  {member.name}
+                                </div>
+                                <div className="text-gray-500">
+                                  {member.email}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <span
+                              className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                                member.role === "admin"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {member.role}
+                            </span>
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            {new Date(member.joinedAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FiUsers className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No members
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    This branch doesn't have any members yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>

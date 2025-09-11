@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import Head from "next/head"
 import BranchSummary from "@/components/ui/BranchSummary"
 import SearchFilters from "@/components/ui/SearchFilter"
-import BranchCard from "@/components/ui/BranchCard"
-import CreateBranchModal from "@/components/CreatBranch"
+import BranchCard from "@/components/ui/ChapterCard"
+import CreateBranchModal from "@/components/CreateChapter"
 import ViewActions from "@/components/ViewAction"
 import api from "@/lib/axiosInstance"
 import {
@@ -32,7 +32,7 @@ const BranchOversight = () => {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await api.get("/branch?page=" + currentPage)
+        const response = await api.get("/chapters?page=" + currentPage)
         setBranches(response.data.branches || [])
         console.log(response.data.branches)
       } catch (error) {
@@ -42,6 +42,8 @@ const BranchOversight = () => {
 
     fetchBranches()
   }, [currentPage])
+
+  console.log(branches)
 
   const handleCreateBranch = (newBranch: { name: string; location: string; institution: string }) => {
     const branch = {

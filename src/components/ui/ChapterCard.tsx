@@ -149,7 +149,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
             )}
           </div>
           <Link
-            href={`/admin/branches/${normalizedBranch.id}`}
+            href={`/admin/chapters/${normalizedBranch.id}`}
             className="inline-flex items-center text-sm bg-white text-royal-600 font-medium px-4 py-1.5 rounded-full hover:bg-royal-50 transition-colors whitespace-nowrap"
           >
             View Details

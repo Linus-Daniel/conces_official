@@ -14,7 +14,10 @@ type User = {
   email: string;
   phone?: string;
   role: 'admin' | 'branch-admin' | 'user';
-  branch?: string;
+  branch: {
+    _id:string;
+    branchName:string 
+  };
   location?: string;
   status: 'active' | 'inactive';
   createdAt: string;
@@ -61,7 +64,7 @@ console.log(users)
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     const matchesStatus = selectedStatus === 'all' || user.status === selectedStatus;
-    const matchesBranch = selectedBranches.length === 0 || (user.branch && selectedBranches.includes(user.branch));
+    const matchesBranch = selectedBranches.length === 0 || (user.branch?.branchName && selectedBranches.includes(user.branch.branchName));
     const matchesDate = (!dateRange.start || user.createdAt >= dateRange.start) && 
                        (!dateRange.end || user.createdAt <= dateRange.end);
     return matchesSearch && matchesRole && matchesStatus && matchesBranch && matchesDate;
@@ -375,7 +378,7 @@ console.log(users)
                       </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.branch || '-'}
+                      {user.branch.branchName || '-'}
                     </td>
                    
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -603,7 +606,7 @@ console.log(users)
                     <div>
                       <h4 className="text-sm font-medium text-gray-500 mb-2">Branch</h4>
                       <p className="text-sm text-gray-900">
-                        {selectedUser.branch || 'N/A'}
+                        {selectedUser.branch.branchName}
                       </p>
                     </div>
 
