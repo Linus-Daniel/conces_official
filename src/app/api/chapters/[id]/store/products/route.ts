@@ -1,4 +1,3 @@
-// app/api/products/branch/[id]/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';

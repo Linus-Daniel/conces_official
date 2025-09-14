@@ -9,7 +9,7 @@ import { authOptions } from '@/lib/next-auth';
 
 const getBranchProducts = async (id:string)=>{
     try{
-      const response = await api.get(`/branch/${id}/store/products`)
+      const response = await api.get(`/chapters/${id}/store/products`)
       const productsData = response.data
       console.log(productsData); 
       return productsData

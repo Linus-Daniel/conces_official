@@ -1,7 +1,8 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Head from "next/head";
+import { useQuery } from "@tanstack/react-query";
 import {
   FiArrowLeft,
   FiUsers,
@@ -32,13 +33,6 @@ interface Branch {
   lastActivity: string;
 }
 
-interface Stats {
-  members: number;
-  events: number;
-  products: number;
-  contents: number;
-}
-
 interface Resource {
   _id: string;
   title: string;
@@ -63,84 +57,105 @@ interface Member {
   avatar: string;
 }
 
+// Custom hooks for data fetching
+const useBranchDetails = (id: string) => {
+  return useQuery({
+    queryKey: ["branch", id],
+    queryFn: async () => {
+      const response = await api.get(`/chapters/${id}`);
+      return response.data.branch as Branch;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+const useBranchResources = (id: string) => {
+  return useQuery({
+    queryKey: ["branch-resources", id],
+    queryFn: async () => {
+      const response = await api.get(`/chapters/${id}/resources`);
+      return response.data as Resource[];
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+const useBranchMembers = (id: string) => {
+  return useQuery({
+    queryKey: ["branch-members", id],
+    queryFn: async () => {
+      const response = await fetch(`/api/chapters/${id}/members`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch members");
+      }
+      const data = await response.json();
+      console.log(data)
+      return data.users as Member[];
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+const useBranchProducts = (id: string) => {
+  return useQuery({
+    queryKey: ["branch-products", id],
+    queryFn: async () => {
+      const response = await api.get(`/chapters/${id}/store/products/`);
+      return response.data as Product[];
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 const BranchDetail = () => {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-
-  const [branch, setBranch] = useState<Branch | null>(null);
-  const [stats, setStats] = useState<Stats>({
-    members: 0,
-    events: 0,
-    products: 0,
-    contents: 0,
-  });
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  // console.log(products)
-  // console.log(members);
-  // console.log(resources);
+  // React Query hooks
+  const {
+    data: branch,
+    isLoading: branchLoading,
+    error: branchError,
+  } = useBranchDetails(id);
 
+  const {
+    data: resources = [],
+    isLoading: resourcesLoading,
+    error: resourcesError,
+  } = useBranchResources(id);
 
-  useEffect(() => {
-    const fetchBranchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch branch details
-        const branchRes = await api.get(`/chapters/${id}`);
-        const branchData = branchRes.data;
-        setBranch(branchData.branch);
+  const {
+    data: members = [],
+    isLoading: membersLoading,
+    error: membersError,
+  } = useBranchMembers(id);
 
-        // Fetch resources
-        const resourcesRes = await api.get(`/chapters/${id}/resources`);
-     const resourcesData = resourcesRes.data;
+  const {
+    data: products = [],
+    isLoading: productsLoading,
+    error: productsError,
+  } = useBranchProducts(id);
 
-          setResources(resourcesData || []);
-          setStats((prev) => ({
-            ...prev,
-            contents: resourcesData.length || 0,
-          }));
-        
+  // Derived loading state
+  const isLoading =
+    branchLoading || resourcesLoading || membersLoading || productsLoading;
 
-        // Fetch members
-        const membersRes = await fetch(`/api/chapters/${id}/members`);
-        if (membersRes.ok) {
-          const membersData = await membersRes.json();
-          setMembers(membersData.members || []);
-          setStats((prev) => ({
-            ...prev,
-            members: membersData.members?.length || 0,
-          }));
-        }
+  // Derived error state
+  const error = branchError || resourcesError || membersError || productsError;
 
-        // Fetch products
-        const productsRes = await api.get(`/chapters/${id}/store/products/`);
-       
-          const productsData = productsRes.data;
-          console.log(productsData)
-          setProducts(productsData || []);
-          setStats((prev) => ({
-            ...prev,
-            products: productsData?.length || 0,
-          }));
-        
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setError("Failed to load branch data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchBranchData();
-    }
-  }, [id]);
+  // Stats calculation
+  const stats = {
+    members: members.length,
+    events: 0, // This seems to not be implemented in the original
+    products: products.length,
+    contents: resources.length,
+  };
 
   const statCards = [
     {
@@ -169,7 +184,8 @@ const BranchDetail = () => {
     },
   ];
 
-  if (loading) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -177,6 +193,7 @@ const BranchDetail = () => {
     );
   }
 
+  // Error state
   if (error || !branch) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -184,7 +201,9 @@ const BranchDetail = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-2">
             Error Loading Branch
           </h2>
-          <p className="text-gray-600 mb-4">{error || "Branch not found"}</p>
+          <p className="text-gray-600 mb-4">
+            {error instanceof Error ? error.message : "Branch not found"}
+          </p>
           <button
             onClick={() => router.back()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -335,7 +354,10 @@ const BranchDetail = () => {
                     <h2 className="text-lg font-medium text-gray-900">
                       Recent Resources
                     </h2>
-                    <button className="text-blue-600 text-sm font-medium">
+                    <button
+                      onClick={() => setActiveTab("resources")}
+                      className="text-blue-600 text-sm font-medium hover:text-blue-800"
+                    >
                       View all
                     </button>
                   </div>
@@ -367,9 +389,14 @@ const BranchDetail = () => {
 
           {activeTab === "resources" && (
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Branch Resources
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-900">
+                  Branch Resources
+                </h2>
+                {resourcesLoading && (
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+                )}
+              </div>
               {resources.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {resources.map((resource) => (
@@ -412,9 +439,14 @@ const BranchDetail = () => {
 
           {activeTab === "products" && (
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Branch Products
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-900">
+                  Branch Products
+                </h2>
+                {productsLoading && (
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+                )}
+              </div>
               {products.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {products.map((product) => (
@@ -423,7 +455,7 @@ const BranchDetail = () => {
                       className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                     >
                       <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                        {product.images ? (
+                        {product.images && product.images.length > 0 ? (
                           <img
                             src={product.images[0]}
                             alt={product.name}
@@ -465,9 +497,14 @@ const BranchDetail = () => {
 
           {activeTab === "members" && (
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Branch Members
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-900">
+                  Branch Members
+                </h2>
+                {membersLoading && (
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+                )}
+              </div>
               {members.length > 0 ? (
                 <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
                   <table className="min-w-full divide-y divide-gray-300">

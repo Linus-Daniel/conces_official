@@ -20,6 +20,8 @@ import {
 } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { IoLibrarySharp } from "react-icons/io5";
+import { GiBrain } from "react-icons/gi";
+import { LucideBrainCircuit } from "lucide-react";
 
 type AdminSidebarProps = {
   sidebarOpen: boolean;
@@ -41,6 +43,16 @@ const menuItems = [
       { link: "/admin/store/products", label: "Products" },
       { link: "/admin/store/categories", label: "Categories" },
       { link: "/admin/store/orders", label: "Orders" },
+    ],
+  },
+  {
+    label: "Talent Hub",
+    icon:GiBrain,
+    subItems: [
+      { link: "/admin/hub/overview", label: "Dashboard" },
+
+      { link: "/admin/hub/users", label: "Talent " },
+      { link: "/admin/hub/skills", label: "Skills" },
     ],
   },
   { link: "/admin/chapters", label: "Chapters", icon: FaMapMarkerAlt },

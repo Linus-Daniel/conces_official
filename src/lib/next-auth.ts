@@ -1,3 +1,5 @@
+// Simple approach: Use NextAuth session directly
+// admin/src/lib/auth.ts (Updated - No JWT library needed)
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyPassword } from "@/lib/hash";
@@ -26,6 +28,7 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user._id.toString(),
           name: user.fullName,
+          email: user.email, // Important: Include email
           institution: user.institution,
           phone: user.phone,
           role: user.role,
@@ -39,6 +42,17 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        // Create a simple custom token using user data
+        const customToken = Buffer.from(
+          JSON.stringify({
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+            timestamp: Date.now(),
+          })
+        ).toString("base64");
+
+        token.accessToken = customToken;
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
@@ -50,8 +64,10 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
+        session.accessToken = token.accessToken as string;
         session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
@@ -64,6 +80,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+
   pages: {
     signIn: "/auth",
   },
@@ -75,6 +92,5 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Handler exports for route.ts file
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

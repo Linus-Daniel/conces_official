@@ -21,7 +21,7 @@ const page = async () => {
       const cookieStore = await cookies();
       const cookieHeader = cookieStore.toString(); // Convert cookies to header string
 
-      const response = await api.get(`/branch/${branchId}`, {
+      const response = await api.get(`/chapters/${branchId}`, {
         headers: {
           Cookie: cookieHeader,
         },

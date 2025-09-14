@@ -1,4 +1,3 @@
-// app/(dashboard)/branch/store/orders/page.tsx
 import Orders from "@/components/BranchOrder";
 import api from "@/lib/axiosInstance";
 import { getServerSession } from "next-auth";
@@ -11,7 +10,7 @@ const OrdersPage = async () => {
   let orders = [];
 
   try {
-    const response = await api.get(`/branch/${branchId}/store/orders`, {
+    const response = await api.get(`/chapters/${branchId}/store/orders`, {
       headers: {
         Cookie: "", // if needed depending on how you're passing session
       },

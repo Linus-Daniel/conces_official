@@ -94,7 +94,7 @@ function ResourcesComponent({
   const getUploadPath = useCallback((role: string) => {
     const paths: Record<string, string> = {
       admin: "/admin/resources/new",
-      "branch-admin": "/branch/resources/new",
+      "branch-admin": "/chapters/resources/new",
       alumni: "/alumni/resources/new",
     };
     return paths[role.toLowerCase()] || "/resources";

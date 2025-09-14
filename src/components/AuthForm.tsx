@@ -337,9 +337,6 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
       newErrors.terms = "You must agree to the terms and conditions";
     }
 
-    if (!formData.captcha) {
-      newErrors.captcha = "Please verify you're not a robot";
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -665,9 +662,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                 <h2 className="text-2xl font-bold text-conces-blue">
                   Create Your Account
                 </h2>
-                {
-                  branches.map((_,index)=>(<p key={index}>{_.branchName}</p>))
-                }
+               
                 <p className="text-royal-500 mt-2">
                   Join our community and access role-specific features
                 </p>
@@ -1019,8 +1014,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                   )}
                 </div>
 
-                {/* Captcha */}
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <div className="bg-gray-100 p-4 rounded-md flex items-center justify-center">
                     <div className="w-full max-w-xs">
                       <p className="text-center text-sm text-gray-800 mb-2">
@@ -1055,7 +1049,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                       )}
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 <div>
                   <button

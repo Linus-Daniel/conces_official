@@ -31,8 +31,8 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
       if (!user?.branch) return;
 
       try {
-        const response = await api.get(`/branch/${user.branch}`);
-        const branchusers = await api.get(`/branch/${user.branch}/members`);
+        const response = await api.get(`/chapters/${user.branch}`);
+        const branchusers = await api.get(`/chapters/${user.branch}/members`);
         console.log(branchusers.data);
         if (isMounted) {
           setBranch(response.data.branch); // Assumes response shape: { branch: {...} }

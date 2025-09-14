@@ -1,14 +1,14 @@
-// app/api/branch/[id]/members/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-
+import Branch from "@/models/Chapter"
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const branch = await Branch.find()
     await dbConnect();
     const { id: branchId } = await params;
     console.log(branchId);

@@ -13,6 +13,7 @@ declare module 'next-auth' {
       avatar:string
 
     };
+    accessToken:string
   }
 
   interface User {

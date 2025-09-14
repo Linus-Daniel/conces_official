@@ -4,7 +4,7 @@ import React, { Suspense } from "react";
 
 async function getBranches(){
   try{
-    const response = await  api.get("/branch");
+    const response = await  api.get("/chapters");
     console.log("Branches fetched successfully:", response.data.branches);
     return response.data.branches;
   }

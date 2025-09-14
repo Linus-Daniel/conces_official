@@ -6,7 +6,7 @@ import React from 'react'
 
 const getBranchResource = async (id:string)=>{
     try{
-        const response = await api.get(`/branch/${id}/resources/${id}`);
+        const response = await api.get(`/chapters/${id}/resources/`);
         const responseData = response.data
         return responseData
 

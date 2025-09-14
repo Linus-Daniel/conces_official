@@ -7,7 +7,7 @@ import React from "react";
 const getUsers = async (id: string) => {
   try {
     console.log(id);
-    const response = await api.get(`/branch/${id}/members/`);
+    const response = await api.get(`/chapters/${id}/members/`);
     return response.data.users;
   } catch (error) {
     console.log(error);
