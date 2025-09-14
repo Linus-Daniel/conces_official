@@ -100,12 +100,12 @@ const EmailVerificationModal = ({
             )}
           </button>
 
-          <button
+          {/* <button
             onClick={onClose}
             className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
           >
             I&apos;ll Check My Email
-          </button>
+          </button> */}
         </div>
 
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
@@ -1066,7 +1066,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                       "Create Account"
                     )}
                   </button>
-                  <p className="mt-4 text-center text-sm text-royal-600">
+                  {/* <p className="mt-4 text-center text-sm text-royal-600">
                     Already have an account?{" "}
                     <span
                       className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer"
@@ -1074,7 +1074,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                     >
                       Log in
                     </span>
-                  </p>
+                  </p> */}
                 </div>
               </form>
             </div>
@@ -1255,7 +1255,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
       <footer className="bg-white border-t border-gray-200 py-6 mt-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-sm text-royal-500">
-            © 2023 CONCES. All rights reserved.
+            © 2025 CONCES. All rights reserved.
           </p>
           <div className="mt-2 space-x-4">
             <span className="text-gold-600 hover:text-gold-700 cursor-pointer">

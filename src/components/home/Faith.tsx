@@ -1,8 +1,21 @@
 "use client";
-import React from "react";
-import { Book, Heart, Cross, Star } from "lucide-react";
+import React, { useState } from "react";
+import { Book, Heart, Cross, Star, ChevronDown, ChevronUp } from "lucide-react";
+
+interface ExpandedState {
+  [key: number]: boolean;
+}
 
 export default function ApostolicCreed() {
+  const [expandedItems, setExpandedItems] = useState<ExpandedState>({});
+
+  const toggleExpanded = (index: number): void => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   const creedStatements = [
     {
       title: "The Holy Scriptures",
@@ -100,30 +113,77 @@ export default function ApostolicCreed() {
         </div>
 
         {/* Creed Statements */}
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-3">
           {creedStatements.map((item, index) => (
             <div
               key={index}
-              className="bg-blue-800/30 backdrop-blur-sm border border-yellow-400/20 rounded-xl p-6 transition-all duration-300 hover:border-yellow-400/40"
+              className="bg-blue-800/30 backdrop-blur-sm border border-yellow-400/20 rounded-xl transition-all duration-300 hover:border-yellow-400/40"
             >
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center text-blue-900">
-                  {item.icon}
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
+              {/* Header - Always visible */}
+              <button
+                onClick={() => toggleExpanded(index)}
+                className="w-full p-6 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-yellow-400/50 rounded-xl"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center text-blue-900">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-white text-left">
                     {item.title}
                   </h3>
-                  <p className="text-blue-100 leading-relaxed text-base sm:text-lg mb-2">
-                    {item.statement}
-                  </p>
-                  <p className="text-yellow-300/80 text-sm italic">
-                    {item.reference}
-                  </p>
+                </div>
+                <div className="flex-shrink-0 ml-4">
+                  {expandedItems[index] ? (
+                    <ChevronUp className="w-5 h-5 text-yellow-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-yellow-400" />
+                  )}
+                </div>
+              </button>
+
+              {/* Content - Expandable */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  expandedItems[index]
+                    ? "max-h-96 opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="px-6 pb-6">
+                  <div className="pl-14">
+                    <p className="text-blue-100 leading-relaxed text-base sm:text-lg mb-3">
+                      {item.statement}
+                    </p>
+                    <p className="text-yellow-300/80 text-sm italic">
+                      {item.reference}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Expand/Collapse All Buttons */}
+        <div className="mt-8 max-w-4xl mx-auto flex justify-center gap-4">
+          <button
+            onClick={() => {
+              const newState: ExpandedState = {};
+              creedStatements.forEach((_, index) => {
+                newState[index] = true;
+              });
+              setExpandedItems(newState);
+            }}
+            className="px-4 py-2 bg-yellow-400/20 border border-yellow-400/40 rounded-lg text-yellow-300 text-sm hover:bg-yellow-400/30 transition-colors duration-200"
+          >
+            Expand All
+          </button>
+          <button
+            onClick={() => setExpandedItems({})}
+            className="px-4 py-2 bg-blue-800/50 border border-blue-600/40 rounded-lg text-blue-200 text-sm hover:bg-blue-800/70 transition-colors duration-200"
+          >
+            Collapse All
+          </button>
         </div>
 
         {/* Conclusion */}
