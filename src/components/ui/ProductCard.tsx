@@ -84,12 +84,14 @@ export default function ProductCard({ product }: { product: IProduct }) {
         <div className="flex items-center justify-between pt-2">
           <div className="space-y-1">
             <span className="font-bold text-lg text-royal-DEFAULT">
-              ${product.price.toFixed(2)}
+              ₦{product.price.toFixed(2)}
             </span>
           </div>
 
           <button
-            onClick={()=>{handleAddToCart()}}
+            onClick={() => {
+              handleAddToCart();
+            }}
             className="p-2 flex items-center gap-1  rounded-full bg-royal-DEFAULT  text-white hover:bg-royal-detext-royal-DEFAULT-dark transition-colors"
             aria-label="Add to cart"
             disabled={product.stock === 0}
