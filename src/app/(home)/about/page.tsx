@@ -6,7 +6,7 @@ export default function AboutPage() {
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-conces-blue mb-6">About CONCES</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Connecting Christian engineering students across Nigeria since 1997
+          Connecting Christian Engineering and Technology Students across Nigeria since 1997
         </p>
       </div>
 

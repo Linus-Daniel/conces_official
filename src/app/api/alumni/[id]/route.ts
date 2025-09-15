@@ -7,20 +7,20 @@ import { authOptions } from "@/lib/next-auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params:  Promise< { id: string }> }
 ) {
   try {
     await dbConnect();
-
+const{id} = await params
     const session = await getServerSession(authOptions);
     if (
       !session ||
-      (session.user.role !== "admin" && session.user.id !== params.id)
+      (session.user.role !== "admin" && session.user.id !==id)
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const alumni = await AlumniProfile.findById(params.id).populate(
+    const alumni = await AlumniProfile.findById(id).populate(
       "userId",
       "name email"
     );
@@ -41,21 +41,23 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
 
+    const {id} = await params
+
     const session = await getServerSession(authOptions);
     if (
       !session ||
-      (session.user.role !== "admin" && session.user.id !== params.id)
+      (session.user.role !== "admin" && session.user.id !== id)
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const alumni = await AlumniProfile.findByIdAndUpdate(params.id, body, {
+    const alumni = await AlumniProfile.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     }).populate("userId", "name email");
@@ -76,17 +78,19 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
+
+    const {id} = await params
 
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const alumni = await AlumniProfile.findByIdAndDelete(params.id);
+    const alumni = await AlumniProfile.findByIdAndDelete(id);
 
     if (!alumni) {
       return NextResponse.json({ error: "Alumni not found" }, { status: 404 });
