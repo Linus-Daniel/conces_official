@@ -91,6 +91,9 @@ function ResourcesComponent({
     [resources]
   );
 
+
+  console.log(resources,"Resources From server componnents")
+
   const getUploadPath = useCallback((role: string) => {
     const paths: Record<string, string> = {
       admin: "/admin/resources/new",
@@ -365,6 +368,8 @@ function ResourcesComponent({
     return AccountModeView;
   }
 
+
+  console.log(filteredResources,"Filtered Resources")
   // Standard mode UI
   return (
     <div>
@@ -522,8 +527,8 @@ function ResourcesComponent({
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {academicResources.map((item, index) => (
-              <ResourceCard resource={item} key={item._id} />
+            {filteredResources.map((item, index) => (
+              <ResourceCard resource={item} key={index} />
             ))}
           </div>
         </section>

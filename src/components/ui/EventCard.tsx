@@ -54,7 +54,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
               {event.category}
             </span>
             <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
-              {event.branch || "national"}
+              {event.branch.name}
             </span>
           </div>
           

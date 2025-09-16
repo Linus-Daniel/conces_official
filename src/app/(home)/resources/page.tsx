@@ -18,6 +18,8 @@ async function page() {
   const resources = await getResources()
   const session = await getServerSession(authOptions)
   const userRole  = session?.user.role as string
+
+  console.log(resources,"Resources")
   
   return (
     <div>

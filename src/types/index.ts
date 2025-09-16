@@ -51,7 +51,10 @@ export interface IEvent {
   id: string;
   title: string;
   category: 'spiritual' | 'academic' | 'career' | 'social' | string;
-  branch: string;
+  branch: {
+    _id: string;
+    name: string;
+  };
   date: string;
   time: string;
   location: string;

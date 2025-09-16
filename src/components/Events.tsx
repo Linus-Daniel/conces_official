@@ -12,6 +12,7 @@ import {
   FaTags,
 } from "react-icons/fa";
 import api from "@/lib/axiosInstance";
+import { fi } from "zod/dist/types/v4/locales";
 
 interface EventsComponentProps {
   branch: string; // User's branch to filter events initially
@@ -69,7 +70,7 @@ const EventsComponent = ({
       if (activeTab === "past" && eventDate >= today) return false;
 
       // Filter by selected branch
-      if (selectedBranch && event.branch !== selectedBranch) return false;
+      if (selectedBranch && event.branch.name !== selectedBranch) return false;
 
       // Filter by selected category
       if (selectedCategory && event.category !== selectedCategory) return false;
@@ -96,6 +97,7 @@ const EventsComponent = ({
     );
   }
 
+  console.log(filteredEvents);
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -188,9 +190,9 @@ const EventsComponent = ({
                     className="pl-10 pr-8 py-2 rounded-lg border-royal-200 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none appearance-none"
                   >
                     <option value="">All Branches</option>
-                    {branches.map((branch) => (
-                      <option key={branch} value={branch}>
-                        {branch}
+                    {branches.map((branch,index) => (
+                      <option key={index} value={branch.name as string}>
+                        {branch.name}
                       </option>
                     ))}
                   </select>
@@ -242,9 +244,9 @@ const EventsComponent = ({
                       className="w-full rounded-lg border-royal-200 py-2 px-3 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none"
                     >
                       <option value="">All Branches</option>
-                      {branches.map((branch) => (
-                        <option key={branch} value={branch}>
-                          {branch}
+                      {branches.map((branch,index) => (
+                        <option key={index} value={branch.name}>
+                          {branch.name}
                         </option>
                       ))}
                     </select>
@@ -306,8 +308,8 @@ const EventsComponent = ({
         {/* Event List */}
         {filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
+            {filteredEvents.map((event,index) => (
+              <EventCard key={index} event={event} />
             ))}
           </div>
         ) : (

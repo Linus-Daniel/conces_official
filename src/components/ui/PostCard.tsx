@@ -1,5 +1,5 @@
 import { IPost } from "@/models/Post";
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Heart,
   MessageCircle,
@@ -7,32 +7,15 @@ import {
   MoreHorizontal,
   Eye,
   Clock,
-  Users,
   Megaphone,
   FolderOpen,
   MessageSquare,
+  Church,
 } from "lucide-react";
 import CommentsSection from "./CommentSections";
 
-export type Post = {
-  _id: string;
-  title: string;
-  content: string;
-  author: {
-    name: string;
-    avatar: string;
-    role: string;
-  };
-  date: string;
-  type: "discussion" | "project" | "announcement";
-  likes: number;
-  comments: number;
-  images?: string[];
-  prayed?: number;
-};
-
 type PostCardProps = {
-  post: Post;
+  post: IPost;
   featured?: boolean;
 };
 
@@ -42,21 +25,19 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.comments);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
-  };
 
-  const handleCommentClick = () => {
-    setShowComments(!showComments);
-  };
-
-  const typeConfig = {
+  const typeConfig = useMemo(() => ({
     discussion: {
       bg: "bg-blue-50",
       text: "text-blue-700",
       icon: MessageSquare,
       color: "#1a3a8f",
+    },
+    prayer: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      icon: Church,
+      color: "#9333ea",
     },
     project: {
       bg: "bg-green-50",
@@ -70,12 +51,14 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
       icon: Megaphone,
       color: "#1a3a8f",
     },
-  };
+  }), []);
 
-  const TypeIcon = typeConfig[post.type].icon;
+  const currentTypeConfig = typeConfig[post.type];
+  const TypeIcon = currentTypeConfig?.icon;
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+
+  const formattedDate = useMemo(() => {
+    const date = new Date(post.date);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
@@ -84,7 +67,20 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffHours < 168) return `${Math.floor(diffHours / 24)}d ago`;
     return date.toLocaleDateString();
-  };
+  }, [post.date]);
+
+  const handleLike = useCallback(() => {
+    setIsLiked(!isLiked);
+    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+  }, [isLiked, likeCount]);
+
+  const handleCommentClick = useCallback(() => {
+    setShowComments(!showComments);
+  }, [showComments]);
+
+  const handleCommentAdded = useCallback(() => {
+    setCommentsCount((prev) => prev + 1);
+  }, []);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 mb-6">
@@ -117,7 +113,7 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
               </div>
               <div className="flex items-center space-x-2 text-gray-500 text-sm">
                 <Clock className="w-3 h-3" />
-                <span>{formatDate(post.date)}</span>
+                <span>{formattedDate}</span>
               </div>
             </div>
           </div>
@@ -125,9 +121,9 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
           <div className="flex items-center space-x-2">
             <div
               className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium ${
-                post.type === "announcement"
-                  ? typeConfig[post.type].bg + " " + typeConfig[post.type].text
-                  : typeConfig[post.type].bg + " " + typeConfig[post.type].text
+                currentTypeConfig?.bg
+              } ${
+                currentTypeConfig?.text
               }`}
             >
               <TypeIcon className="w-4 h-4" />
@@ -232,7 +228,7 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
             <CommentsSection
               postId={post._id as string}
               initialCommentsCount={commentsCount}
-              onCommentAdded={() => setCommentsCount((prev) => prev + 1)}
+              onCommentAdded={handleCommentAdded}
             />
           </div>
         )}

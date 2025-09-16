@@ -4,28 +4,31 @@ import dbConnect from "@/lib/dbConnect";
 import { Types } from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
+import Branch from "@/models/Chapter";
 
 export async function GET(req:NextRequest) {
 
   const session = await getServerSession(authOptions)
   const user =  session?.user
 console.log(user)  
-  try {
 
-    await dbConnect();
-  } catch (error) {
-    console.error("Database connection error:", error);
-    return NextResponse.json(
-      { error: "Database connection failed" },
-      { status: 500 }
-    );
-  }
+try {
+  const B =  await Branch.find()
+  
+  await dbConnect();
+} catch (error) {
+  console.error("Database connection error:", error);
+  return NextResponse.json(
+    { error: "Database connection failed" },
+    { status: 500 }
+  );
+}
 
-  try {
-    if (user?.role =="admin"){
+try {
+  if (user?.role =="admin"){
 
       console.log("Admin user detected, fetching all events");
-      const events = await Event.find().sort({ date: 1 });
+      const events = await Event.find().sort({ date: 1 }).populate("branch","name");
       return NextResponse.json(events);
     }
     // Only return approved events for public view
