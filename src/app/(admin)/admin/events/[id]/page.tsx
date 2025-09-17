@@ -16,6 +16,7 @@ export default function EditEventPage() {
   const id = params.id as string;
   const { data: session } = useSession();
 
+  
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -32,42 +33,42 @@ export default function EditEventPage() {
         setIsLoading(false);
       }
     };
-
+    
     fetchEvent();
   }, [id]);
-
+  
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
-
+    
     try {
       // Handle image upload if a new file was selected
       const imageFile = formData.get("file") as File;
       let imageUrl = event.image;
       let oldPublicId = null;
-
+      
       if (imageFile && imageFile.size > 0) {
         // Get old public ID if exists
         if (event.image) {
           oldPublicId = extractPublicId(event.image);
         }
-
+        
         const uploadFormData = new FormData();
         uploadFormData.append("file", imageFile);
         uploadFormData.append("type", "events");
-
+        
         const uploadResponse = await fetch("/api/upload", {
           method: "POST",
           body: uploadFormData,
         });
-
+        
         if (!uploadResponse.ok) {
           throw new Error("Image upload failed");
         }
-
+        
         const { secure_url } = await uploadResponse.json();
         imageUrl = secure_url;
       }
-
+      
       // Prepare event data
       const eventData = {
         title: formData.get("title"),
@@ -85,7 +86,7 @@ export default function EditEventPage() {
         contactPhone: formData.get("contactPhone"),
         requirements: formData.get("requirements"),
       };
-
+      
       // Update event
       const response = await fetch(`/api/events/${params.id}`, {
         method: "PUT",
@@ -94,7 +95,7 @@ export default function EditEventPage() {
         },
         body: JSON.stringify(eventData),
       });
-
+      
       if (response.ok && oldPublicId) {
         // Delete old image after successful update
         await fetch("/api/delete-image", {
@@ -116,7 +117,7 @@ export default function EditEventPage() {
       setIsSubmitting(false);
     }
   };
-
+  
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -124,6 +125,7 @@ export default function EditEventPage() {
       </div>
     );
   }
+  console.log(event,"current event")
 
   if (!event) {
     return (

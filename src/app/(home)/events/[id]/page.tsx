@@ -16,11 +16,13 @@ import {
   FaUsers,
   FaVideo,
   FaWhatsapp,
+  FaPhone,
 } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { IEvent } from "@/types";
 import api from "@/lib/axiosInstance";
 import Image from "next/image";
+import { FaInfoCircle } from "react-icons/fa";
 
 const EventPage = () => {
   const router = useRouter();
@@ -145,27 +147,43 @@ const EventPage = () => {
                       event.category.slice(1)}
                   </span>
                   <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
-                    {event.chapter
-                      ? event.chapter.name.charAt(0).toUpperCase() +
-                        event.chapter._id.slice(1)
+                    {event?.chapter
+                      ? event?.chapter?.name.charAt(0).toUpperCase() +
+                        event.chapter.name.slice(1)
                       : "National"}{" "}
-                    Chapter
                   </span>
+                  {/* Registration Status Badge */}
+                  {event.hasRegistration ? (
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                      Registration Required
+                    </span>
+                  ) : (
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                      Open Event
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                   {event.title}
                 </h1>
               </div>
               <div className="mt-3 md:mt-0">
-                <a
-                  href={event.registrationLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gold-500 hover:bg-gold-600 focus:outline-none"
-                >
-                  <FaCalendarCheck className="mr-2" />
-                  Register Now
-                </a>
+                {event.hasRegistration ? (
+                  <a
+                    href={event.registrationLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gold-500 hover:bg-gold-600 focus:outline-none"
+                  >
+                    <FaCalendarCheck className="mr-2" />
+                    Register Now
+                  </a>
+                ) : (
+                  <button className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none">
+                    <FaInfoCircle className="mr-2" />
+                    View Details
+                  </button>
+                )}
               </div>
             </div>
 
@@ -236,40 +254,75 @@ const EventPage = () => {
               </div>
 
               <div>
-                <div className="flex items-start mb-3 md:mb-4">
-                  <div className="flex-shrink-0 pt-1">
-                    <FaUsers className="text-royal-600" />
+                {event.hasRegistration && (
+                  <div className="flex items-start mb-3 md:mb-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <FaUsers className="text-royal-600" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Attendees
+                      </h3>
+                      <p className="text-sm text-gray-900 mt-1">
+                        {event.rsvps} people registered
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-500">
-                      Attendees
-                    </h3>
-                    <p className="text-sm text-gray-900 mt-1">
-                      {event.rsvps} people registered
-                    </p>
-                  </div>
-                </div>
+                )}
 
-                <div className="flex items-start mb-3 md:mb-4">
-                  <div className="flex-shrink-0 pt-1">
-                    <FaEnvelope className="text-royal-600" />
+                {/* Contact Information - Only show if registration is required */}
+                {event.hasRegistration && event.contactEmail && (
+                  <div className="flex items-start mb-3 md:mb-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <FaEnvelope className="text-royal-600" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Contact
+                      </h3>
+                      <div className="text-sm text-gray-900 mt-1 space-y-1">
+                        <div>
+                          <a
+                            href={`mailto:${event.contactEmail}`}
+                            className="text-royal-600 hover:text-royal-800 inline-flex items-center"
+                          >
+                            <FaEnvelope className="mr-1 text-xs" />
+                            {event.contactEmail}
+                          </a>
+                        </div>
+                        {event.contactPhone && (
+                          <div>
+                            <a
+                              href={`tel:${event.contactPhone}`}
+                              className="text-royal-600 hover:text-royal-800 inline-flex items-center"
+                            >
+                              <FaPhone className="mr-1 text-xs" />
+                              {event.contactPhone}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-500">
-                      Contact
-                    </h3>
-                    <p className="text-sm text-gray-900 mt-1">
-                      <a
-                        href={`mailto:${event.contactEmail}`}
-                        className="text-royal-600 hover:text-royal-800"
-                      >
-                        {event.contactEmail}
-                      </a>
-                      <br />
-                      {event.contactPhone}
-                    </p>
+                )}
+
+                {/* Event Type Information */}
+                {!event.hasRegistration && (
+                  <div className="flex items-start mb-3 md:mb-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <FaInfoCircle className="text-blue-600" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Event Type
+                      </h3>
+                      <p className="text-sm text-gray-900 mt-1">
+                        This is an open event - no registration required! Just
+                        show up and join us.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="flex items-start">
                   <div className="flex-shrink-0 pt-1">
@@ -343,24 +396,46 @@ const EventPage = () => {
           </div>
         </div>
 
-        {/* Registration CTA */}
-        <div className="bg-royal-50 rounded-lg shadow-sm overflow-hidden mb-6 md:mb-8">
+        {/* Dynamic CTA based on registration requirement */}
+        <div
+          className={`${
+            event.hasRegistration ? "bg-royal-50" : "bg-blue-50"
+          } rounded-lg shadow-sm overflow-hidden mb-6 md:mb-8`}
+        >
           <div className="p-4 md:p-6 text-center">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Ready to join us?
-            </h2>
-            <p className="text-gray-600 mb-3 md:mb-4">
-              Register now to secure your spot at this event
-            </p>
-            <a
-              href={event.registrationLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 md:px-6 md:py-3 border border-transparent rounded-md shadow-sm text-sm md:text-base font-medium text-white bg-gold-500 hover:bg-gold-600 focus:outline-none"
-            >
-              <FaCalendar className="mr-2" />
-              Register for Event
-            </a>
+            {event.hasRegistration ? (
+              <>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                  Ready to join us?
+                </h2>
+                <p className="text-gray-600 mb-3 md:mb-4">
+                  Register now to secure your spot at this event
+                </p>
+                <a
+                  href={event.registrationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 md:px-6 md:py-3 border border-transparent rounded-md shadow-sm text-sm md:text-base font-medium text-white bg-gold-500 hover:bg-gold-600 focus:outline-none"
+                >
+                  <FaCalendar className="mr-2" />
+                  Register for Event
+                </a>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                  Join us at this open event!
+                </h2>
+                <p className="text-gray-600 mb-3 md:mb-4">
+                  No registration required - just show up and be part of the
+                  community
+                </p>
+                <div className="inline-flex items-center px-4 py-2 md:px-6 md:py-3 border border-transparent rounded-md shadow-sm text-sm md:text-base font-medium text-white bg-blue-500 hover:bg-blue-600">
+                  <FaUsers className="mr-2" />
+                  Open to All
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -390,9 +465,9 @@ const EventPage = () => {
                     May 5, 2025
                   </div>
                   <p className="text-sm text-gray-600">
-                    Looking forward to this event! I've attended the last three
-                    prayer summits and they've been transformative for my
-                    engineering practice.
+                    {event.hasRegistration
+                      ? "Looking forward to this event! I've registered and can't wait to join the community."
+                      : "Great to see an open event! I'll definitely be there - love that no registration is needed."}
                   </p>
                 </div>
               </div>

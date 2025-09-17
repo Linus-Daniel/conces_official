@@ -132,7 +132,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
               {/* {event.status.charAt(0).toUpperCase() + event.status.slice(1)} */}
             </span>
             <Link
-              href={`/events/${event.id}`}
+              href={`/events/${event._id}`}
               className="inline-flex text-white text-royal-white items-center px-3 py-1.5  border border-transparent rounded-md shadow-sm text-xs font-medium  bg-royal-600 hover:bg-royal-700 transition-colors"
             >
               View Details

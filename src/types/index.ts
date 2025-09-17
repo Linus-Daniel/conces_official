@@ -45,6 +45,7 @@ export interface Resource {
 
 export interface IEvent {
   id: string;
+  _id?: string;
   title: string;
   category: "spiritual" | "academic" | "career" | "social" | string;
   chapter: {
@@ -60,6 +61,7 @@ export interface IEvent {
   comments: number;
   featured: boolean;
   image: string;
+  hasRegistration: boolean; 
   registrationLink: string;
   contactEmail: string;
   contactPhone: string;

@@ -5,6 +5,7 @@ import dbConnect from "@/lib/dbConnect";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
 import mongoose from "mongoose";
+import Chapter from "@/models/Chapter";
 
 export async function GET(
   request: Request,
@@ -12,6 +13,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
+    const chapter = await Chapter.find()
 
     const { id } = await params;
     console.log("🔍 Fetching event with ID:", id);
@@ -29,7 +31,7 @@ export async function GET(
 
     // Method 2: Try with MongoDB _id field (if it's a valid ObjectId)
     if (!event && mongoose.Types.ObjectId.isValid(id)) {
-      event = await Event.findById(id);
+      event = await Event.findById(id).populate('chapter',' name');
       console.log("🔍 Method 2 (MongoDB _id):", event ? "FOUND" : "NOT FOUND");
     }
 

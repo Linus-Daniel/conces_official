@@ -31,7 +31,7 @@ import { useApprovalSystem } from "@/hooks/useApprove";
 
 
 export interface Event {
-  id: string;
+  _id: string;
   title: string;
   category: "spiritual" | "academic" | "career" | "social" | string;
   chapter: {
@@ -199,7 +199,7 @@ export default function EventTable({
           </TableHeader>
           <TableBody>
             {finalFilteredItems.map((event) => (
-              <TableRow key={event.id} className="hover:bg-royal-50/50">
+              <TableRow key={event._id} className="hover:bg-royal-50/50">
                 {approvalSystem.canApprove && (
                   <TableCell>
                     <ItemCheckbox item={event} />
@@ -282,7 +282,7 @@ export default function EventTable({
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/events/${event.id}`}>Edit</Link>
+                      <Link href={`/admin/events/${event._id}`}>Edit</Link>
                     </Button>
                     <Button variant="destructive" size="sm">
                       Delete

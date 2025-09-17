@@ -16,9 +16,10 @@ export interface IEvent extends Document {
   comments: number;
   featured: boolean;
   image: string;
-  registrationLink: string;
-  contactEmail: string;
-  contactPhone: string;
+  hasRegistration: boolean; // New field to indicate if registration is required
+  registrationLink?: string; // Now optional
+  contactEmail?: string; // Now optional
+  contactPhone?: string; // Now optional
   approved: boolean;
   requirements?: string;
   createdAt?: Date;
@@ -44,9 +45,25 @@ const EventSchema: Schema<IEvent> = new Schema(
     comments: { type: Number, default: 0 },
     featured: { type: Boolean, default: false },
     image: { type: String, required: true },
-    registrationLink: { type: String, required: true },
-    contactEmail: { type: String, required: true },
-    contactPhone: { type: String, required: true },
+    hasRegistration: { type: Boolean, default: false }, // New field
+    registrationLink: {
+      type: String,
+      required: function (this: IEvent) {
+        return this.hasRegistration;
+      },
+    }, // Conditionally required
+    contactEmail: {
+      type: String,
+      required: function (this: IEvent) {
+        return this.hasRegistration;
+      },
+    }, // Conditionally required
+    contactPhone: {
+      type: String,
+      required: function (this: IEvent) {
+        return this.hasRegistration;
+      },
+    }, // Conditionally required
     approved: { type: Boolean, default: false },
     requirements: { type: String },
   },
