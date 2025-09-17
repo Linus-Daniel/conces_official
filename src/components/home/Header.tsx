@@ -1,13 +1,14 @@
 "use client";
+
 import { Menu, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { User as UserInfo } from "next-auth";
 import useAuthStore from "@/zustand/authStore";
 import Image from "next/image";
-import { User as UserInfo } from "next-auth";
 
+// ------------------ Config ------------------
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
@@ -21,61 +22,63 @@ const navLinks = [
   { name: "Executives", href: "/executives" },
 ];
 
-function Header({ user }: { user: UserInfo | null }) {
+const authLinks = [
+  {
+    name: "Login",
+    href: "/auth?mode=login",
+    className:
+      "px-4 py-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white",
+  },
+  {
+    name: "Join Now",
+    href: "/auth?mode=signup",
+    className:
+      "px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-dark hover:bg-primary",
+  },
+];
+
+const getDashboardUrl = (role?: string) => {
+  const map: Record<string, string> = {
+    admin: "/admin/",
+    alumni: "/alumni/dashboard",
+    "chapter-admin": "/chapter",
+    student: "/user/",
+  };
+  return map[role ?? ""] || "/";
+};
+
+// ------------------ Header ------------------
+function Header({ user }: { user: (UserInfo & { role?: string }) | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
   const pathname = usePathname();
   const { logout } = useAuthStore();
-  const session = useSession();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
+  // Close mobile menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handler = (e: MouseEvent) => {
       if (
         mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
+        !mobileMenuRef.current.contains(e.target as Node)
       ) {
         setMobileMenuOpen(false);
       }
     };
-
-    if (mobileMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    if (mobileMenuOpen) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [mobileMenuOpen]);
 
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        openDropdown &&
-        !(event.target as Element).closest(".user-dropdown")
-      ) {
+    const handler = (e: MouseEvent) => {
+      if (openDropdown && !(e.target as Element).closest(".user-dropdown")) {
         setOpenDropdown(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [openDropdown]);
-
-  const getDashboardUrl = (role?: string) => {
-    switch (role) {
-      case "admin":
-        return "/admin/";
-      case "alumni":
-        return "/alumni/dashboard";
-      case "chapter-admin":
-        return "/chapter";
-      case "student":
-        return "/user/";
-      default:
-        return "/";
-    }
-  };
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -83,13 +86,8 @@ function Header({ user }: { user: UserInfo | null }) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <div className="h-14 p-1 w-14 bg-primary-dark rounded-full flex items-center justify-center">
-              <Image
-                src={"/images/logo.png"}
-                alt="logo image"
-                width={70}
-                height={70}
-              />
+            <div className="h-14 w-14 p-1 bg-primary-dark rounded-full flex items-center justify-center">
+              <Image src="/images/logo.png" alt="logo" width={70} height={70} />
             </div>
             <span className="ml-2 text-xl font-bold text-primary-dark">
               CONCES
@@ -98,9 +96,9 @@ function Header({ user }: { user: UserInfo | null }) {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center space-x-1">
-            {navLinks.map((link, index) => (
+            {navLinks.map((link) => (
               <Link
-                key={index}
+                key={link.href}
                 href={link.href}
                 className={`px-3 py-2 rounded-md text-sm font-medium ${
                   pathname === link.href
@@ -113,56 +111,49 @@ function Header({ user }: { user: UserInfo | null }) {
             ))}
           </nav>
 
-          {/* Desktop Auth Buttons or User Info */}
+          {/* Desktop Auth / User */}
           <div className="hidden lg:flex items-center space-x-3">
             {user ? (
-              <div className="flex items-center space-x-2 user-dropdown">
-                <div className="relative">
-                  <button
-                    onClick={() => setOpenDropdown(!openDropdown)}
-                    className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 hover:bg-gray-300"
-                  >
-                    <User className="text-gray-700" />
-                  </button>
-                  {openDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                      <div className="px-4 py-2 border-b">
-                        <p className="text-sm text-blue-500 font-medium">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
-                      </div>
-                      <Link
-                        href={getDashboardUrl(user.role)}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Profile
-                      </Link>
-                      <button
-                        onClick={logout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Logout
-                      </button>
+              <div className="relative user-dropdown">
+                <button
+                  onClick={() => setOpenDropdown(!openDropdown)}
+                  className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 hover:bg-gray-300"
+                >
+                  <User className="text-gray-700" />
+                </button>
+                {openDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                    <div className="px-4 py-2 border-b">
+                      <p className="text-sm text-blue-500 font-medium">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
-                  )}
-                </div>
+                    <Link
+                      href={getDashboardUrl(user.role)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
-              <>
+              authLinks.map((link) => (
                 <Link
-                  href="/auth?mode=login"
-                  className="px-4 py-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white"
+                  key={link.href}
+                  href={link.href}
+                  className={link.className}
                 >
-                  Login
+                  {link.name}
                 </Link>
-                <Link
-                  href="/auth?mode=signup"
-                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-dark hover:bg-primary"
-                >
-                  Join Now
-                </Link>
-              </>
+              ))
             )}
           </div>
 
@@ -177,7 +168,7 @@ function Header({ user }: { user: UserInfo | null }) {
           </div>
         </div>
 
-        {/* Mobile Menu - Slides from left */}
+        {/* Mobile Menu */}
         <div
           ref={mobileMenuRef}
           className={`lg:hidden fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform ${
@@ -207,16 +198,16 @@ function Header({ user }: { user: UserInfo | null }) {
             </div>
 
             <nav className="flex-1">
-              {navLinks.map((link, index) => (
+              {navLinks.map((link) => (
                 <Link
-                  key={index}
+                  key={link.href}
                   href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={`block px-4 py-3 rounded-md text-sm font-medium mb-1 ${
                     pathname === link.href
                       ? "bg-primary-light text-white"
                       : "text-gray-900 hover:bg-gray-100"
                   }`}
-                  onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.name}
                 </Link>
@@ -237,8 +228,8 @@ function Header({ user }: { user: UserInfo | null }) {
                   </div>
                   <Link
                     href={getDashboardUrl(user.role)}
-                    className="block w-full text-center px-4 py-2 mt-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white"
                     onClick={() => setMobileMenuOpen(false)}
+                    className="block w-full text-center px-4 py-2 mt-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white"
                   >
                     Profile
                   </Link>
@@ -253,31 +244,25 @@ function Header({ user }: { user: UserInfo | null }) {
                   </button>
                 </>
               ) : (
-                <>
+                authLinks.map((link) => (
                   <Link
-                    href="/auth?mode=login"
-                    className="block w-full text-center px-4 py-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white"
+                    key={link.href}
+                    href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
+                    className={`block w-full text-center mt-2 ${link.className}`}
                   >
-                    Login
+                    {link.name}
                   </Link>
-                  <Link
-                    href="/auth?mode=signup"
-                    className="block w-full text-center px-4 py-2 mt-2 rounded-md text-sm font-medium text-white bg-primary-dark hover:bg-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Join Now
-                  </Link>
-                </>
+                ))
               )}
             </div>
           </div>
         </div>
 
-        {/* Overlay when mobile menu is open */}
+        {/* Overlay */}
         {mobileMenuOpen && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-[1px] bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-bzlack/50 backdrop-blur-[1px] z-40 lg:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
         )}

@@ -28,8 +28,37 @@ import {
 } from "@/components/admin/ApprovalSystem";
 import { useApprovalSystem } from "@/hooks/useApprove";
 
-interface ApprovalableIEvent extends IEvent {
+
+
+export interface Event {
+  id: string;
+  title: string;
+  category: "spiritual" | "academic" | "career" | "social" | string;
+  chapter: {
+    _id: string;
+    name:string
+  };
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+  longDescription: string;
+  rsvps: number;
+  comments: number;
+  featured: boolean;
+  image: string;
+  registrationLink: string;
+  contactEmail: string;
+  contactPhone: string;
+  approved: boolean;
+  requirements?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface ApprovalableIEvent extends Event {
   _id: string;
+  name: string;
   approved: boolean;
 }
 
@@ -188,7 +217,9 @@ export default function EventTable({
                     </div>
                     <div>
                       <p className="font-medium line-clamp-1">{event.title}</p>
-                      <p className="text-sm text-gray-500">{event.chapter}</p>
+                      <p className="text-sm text-gray-500">
+                        {event?.chapter?.name}
+                      </p>
                     </div>
                   </div>
                 </TableCell>
