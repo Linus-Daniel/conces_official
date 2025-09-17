@@ -34,7 +34,7 @@ interface ApprovalableProduct {
   description?: string;
   price: number;
   images: string[];
-  branch: string;
+  chapter: string;
   category: string | Category;
   stock: number;
   featured?: boolean;
@@ -47,7 +47,7 @@ interface ProductTableProps {
   totalPages: number;
   search?: string;
   userRole: string;
-  branch: string;
+  chapter: string;
   categories: Category[];
 }
 
@@ -57,12 +57,14 @@ export function ProductTable({
   totalPages,
   search,
   userRole,
-  branch,
+  chapter,
   categories,
 }: ProductTableProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ApprovalableProduct | null>(null);
-  const [products, setProducts] = useState<ApprovalableProduct[]>(initialProducts);
+  const [editingProduct, setEditingProduct] =
+    useState<ApprovalableProduct | null>(null);
+  const [products, setProducts] =
+    useState<ApprovalableProduct[]>(initialProducts);
   const router = useRouter();
 
   // 🔥 ONE hook handles all approval logic
@@ -255,12 +257,12 @@ export function ProductTable({
       >
         <ProductForm
           userRole={userRole}
-          branch={branch}
+          chapter={chapter}
           categories={categories}
           initialData={editingProduct || undefined}
           onSuccess={handleCloseModal}
           url=""
-          branchId=""
+          chapterId=""
         />
       </Modal>
     </div>

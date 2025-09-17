@@ -1,15 +1,19 @@
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { FaPlus } from 'react-icons/fa';
+import { useSession } from "next-auth/react";
+import { FaPlus } from "react-icons/fa";
 
-export default function CreatePostButton({ onCreatePost }: { onCreatePost: () => void }) {
+export default function CreatePostButton({
+  onCreatePost,
+}: {
+  onCreatePost: () => void;
+}) {
   const { data: session, status } = useSession();
 
-  const allowedRoles = ['admin', 'branch-admin', 'alumni'];
+  const allowedRoles = ["admin", "chapter-admin", "alumni"];
   const userRole = session?.user?.role;
 
-  if (status === 'loading') return null;
+  if (status === "loading") return null;
 
   const isAuthorized = session && allowedRoles.includes(userRole as string);
 

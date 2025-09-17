@@ -5,10 +5,10 @@ export interface IUser extends Document {
   email: string;
   phone: string;
   institution: string;
-  role: "student" | "alumni" | "branch-admin" | "admin";
+  role: "student" | "alumni" | "chapter-admin" | "admin";
   password: string;
   avatar?: string;
-  branch?: string;
+  chapter?: string;
   verified: boolean;
   verificationToken?: string;
   verificationExpires?: Date;
@@ -26,12 +26,12 @@ const UserSchema = new Schema<IUser>(
     institution: { type: String },
     role: {
       type: String,
-      enum: ["student", "alumni", "branch-admin", "admin"],
+      enum: ["student", "alumni", "chapter-admin", "admin"],
       required: true,
     },
     password: { type: String, required: true },
     avatar: { type: String },
-    branch: { type: Schema.Types.ObjectId, ref: "Branch" },
+    chapter: { type: Schema.Types.ObjectId, ref: "Chapter" },
     location: { type: String },
     verified: { type: Boolean, default: false },
     verificationToken: { type: String },
@@ -43,7 +43,7 @@ const UserSchema = new Schema<IUser>(
 );
 
 UserSchema.index({ verificationToken: 1 });
-UserSchema.index({ email: 1, branch: 1 }, { unique: true });
+UserSchema.index({ email: 1, chapter: 1 }, { unique: true });
 
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string

@@ -74,9 +74,9 @@ export async function PUT(
       );
     }
 
-    // Branch admin can only update their own resource (except for approval)
+    // Chapter admin can only update their own resource (except for approval)
     if (
-      user.role === "branch-admin" &&
+      user.role === "chapter-admin" &&
       resource.createdBy &&
       resource.createdBy.toString() !== user.id &&
       body.approved === undefined
@@ -127,9 +127,9 @@ export async function DELETE(
       );
     }
 
-    // Branch admin can only delete their own resource
+    // Chapter admin can only delete their own resource
     if (
-      user.role === "branch-admin" &&
+      user.role === "chapter-admin" &&
       resource.createdBy &&
       resource.createdBy.toString() !== user.id
     ) {

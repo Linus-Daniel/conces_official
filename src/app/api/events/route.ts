@@ -4,31 +4,31 @@ import dbConnect from "@/lib/dbConnect";
 import { Types } from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
-import Branch from "@/models/Chapter";
+import Chapter from "@/models/Chapter";
 
-export async function GET(req:NextRequest) {
+export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+  console.log(user);
 
-  const session = await getServerSession(authOptions)
-  const user =  session?.user
-console.log(user)  
+  try {
+    const B = await Chapter.find();
 
-try {
-  const B =  await Branch.find()
-  
-  await dbConnect();
-} catch (error) {
-  console.error("Database connection error:", error);
-  return NextResponse.json(
-    { error: "Database connection failed" },
-    { status: 500 }
-  );
-}
+    await dbConnect();
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return NextResponse.json(
+      { error: "Database connection failed" },
+      { status: 500 }
+    );
+  }
 
-try {
-  if (user?.role =="admin"){
-
+  try {
+    if (user?.role == "admin") {
       console.log("Admin user detected, fetching all events");
-      const events = await Event.find().sort({ date: 1 }).populate("branch","name");
+      const events = await Event.find()
+        .sort({ date: 1 })
+        .populate("chapter", "name");
       return NextResponse.json(events);
     }
     // Only return approved events for public view
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
   const session = await getServerSession(authOptions);
 
-  if (!session || !["admin", "branch-admin"].includes(session.user.role)) {
+  if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       id: newId, // set the id explicitly
       ...body.eventData,
       approved, // Add approval field
-      branch: session.user.branch, // Set branch from user session
+      chapter: session.user.chapter, // Set chapter from user session
     });
 
     const savedEvent = await event.save();

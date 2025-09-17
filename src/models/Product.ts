@@ -1,25 +1,24 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IProduct extends Document {
   name: string;
   description: string;
   price: number;
   images: string[];
-  branch: string;
+  chapter: string;
   category: string;
   stock: number;
   featured: boolean;
-  approved:boolean;
+  approved: boolean;
   createdAt: Date;
   updatedAt: Date;
-
 }
 
 const ProductSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    branch: { type: String, required: true },
+    chapter: { type: String, required: true },
     price: { type: Number, required: true },
     images: { type: [String], required: true },
     approved: { type: Boolean, default: false },
@@ -30,4 +29,5 @@ const ProductSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+export default mongoose.models.Product ||
+  mongoose.model<IProduct>("Product", ProductSchema);

@@ -9,9 +9,9 @@ import api from "@/lib/axiosInstance";
 import useAuthStore from "@/zustand/authStore";
 import { useRouter } from "next/navigation";
 
-interface Branch {
+interface Chapter {
   _id: string;
-  branchName: string;
+  chapterName: string;
   location?: string;
   // Add other fields if needed
 }
@@ -19,37 +19,37 @@ interface Branch {
 export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { logout } = useAuthStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [branch, setBranch] = useState<Branch | null>(null);
+  const [chapter, setChapter] = useState<Chapter | null>(null);
   const { data: session } = useSession();
-  const router = useRouter()
+  const router = useRouter();
   const user = session?.user;
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchBranch = async () => {
-      if (!user?.branch) return;
+    const fetchChapter = async () => {
+      if (!user?.chapter) return;
 
       try {
-        const response = await api.get(`/chapters/${user.branch}`);
-        const branchusers = await api.get(`/chapters/${user.branch}/members`);
-        console.log(branchusers.data);
+        const response = await api.get(`/chapters/${user.chapter}`);
+        const chapterusers = await api.get(`/chapters/${user.chapter}/members`);
+        console.log(chapterusers.data);
         if (isMounted) {
-          setBranch(response.data.branch); // Assumes response shape: { branch: {...} }
+          setChapter(response.data.chapter); // Assumes response shape: { chapter: {...} }
         }
       } catch (error) {
-        console.error("Error fetching branch:", error);
+        console.error("Error fetching chapter:", error);
       }
     };
 
-    fetchBranch();
+    fetchChapter();
 
     return () => {
       isMounted = false;
     };
-  }, [user?.branch]);
+  }, [user?.chapter]);
 
-  console.log(branch);
+  console.log(chapter);
 
   return (
     <header className="bg-white shadow-sm p-4 flex items-center justify-between gap-4">
@@ -67,7 +67,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <Building className="text-white w-3.5 h-3.5" />
           </div>
           <h1 className="text-lg font-bold text-gray-800">
-            {branch?.branchName}
+            {chapter?.chapterName}
           </h1>
         </div>
       </div>
@@ -119,7 +119,7 @@ export default function Header({ onMenuClick }: { onMenuClick: () => void }) {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     onClick={() => {
                       logout();
-                    router.replace("/auth?mode=login")
+                      router.replace("/auth?mode=login");
                     }}
                   >
                     {item}

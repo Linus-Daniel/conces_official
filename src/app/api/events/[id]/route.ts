@@ -71,7 +71,7 @@ export async function GET(
 
     console.log("✅ Event found:", event.title);
     return NextResponse.json(event);
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("❌ Error fetching event:", error);
     return NextResponse.json(
       { message: "Error fetching event", error: error.message },
@@ -86,7 +86,7 @@ export async function PUT(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["admin", "branch-admin"].includes(session.user.role)) {
+  if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -123,10 +123,10 @@ export async function PUT(
 
     console.log("✅ Event found for update:", event.title);
 
-    // Check permissions for branch-admin
+    // Check permissions for chapter-admin
     if (
-      session.user.role === "branch-admin" &&
-      event.branch !== session.user.branch &&
+      session.user.role === "chapter-admin" &&
+      event.chapter !== session.user.chapter &&
       body.approved === undefined
     ) {
       return NextResponse.json(
@@ -151,7 +151,7 @@ export async function PUT(
 
     console.log("✅ Event updated successfully");
     return NextResponse.json(updatedEvent);
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("❌ PUT /events/[id] error:", error);
     return NextResponse.json(
       { message: "Error updating event", error: error.message },
@@ -166,7 +166,7 @@ export async function DELETE(
 ) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["admin", "branch-admin"].includes(session.user.role)) {
+  if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
@@ -192,10 +192,10 @@ export async function DELETE(
 
     console.log("✅ Event found for deletion:", event.title);
 
-    // Check permissions for branch-admin
+    // Check permissions for chapter-admin
     if (
-      session.user.role === "branch-admin" &&
-      event.branch !== session.user.branch
+      session.user.role === "chapter-admin" &&
+      event.chapter !== session.user.chapter
     ) {
       return NextResponse.json(
         { error: "Forbidden: Not your event" },
@@ -212,7 +212,7 @@ export async function DELETE(
 
     console.log("✅ Event deleted successfully");
     return NextResponse.json({ message: "Event deleted successfully" });
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("❌ DELETE /events/[id] error:", error);
     return NextResponse.json(
       { message: "Error deleting event", error: error.message },

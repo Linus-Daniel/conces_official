@@ -55,32 +55,32 @@ interface SidebarLink {
 export const sidebarLinks: SidebarLink[] = [
   {
     name: "Dashboard Overview",
-    href: "/branch",
+    href: "/chapter",
     icon: Gauge,
   },
   {
     name: "Manage Members",
-    href: "/branch/members",
+    href: "/chapter/members",
     icon: Users,
   },
   {
     name: "Events",
-    href: "/branch/events",
+    href: "/chapter/events",
     icon: Calendar,
   },
   {
     name: "Mentorship",
-    href: "/branch/mentorship",
+    href: "/chapter/mentorship",
     icon: User, // using FontAwesome faHandsHelping
   },
   {
     name: "Resources Hub",
-    href: "/branch/resources",
+    href: "/chapter/resources",
     icon: Folder,
   },
   {
     name: "Alumni",
-    href: "/branch/alumni",
+    href: "/chapter/alumni",
     icon: GraduationCap,
   },
   {
@@ -88,14 +88,14 @@ export const sidebarLinks: SidebarLink[] = [
     href: "",
     icon: ShoppingCart,
     dropdown: [
-      { name: "Products", href: "/branch/store/products", icon: Package },
-      { name: "Orders", href: "/branch/store/orders", icon: Receipt },
+      { name: "Products", href: "/chapter/store/products", icon: Package },
+      { name: "Orders", href: "/chapter/store/orders", icon: Receipt },
     ],
   },
 
   {
     name: "Settings & Profile",
-    href: "/branch/settings",
+    href: "/chapter/settings",
     icon: Cog,
   },
 ];
@@ -192,7 +192,6 @@ export const categories = [
     iconColor: "text-indigo-600",
   },
 ];
-
 
 export const executives = [
   {

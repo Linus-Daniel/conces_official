@@ -1,29 +1,34 @@
-"use client"
-import React, { useState, useEffect } from "react"
-import { FaSave, FaTrash } from "react-icons/fa"
-import { useRouter, useParams } from "next/navigation"
-import { Resource } from "@/types"
+"use client";
+import React, { useState, useEffect } from "react";
+import { FaSave, FaTrash } from "react-icons/fa";
+import { useRouter, useParams } from "next/navigation";
+import { Resource } from "@/types";
 
 export default function EditResource() {
-  const router = useRouter()
-  const params = useParams()
-  const id = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : ""
+  const router = useRouter();
+  const params = useParams();
+  const id =
+    typeof params?.id === "string"
+      ? params.id
+      : Array.isArray(params?.id)
+      ? params.id[0]
+      : "";
 
-  const [resource, setResource] = useState<Resource | null>(null)
-  const [tagInput, setTagInput] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [resource, setResource] = useState<Resource | null>(null);
+  const [tagInput, setTagInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
 
     // Simulate fetching resource
     const fetchResource = async () => {
       const mockResource: Resource = {
-        _id:"",
-        branch:"",
+        _id: "",
+        chapter: "",
         title: "Daily Devotional - June 15",
         type: "devotional",
-        thumbnail:"",
+        thumbnail: "",
         category: "Spiritual",
         description: "Daily spiritual guidance for June 15",
         content: "Lorem ipsum dolor sit amet...",
@@ -32,23 +37,27 @@ export default function EditResource() {
         views: 150,
         tags: ["devotion", "daily"],
         featured: true,
-        createdAt:""
-      }
-      setResource(mockResource)
-    }
+        createdAt: "",
+      };
+      setResource(mockResource);
+    };
 
-    fetchResource()
-  }, [id])
+    fetchResource();
+  }, [id]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const target = e.target;
     const name = target.name;
     const value = target.value;
     const isCheckbox = target.type === "checkbox";
-    const finalValue = isCheckbox ? (target as HTMLInputElement).checked : value;
-  
+    const finalValue = isCheckbox
+      ? (target as HTMLInputElement).checked
+      : value;
+
     setResource((prev) =>
       prev
         ? {
@@ -58,7 +67,7 @@ export default function EditResource() {
         : prev
     );
   };
-  
+
   const handleAddTag = () => {
     if (
       tagInput.trim() &&
@@ -70,16 +79,16 @@ export default function EditResource() {
         prev
           ? {
               ...prev,
-              tags: [...prev?.tags as string[], tagInput.trim()],
+              tags: [...(prev?.tags as string[]), tagInput.trim()],
             }
           : prev
       );
       setTagInput("");
     }
   };
-  
+
   const handleRemoveTag = (tag: string) => {
-    if (!resource) return
+    if (!resource) return;
     setResource((prev) =>
       prev
         ? {
@@ -87,53 +96,63 @@ export default function EditResource() {
             tags: prev?.tags?.filter((t) => t !== tag),
           }
         : prev
-    )
-  }
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!resource) return
-    setIsSubmitting(true)
+    e.preventDefault();
+    if (!resource) return;
+    setIsSubmitting(true);
     try {
       // Simulate API call
-      console.log("Updating resource:", resource)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      router.push("/resources")
+      console.log("Updating resource:", resource);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      router.push("/resources");
     } catch (error) {
-      console.error("Error updating resource:", error)
+      console.error("Error updating resource:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this resource?")) return
+    if (!confirm("Are you sure you want to delete this resource?")) return;
     try {
-      console.log("Deleting resource:", id)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      router.push("/resources")
+      console.log("Deleting resource:", id);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      router.push("/resources");
     } catch (error) {
-      console.error("Error deleting resource:", error)
+      console.error("Error deleting resource:", error);
     }
-  }
+  };
 
-  if (!resource) return <div className="container mx-auto px-4 py-8">Loading...</div>
+  if (!resource)
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-royal-DEFAULT">Edit Resource</h1>
         <div className="flex space-x-3">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">
+          <button
+            onClick={() => router.back()}
+            className="text-gray-500 hover:text-gray-700"
+          >
             Cancel
           </button>
-          <button onClick={handleDelete} className="text-red-500 hover:text-red-700 flex items-center">
+          <button
+            onClick={handleDelete}
+            className="text-red-500 hover:text-red-700 flex items-center"
+          >
             <FaTrash className="mr-1" /> Delete
           </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4"
+      >
         {/* Example fields */}
         <input
           type="text"
@@ -154,9 +173,16 @@ export default function EditResource() {
         {/* Tags */}
         <div className="flex flex-wrap gap-2">
           {resource.tags?.map((tag) => (
-            <span key={tag} className="bg-gray-200 px-3 py-1 rounded-full text-sm">
+            <span
+              key={tag}
+              className="bg-gray-200 px-3 py-1 rounded-full text-sm"
+            >
               {tag}
-              <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-2 text-red-500">
+              <button
+                type="button"
+                onClick={() => handleRemoveTag(tag)}
+                className="ml-2 text-red-500"
+              >
                 ×
               </button>
             </span>
@@ -170,7 +196,11 @@ export default function EditResource() {
             placeholder="Add tag"
             className="border p-2 rounded w-full"
           />
-          <button type="button" onClick={handleAddTag} className="px-4 py-2 bg-blue-500 text-white rounded">
+          <button
+            type="button"
+            onClick={handleAddTag}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
             Add Tag
           </button>
         </div>
@@ -196,5 +226,5 @@ export default function EditResource() {
         </div>
       </form>
     </div>
-  )
+  );
 }

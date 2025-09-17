@@ -1,22 +1,21 @@
-import { ProductTable } from '@/components/admin/ProductTable';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { getProducts } from '@/lib/actions/admin';
-import api from '@/lib/axiosInstance';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/next-auth';
+import { ProductTable } from "@/components/admin/ProductTable";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { getProducts } from "@/lib/actions/admin";
+import api from "@/lib/axiosInstance";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/next-auth";
 
-
-const getBranchProducts = async (id:string)=>{
-    try{
-      const response = await api.get(`/chapters/${id}/store/products`)
-      const productsData = response.data
-      console.log(productsData); 
-      return productsData
-    }catch(error){
-      console.log(error)
-    }
-}
+const getChapterProducts = async (id: string) => {
+  try {
+    const response = await api.get(`/chapters/${id}/store/products`);
+    const productsData = response.data;
+    console.log(productsData);
+    return productsData;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 export default async function AdminProductsPage({
   searchParams,
@@ -24,14 +23,14 @@ export default async function AdminProductsPage({
   searchParams: Promise<{ page?: string; search?: string }>;
 }) {
   const session = await getServerSession(authOptions);
-  const id  = session?.user.branch as string
-  console.log(id)
-  const products = await getBranchProducts(id)
+  const id = session?.user.chapter as string;
+  console.log(id);
+  const products = await getChapterProducts(id);
 
   // Await the searchParams since it's now a Promise
   const params = await searchParams;
   const page = Number(params.page) || 1;
-  const search = params.search || '';
+  const search = params.search || "";
 
   return (
     <div className="space-y-6">
@@ -43,14 +42,14 @@ export default async function AdminProductsPage({
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <ProductTable 
-          products={products} 
+        <ProductTable
+          products={products}
           page={page}
           totalPages={5}
           search={search}
-          branch=''
+          chapter=""
           categories={[]}
-          userRole=''
+          userRole=""
           key={Math.random()}
         />
       </div>

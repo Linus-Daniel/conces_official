@@ -1,12 +1,12 @@
-import EventsComponent from '@/components/Events'
-import React from 'react'
+import EventsComponent from "@/components/Events";
+import React from "react";
 
 function page() {
   return (
     <div>
-      <EventsComponent branch='' />
+      <EventsComponent chapter="" />
     </div>
-  )
+  );
 }
 
-export default page
+export default page;

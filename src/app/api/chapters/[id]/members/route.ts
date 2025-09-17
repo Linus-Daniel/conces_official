@@ -1,20 +1,21 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
-import Branch from "@/models/Chapter"
+import Chapter from "@/models/Chapter";
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const branch = await Branch.find()
+    const chapter = await Chapter.find();
     await dbConnect();
-    const { id: branchId } = await params;
-    console.log(branchId);
+    const { id: chapterId } = await params;
+    console.log(chapterId);
 
-    const users = await User.find({ branch: branchId }).lean().populate("branch","branchName");
-    console.log(users, "Users from the branch");
+    const users = await User.find({ chapter: chapterId })
+      .lean()
+      .populate("chapter", "chapterName");
+    console.log(users, "Users from the chapter");
 
     return NextResponse.json({
       status: 200,
@@ -22,7 +23,7 @@ export async function GET(
       users,
     });
   } catch (error) {
-    console.error("Error fetching branch members:", error);
+    console.error("Error fetching chapter members:", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }

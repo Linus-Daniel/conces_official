@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
+import Image from "next/image";
 import {
   CalendarDays,
   Video,
   PenSquare,
   Trash2,
   UserCheck,
-  MessageSquare
-} from 'lucide-react';
-import { IEvent } from '@/types';
+  MessageSquare,
+} from "lucide-react";
+import { IEvent } from "@/types";
 
-const EventCard = (event:IEvent) => {
+const EventCard = (event: IEvent) => {
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="md:flex">
@@ -21,7 +21,7 @@ const EventCard = (event:IEvent) => {
             src="https://storage.googleapis.com/uxpilot-auth.appspot.com/33dac56dd4-c73e8ca7254638195768.png"
             alt="Nigerian engineering workshop"
             fill
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: "cover" }}
           />
         </div>
         <div className="p-6 flex-1">
@@ -32,7 +32,7 @@ const EventCard = (event:IEvent) => {
                   {event.category}
                 </span>
                 <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
-                    {event.branch.name}
+                  {event.chapter.name}
                 </span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900">
@@ -58,7 +58,8 @@ const EventCard = (event:IEvent) => {
           </div>
           <p className="mt-3 text-gray-600 line-clamp-2">
             Learn about sustainable energy solutions and how Christian engineers
-            can lead in developing eco-friendly technologies for Nigerian communities.
+            can lead in developing eco-friendly technologies for Nigerian
+            communities.
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-between">
             <div className="flex items-center space-x-4">

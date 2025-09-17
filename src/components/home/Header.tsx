@@ -68,8 +68,8 @@ function Header({ user }: { user: UserInfo | null }) {
         return "/admin/";
       case "alumni":
         return "/alumni/dashboard";
-      case "branch-admin":
-        return "/branch";
+      case "chapter-admin":
+        return "/chapter";
       case "student":
         return "/user/";
       default:

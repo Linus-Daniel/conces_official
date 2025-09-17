@@ -22,10 +22,10 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "@/lib/axiosInstance";
 
-interface IBranch {
+interface IChapter {
   _id: string;
-  branchName: string;
-  branchLocation: string;
+  chapterName: string;
+  chapterLocation: string;
   motto: string;
   socialLinks?: { name: string; url: string }[];
   banner: string;
@@ -234,21 +234,18 @@ const ForgotPasswordModal = ({
   );
 };
 
-
-  const getBranches= async ()=>{
-    try{
-      const response = await api.get("/branch")
-      console.log(response.data)
-    }
-    catch(error){
-      console.log("Error Fetchin Branches");
-      console.log("Error")
-    }
+const getChapters = async () => {
+  try {
+    const response = await api.get("/chapter");
+    console.log(response.data);
+  } catch (error) {
+    console.log("Error Fetchin Chapters");
+    console.log("Error");
   }
-const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
+};
+const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
 
   // Initialize activeTab based on URL params (works on both server and client)
   const mode = searchParams.get("mode");
@@ -283,7 +280,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
     confirmPassword: "",
     terms: false,
     captcha: false,
-    branch: "",
+    chapter: "",
   });
 
   const [loginFormData, setLoginFormData] = useState({
@@ -329,14 +326,13 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    if (!formData.branch) {
-      newErrors.branch = "Please select a branch";
+    if (!formData.chapter) {
+      newErrors.chapter = "Please select a chapter";
     }
 
     if (!formData.terms) {
       newErrors.terms = "You must agree to the terms and conditions";
     }
-
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -377,7 +373,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
         institution: formData.institution,
         role: formData.role,
         password: formData.password,
-        branch: formData.branch,
+        chapter: formData.chapter,
       };
 
       await register(userData);
@@ -395,7 +391,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
         confirmPassword: "",
         terms: false,
         captcha: false,
-        branch: "",
+        chapter: "",
       });
 
       toast.success(
@@ -495,7 +491,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
       });
     }
   };
-  console.log(!branches)
+  console.log(!chapteres);
 
   const calculatePasswordStrength = (password: string) => {
     if (password.length === 0) {
@@ -548,8 +544,8 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
         case "admin":
           router.push("/admin");
           break;
-        case "branch-admin":
-          router.push("/branch");
+        case "chapter-admin":
+          router.push("/chapter");
           break;
         case "alumni":
           router.push("/alumni/dashboard");
@@ -662,7 +658,7 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                 <h2 className="text-2xl font-bold text-conces-blue">
                   Create Your Account
                 </h2>
-               
+
                 <p className="text-royal-500 mt-2">
                   Join our community and access role-specific features
                 </p>
@@ -828,9 +824,9 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                   <div className="mb-4">
                     <label
                       className="block text-sm font-medium text-gray-800 mb-1"
-                      htmlFor="branch"
+                      htmlFor="chapter"
                     >
-                      Select Your Branch
+                      Select Your Chapter
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -838,17 +834,17 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                       </div>
 
                       <select
-                        id="branch"
-                        name="branch"
-                        value={formData.branch}
+                        id="chapter"
+                        name="chapter"
+                        value={formData.chapter}
                         onChange={handleInputChange}
                         className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
                         required
                       >
-                        <option value="">Select a branch</option>
-                        {branches.map((branch) => (
-                          <option key={branch._id} value={branch._id}>
-                            {branch.branchName} - {branch.branchLocation}
+                        <option value="">Select a chapter</option>
+                        {chapteres.map((chapter) => (
+                          <option key={chapter._id} value={chapter._id}>
+                            {chapter.chapterName} - {chapter.chapterLocation}
                           </option>
                         ))}
                       </select>
@@ -857,9 +853,9 @@ const AuthForm = ({ branches = [] }: { branches?: IBranch[] }) => {
                         <FaChevronDown />
                       </div>
                     </div>
-                    {!formData.branch && errors.branch && (
+                    {!formData.chapter && errors.chapter && (
                       <p className="mt-1 text-sm text-red-600">
-                        {errors.branch}
+                        {errors.chapter}
                       </p>
                     )}
                   </div>

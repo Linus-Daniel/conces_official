@@ -188,7 +188,7 @@ export default function EventTable({
                     </div>
                     <div>
                       <p className="font-medium line-clamp-1">{event.title}</p>
-                      <p className="text-sm text-gray-500">{event.branch}</p>
+                      <p className="text-sm text-gray-500">{event.chapter}</p>
                     </div>
                   </div>
                 </TableCell>

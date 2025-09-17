@@ -1,46 +1,52 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { toast } from 'sonner';
-import { ChevronLeft } from 'lucide-react';
-import { ICategory } from '@/models/Category';
-import ImageUpload from '../ImageUpload';
-import { FaUpload, FaTimes } from 'react-icons/fa';
-import api from '@/lib/axiosInstance';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { ChevronLeft } from "lucide-react";
+import { ICategory } from "@/models/Category";
+import ImageUpload from "../ImageUpload";
+import { FaUpload, FaTimes } from "react-icons/fa";
+import api from "@/lib/axiosInstance";
+import Link from "next/link";
 
 interface ProductFormProps {
   userRole: string;
-  branch: string;
+  chapter: string;
   categories: Partial<ICategory>[];
-  initialData?: any; 
+  initialData?: any;
   onSuccess?: () => void;
-  url:string,
-  branchId:string
+  url: string;
+  chapterId: string;
 }
- function ProductForm({ 
-  userRole, 
-  branch, 
-  categories, 
-  initialData, 
-  branchId,
-  onSuccess ,
-  url
+function ProductForm({
+  userRole,
+  chapter,
+  categories,
+  initialData,
+  chapterId,
+  onSuccess,
+  url,
 }: ProductFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     price: 0,
-    category: '',
+    category: "",
     stock: 0,
-    branch: branchId,
+    chapter: chapterId,
     featured: false,
     images: [] as string[],
   });
@@ -54,83 +60,90 @@ interface ProductFormProps {
         price: initialData.price,
         category: initialData.category?.slug || initialData.category,
         stock: initialData.stock,
-        branch: initialData.branch || (userRole === 'admin' ? 'national' : branch),
+        chapter:
+          initialData.chapter || (userRole === "admin" ? "national" : chapter),
         featured: initialData.featured || false,
         images: initialData.images || [],
       });
     } else {
       setFormData({
-        name: '',
-        description: '',
+        name: "",
+        description: "",
         price: 0,
-        category: '',
+        category: "",
         stock: 0,
-        branch: userRole === 'admin' ? 'national' : branch,
+        chapter: userRole === "admin" ? "national" : chapter,
         featured: false,
         images: [],
       });
     }
-  }, [initialData, userRole, branch]);
+  }, [initialData, userRole, chapter]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) newErrors.name = 'Product name is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (formData.price <= 0) newErrors.price = 'Price must be positive';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (formData.stock < 0) newErrors.stock = 'Stock must be positive';
-    if (formData.images.length === 0) newErrors.images = 'At least one image is required';
+
+    if (!formData.name.trim()) newErrors.name = "Product name is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+    if (formData.price <= 0) newErrors.price = "Price must be positive";
+    if (!formData.category) newErrors.category = "Category is required";
+    if (formData.stock < 0) newErrors.stock = "Stock must be positive";
+    if (formData.images.length === 0)
+      newErrors.images = "At least one image is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'price' || name === 'stock' ? Number(value) : value
+      [name]: name === "price" || name === "stock" ? Number(value) : value,
     }));
   };
 
   const handleImageUpload = (url: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, url]
+      images: [...prev.images, url],
     }));
   };
 
   const handleRemoveImage = (url: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      images: prev.images.filter(image => image !== url)
+      images: prev.images.filter((image) => image !== url),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
-      toast.error('Please fix the errors in the form');
+      toast.error("Please fix the errors in the form");
       return;
     }
 
     try {
       setIsLoading(true);
-      const url = initialData 
+      const url = initialData
         ? `/store/products/${initialData._id}`
-        : '/store/products';
-      const method = initialData ? 'PUT' : 'POST';
+        : "/store/products";
+      const method = initialData ? "PUT" : "POST";
 
       const response = await api({
         url,
         method,
-        data: formData
+        data: formData,
       });
 
-      toast.success(`Product ${initialData ? 'updated' : 'created'} successfully!`);
-      
+      toast.success(
+        `Product ${initialData ? "updated" : "created"} successfully!`
+      );
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -138,13 +151,16 @@ interface ProductFormProps {
         router.refresh();
       }
     } catch (error) {
-      toast.error(`Failed to ${initialData ? 'update' : 'create'} product. Please try again.`);
-      console.error('Error:', error);
+      toast.error(
+        `Failed to ${
+          initialData ? "update" : "create"
+        } product. Please try again.`
+      );
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="container py-6">
@@ -173,30 +189,40 @@ interface ProductFormProps {
                 onChange={handleChange}
                 placeholder="Enter product name"
               />
-              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+              {errors.name && (
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="branch">
-                Branch
+              <label
+                className="block text-sm font-medium mb-1"
+                htmlFor="chapter"
+              >
+                Chapter
               </label>
               <Input
-                id="branch"
-                name="branch"
-                value={formData.branch}
+                id="chapter"
+                name="chapter"
+                value={formData.chapter}
                 onChange={handleChange}
                 disabled // Make it read-only since it's determined by role
-                placeholder="Branch"
+                placeholder="Chapter"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                {userRole === 'admin' ? 'National (all branches)' : `Your branch: ${branch}`}
+                {userRole === "admin"
+                  ? "National (all chapteres)"
+                  : `Your chapter: ${chapter}`}
               </p>
             </div>
           </div>
 
           {/* Rest of your form remains the same */}
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="description">
+            <label
+              className="block text-sm font-medium mb-1"
+              htmlFor="description"
+            >
               Description
             </label>
             <Textarea
@@ -207,7 +233,9 @@ interface ProductFormProps {
               placeholder="Enter product description"
               className="min-h-[120px]"
             />
-            {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
+            {errors.description && (
+              <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -224,7 +252,9 @@ interface ProductFormProps {
                 placeholder="0.00"
                 step="0.01"
               />
-              {errors.price && <p className="text-sm text-red-500 mt-1">{errors.price}</p>}
+              {errors.price && (
+                <p className="text-sm text-red-500 mt-1">{errors.price}</p>
+              )}
             </div>
 
             <div>
@@ -239,17 +269,22 @@ interface ProductFormProps {
                 onChange={handleChange}
                 placeholder="0"
               />
-              {errors.stock && <p className="text-sm text-red-500 mt-1">{errors.stock}</p>}
+              {errors.stock && (
+                <p className="text-sm text-red-500 mt-1">{errors.stock}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="category">
+              <label
+                className="block text-sm font-medium mb-1"
+                htmlFor="category"
+              >
                 Category
               </label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => {
-                  setFormData(prev => ({ ...prev, category: value }));
+                  setFormData((prev) => ({ ...prev, category: value }));
                 }}
               >
                 <SelectTrigger>
@@ -257,16 +292,15 @@ interface ProductFormProps {
                 </SelectTrigger>
                 <SelectContent>
                   {categories?.map((category, index) => (
-                    <SelectItem 
-                      key={index} 
-                      value={category.slug as string}
-                    >
+                    <SelectItem key={index} value={category.slug as string}>
                       {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
+              {errors.category && (
+                <p className="text-sm text-red-500 mt-1">{errors.category}</p>
+              )}
             </div>
           </div>
 
@@ -283,7 +317,9 @@ interface ProductFormProps {
             <Switch
               id="featured"
               checked={formData.featured}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, featured: checked }))
+              }
             />
           </div>
 
@@ -301,7 +337,7 @@ interface ProductFormProps {
                   Upload Images
                 </div>
               </ImageUpload>
-              
+
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                   {formData.images.map((image) => (
@@ -322,32 +358,38 @@ interface ProductFormProps {
                   ))}
                 </div>
               )}
-              {errors.images && <p className="text-sm text-red-500 mt-1">{errors.images}</p>}
+              {errors.images && (
+                <p className="text-sm text-red-500 mt-1">{errors.images}</p>
+              )}
             </div>
           </div>
 
           <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onSuccess ? () => onSuccess() : () => router.push('/admin/store/products')}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading 
-              ? initialData 
-                ? 'Updating...' 
-                : 'Creating...' 
-              : initialData 
-                ? 'Update Product' 
-                : 'Create Product'}
-          </Button>
-        </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={
+                onSuccess
+                  ? () => onSuccess()
+                  : () => router.push("/admin/store/products")
+              }
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading
+                ? initialData
+                  ? "Updating..."
+                  : "Creating..."
+                : initialData
+                ? "Update Product"
+                : "Create Product"}
+            </Button>
+          </div>
         </form>
       </div>
     </div>
   );
 }
 
-export default ProductForm
+export default ProductForm;

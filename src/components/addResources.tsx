@@ -1,14 +1,21 @@
-"use client"
-import { useState } from 'react';
-import { FaUpload, FaTimes, FaPlus, FaMinus, FaSpinner, FaStar } from 'react-icons/fa';
-import FileUpload from '@/components/FileUpload'; // adjust path accordingly
-import ImageUpload from '@/components/ImageUpload';
-import axios from 'axios';
-import RichTextEditor from '@/components/EditText';
+"use client";
+import { useState } from "react";
+import {
+  FaUpload,
+  FaTimes,
+  FaPlus,
+  FaMinus,
+  FaSpinner,
+  FaStar,
+} from "react-icons/fa";
+import FileUpload from "@/components/FileUpload"; // adjust path accordingly
+import ImageUpload from "@/components/ImageUpload";
+import axios from "axios";
+import RichTextEditor from "@/components/EditText";
 
 // Type definitions
-type ResourceType = 'pdf' | 'devotional' | 'video' | 'article' | 'spreadsheet';
-type ResourceCategory = 'academic' | 'spiritual' | 'career' | 'media';
+type ResourceType = "pdf" | "devotional" | "video" | "article" | "spreadsheet";
+type ResourceCategory = "academic" | "spiritual" | "career" | "media";
 
 interface NewResource {
   title: string;
@@ -22,66 +29,70 @@ interface NewResource {
   content?: string;
   videoUrl?: string;
   duration?: string;
-  branch:string;
+  chapter: string;
   featured: boolean;
 }
 
 const initialResourceState: NewResource = {
-  title: '',
-  type: 'pdf',
-  author: '',
-  description: '',
+  title: "",
+  type: "pdf",
+  author: "",
+  description: "",
   content: "",
-  thumbnail: '',
+  thumbnail: "",
   videoUrl: "",
   fileUrl: "",
   tags: [],
-  category: 'academic',
+  category: "academic",
   featured: false,
-  branch:""
+  chapter: "",
 };
 
-const AddResources = ({branch}:{branch:string}) => {
+const AddResources = ({ chapter }: { chapter: string }) => {
   const [resource, setResource] = useState<NewResource>(initialResourceState);
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [thumbnailPreview, setThumbnailPreview] = useState('');
-  const [videoPreview, setVideoPreview] = useState('');
+  const [thumbnailPreview, setThumbnailPreview] = useState("");
+  const [videoPreview, setVideoPreview] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setResource(prev => ({ ...prev, [name]: value }));
+    setResource((prev) => ({ ...prev, [name]: value }));
 
-    if (name === 'videoUrl') {
+    if (name === "videoUrl") {
       setVideoPreview(value);
     }
   };
 
   const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setResource(prev => ({ ...prev, [name]: checked }));
+    setResource((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleTagAdd = () => {
     if (newTag.trim() && !resource.tags.includes(newTag.trim())) {
-      setResource(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
-      setNewTag('');
+      setResource((prev) => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+      setNewTag("");
     }
   };
 
   const handleTagRemove = (tagToRemove: string) => {
-    setResource(prev => ({
+    setResource((prev) => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const resetForm = () => {
     setResource(initialResourceState);
-    setNewTag('');
-    setThumbnailPreview('');
-    setVideoPreview('');
+    setNewTag("");
+    setThumbnailPreview("");
+    setVideoPreview("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,13 +101,13 @@ const AddResources = ({branch}:{branch:string}) => {
     setSubmitSuccess(false);
 
     try {
-      const response = await axios.post('/api/resources', resource);
-      console.log('Submitted:', response.data);
+      const response = await axios.post("/api/resources", resource);
+      console.log("Submitted:", response.data);
       setSubmitSuccess(true);
       resetForm();
     } catch (error) {
-      console.error('Error creating resource:', error);
-      alert('Failed to create resource');
+      console.error("Error creating resource:", error);
+      alert("Failed to create resource");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,16 +115,20 @@ const AddResources = ({branch}:{branch:string}) => {
 
   const renderTypeSpecificFields = () => {
     switch (resource.type) {
-      case 'pdf':
-      case 'spreadsheet':
+      case "pdf":
+      case "spreadsheet":
         return (
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Upload File
+            </label>
             <FileUpload
               folder="resources/files"
-              allowedFormats={resource.type === 'pdf' ? ['pdf'] : ['xlsx,xls,csv']}
+              allowedFormats={
+                resource.type === "pdf" ? ["pdf"] : ["xlsx,xls,csv"]
+              }
               onSuccess={(info) => {
-                setResource(prev => ({ ...prev, fileUrl: info.secure_url }));
+                setResource((prev) => ({ ...prev, fileUrl: info.secure_url }));
               }}
             >
               <span className="flex items-center">
@@ -122,32 +137,38 @@ const AddResources = ({branch}:{branch:string}) => {
               </span>
             </FileUpload>
             {resource.fileUrl && (
-              <p className="mt-2 text-green-600 text-sm">File uploaded successfully!</p>
+              <p className="mt-2 text-green-600 text-sm">
+                File uploaded successfully!
+              </p>
             )}
           </div>
         );
 
-      case 'video':
+      case "video":
         return (
           <div className="mb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Video URL
+                </label>
                 <input
                   type="url"
                   name="videoUrl"
-                  value={resource.videoUrl || ''}
+                  value={resource.videoUrl || ""}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   placeholder="https://youtube.com/embed/..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Duration (HH:MM:SS)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Duration (HH:MM:SS)
+                </label>
                 <input
                   type="text"
                   name="duration"
-                  value={resource.duration || ''}
+                  value={resource.duration || ""}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   placeholder="1:25:36"
@@ -156,7 +177,9 @@ const AddResources = ({branch}:{branch:string}) => {
             </div>
             {videoPreview && (
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Video Preview</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Video Preview
+                </label>
                 <div className="aspect-video w-full border rounded-md overflow-hidden bg-gray-100">
                   <iframe
                     src={videoPreview}
@@ -169,20 +192,26 @@ const AddResources = ({branch}:{branch:string}) => {
           </div>
         );
 
-        case 'devotional':
-          case 'article':
-            return (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Content</label>
-                <RichTextEditor
-                  value={resource.content || ''}
-                  onChange={(val) => setResource(prev => ({ ...prev, content: val }))}
-                  placeholder="Enter your content here (rich formatting supported)"
-                />
-                <input type="hidden" name="content" value={resource.content} />
-                <p className="text-xs text-gray-500 mt-1">Rich text supported (bold, italics, images, etc.)</p>
-              </div>
-            );
+      case "devotional":
+      case "article":
+        return (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Content
+            </label>
+            <RichTextEditor
+              value={resource.content || ""}
+              onChange={(val) =>
+                setResource((prev) => ({ ...prev, content: val }))
+              }
+              placeholder="Enter your content here (rich formatting supported)"
+            />
+            <input type="hidden" name="content" value={resource.content} />
+            <p className="text-xs text-gray-500 mt-1">
+              Rich text supported (bold, italics, images, etc.)
+            </p>
+          </div>
+        );
 
       default:
         return null;
@@ -191,7 +220,9 @@ const AddResources = ({branch}:{branch:string}) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Create New Resource</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+        Create New Resource
+      </h1>
 
       {submitSuccess && (
         <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -203,7 +234,9 @@ const AddResources = ({branch}:{branch:string}) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title*</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Title*
+              </label>
               <input
                 type="text"
                 name="title"
@@ -216,7 +249,9 @@ const AddResources = ({branch}:{branch:string}) => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Resource Type*</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Resource Type*
+              </label>
               <select
                 name="type"
                 value={resource.type}
@@ -233,7 +268,9 @@ const AddResources = ({branch}:{branch:string}) => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Author*</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Author*
+              </label>
               <input
                 type="text"
                 name="author"
@@ -246,7 +283,9 @@ const AddResources = ({branch}:{branch:string}) => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category*</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category*
+              </label>
               <select
                 name="category"
                 value={resource.category}
@@ -264,10 +303,15 @@ const AddResources = ({branch}:{branch:string}) => {
 
           <div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Thumbnail Image</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Thumbnail Image
+              </label>
               <ImageUpload
                 onSuccess={(info) => {
-                  setResource(prev => ({ ...prev, thumbnail: info.secure_url }));
+                  setResource((prev) => ({
+                    ...prev,
+                    thumbnail: info.secure_url,
+                  }));
                   setThumbnailPreview(info.secure_url);
                 }}
                 folder="resources/thumbnails"
@@ -287,8 +331,8 @@ const AddResources = ({branch}:{branch:string}) => {
                   <button
                     type="button"
                     onClick={() => {
-                      setThumbnailPreview('');
-                      setResource(prev => ({ ...prev, thumbnail: '' }));
+                      setThumbnailPreview("");
+                      setResource((prev) => ({ ...prev, thumbnail: "" }));
                     }}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600 transition"
                   >
@@ -299,7 +343,9 @@ const AddResources = ({branch}:{branch:string}) => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tags
+              </label>
               <div className="flex">
                 <input
                   type="text"
@@ -307,7 +353,9 @@ const AddResources = ({branch}:{branch:string}) => {
                   onChange={(e) => setNewTag(e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   placeholder="Add tag"
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleTagAdd())}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), handleTagAdd())
+                  }
                 />
                 <button
                   type="button"
@@ -319,7 +367,7 @@ const AddResources = ({branch}:{branch:string}) => {
               </div>
               {resource.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {resource.tags.map(tag => (
+                  {resource.tags.map((tag) => (
                     <span
                       key={tag}
                       className="inline-flex items-center bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded-full"
@@ -348,19 +396,29 @@ const AddResources = ({branch}:{branch:string}) => {
                     onChange={handleToggleChange}
                     className="sr-only"
                   />
-                  <div className={`block w-14 h-8 rounded-full ${resource.featured ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
+                  <div
+                    className={`block w-14 h-8 rounded-full ${
+                      resource.featured ? "bg-blue-500" : "bg-gray-400"
+                    }`}
+                  ></div>
                   <div
                     className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${
-                      resource.featured ? 'transform translate-x-6' : ''
+                      resource.featured ? "transform translate-x-6" : ""
                     }`}
                   ></div>
                 </div>
                 <div className="ml-3 text-gray-700 font-medium flex items-center">
-                  <FaStar className={`mr-1 ${resource.featured ? 'text-yellow-400' : 'text-gray-400'}`} />
+                  <FaStar
+                    className={`mr-1 ${
+                      resource.featured ? "text-yellow-400" : "text-gray-400"
+                    }`}
+                  />
                   Featured Resource
                 </div>
               </label>
-              <p className="text-xs text-gray-500 mt-1">Featured resources will be highlighted on the website</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Featured resources will be highlighted on the website
+              </p>
             </div>
           </div>
         </div>
@@ -368,7 +426,9 @@ const AddResources = ({branch}:{branch:string}) => {
         {renderTypeSpecificFields()}
 
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Description*
+          </label>
           <textarea
             name="description"
             value={resource.description}
@@ -400,7 +460,7 @@ const AddResources = ({branch}:{branch:string}) => {
                 Creating...
               </>
             ) : (
-              'Create Resource'
+              "Create Resource"
             )}
           </button>
         </div>

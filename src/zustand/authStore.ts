@@ -10,7 +10,7 @@ interface User {
   emailVerified?: boolean;
   phone?: string;
   institution?: string;
-  branch?: string;
+  chapter?: string;
 }
 
 interface AuthState {
@@ -28,7 +28,7 @@ interface AuthState {
     institution?: string;
     role: string;
     password: string;
-    branch?: string;
+    chapter?: string;
   }) => Promise<void>;
   verifyEmail: (
     verificationCode: string,
@@ -39,7 +39,7 @@ interface AuthState {
       institution?: string;
       role: string;
       password: string;
-      branch?: string;
+      chapter?: string;
     },
     verificationId: string
   ) => Promise<void>;
@@ -50,7 +50,7 @@ interface AuthState {
     institution?: string;
     role: string;
     password: string;
-    branch?: string;
+    chapter?: string;
   }) => Promise<void>;
   checkAuthStatus: () => Promise<void>;
   clearAuth: () => void;
@@ -105,13 +105,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
         verificationId: null,
       });
 
-      
       if (typeof window !== "undefined") {
         localStorage.removeItem("authToken");
-        window.location.reload()
+        window.location.reload();
       }
-
-
     } catch (error) {
       console.error("Logout error:", error);
       // Still clear local state even if signOut fails
@@ -132,7 +129,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
     institution,
     role,
     password,
-    branch,
+    chapter,
   }) => {
     console.log("🚀 [AUTH STORE] Starting registration process");
     console.log("📝 [AUTH STORE] Registration data:", {
@@ -142,7 +139,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
       institution: institution || "undefined",
       role,
       password: password ? "***HIDDEN***" : "undefined",
-      branch: branch || "undefined",
+      chapter: chapter || "undefined",
     });
 
     try {
@@ -155,7 +152,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
         institution,
         role,
         password,
-        branch,
+        chapter,
       };
 
       console.log("📦 [AUTH STORE] Request payload:", {
@@ -199,7 +196,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
           id: data.user.id,
           email: data.user.email,
           role: data.user.role,
-          branch: data.user.branch || "undefined",
+          chapter: data.user.chapter || "undefined",
         });
 
         set({
@@ -320,7 +317,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
         institution: userData.institution || "undefined",
         role: userData.role,
         password: userData.password ? "***HIDDEN***" : "undefined",
-        branch: userData.branch || "undefined",
+        chapter: userData.chapter || "undefined",
       },
     });
 
@@ -472,7 +469,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
       institution: userData.institution || "undefined",
       role: userData.role,
       password: userData.password ? "***HIDDEN***" : "undefined",
-      branch: userData.branch || "undefined",
+      chapter: userData.chapter || "undefined",
     });
 
     try {

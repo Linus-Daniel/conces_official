@@ -9,11 +9,9 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   const user = session?.user;
   try {
-    
-    if( user?.role =="admin"){
+    if (user?.role == "admin") {
       const resources = await Resource.find().sort({ createdAt: -1 });
       return NextResponse.json(resources, { status: 200 });
-
     }
 
     const session = await getServerSession(authOptions);
@@ -21,8 +19,6 @@ export async function GET(req: NextRequest) {
       createdAt: -1,
     });
     return NextResponse.json(resources, { status: 200 });
-
-
   } catch (error) {
     console.error("GET /resources error:", error);
     return NextResponse.json(
@@ -44,8 +40,8 @@ export async function POST(req: NextRequest) {
     }
 
     const userRole = session.user.role;
-    const allowedRoles = ["admin", "branch-admin", "alumni"];
-    const branch = session?.user.branch;
+    const allowedRoles = ["admin", "chapter-admin", "alumni"];
+    const chapter = session?.user.chapter;
 
     if (!allowedRoles.includes(userRole)) {
       console.warn(`Forbidden access by user with role: ${userRole}`);
@@ -93,7 +89,7 @@ export async function POST(req: NextRequest) {
     console.log("Creating resource:", {
       title,
       featured,
-      branch,
+      chapter,
       description,
       type,
       author,
@@ -109,7 +105,7 @@ export async function POST(req: NextRequest) {
       description,
       thumbnail,
       category,
-      branch,
+      chapter,
       type,
       tags,
       author,

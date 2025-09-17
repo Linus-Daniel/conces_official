@@ -16,7 +16,7 @@ const getUsers = async (id: string) => {
 
 const page = async () => {
   const session = await getServerSession(authOptions);
-  const id = session?.user.branch as string;
+  const id = session?.user.chapter as string;
   console.log(id);
   const users = await getUsers(id);
   return (

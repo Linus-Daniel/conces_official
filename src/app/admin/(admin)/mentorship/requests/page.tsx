@@ -1,8 +1,8 @@
-"use client"
+"use client";
 // app/(admin)/mentor-requests/page.tsx
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -10,16 +10,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import { MoreVertical, Loader2, Eye } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { MoreVertical, Loader2, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,25 +29,25 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { toast } from 'react-toastify';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@/components/ui/alert-dialog";
+import { toast } from "react-toastify";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { format } from 'date-fns';
-import Image from 'next/image';
-import api from '@/lib/axiosInstance';
+} from "@/components/ui/dialog";
+import { format } from "date-fns";
+import Image from "next/image";
+import api from "@/lib/axiosInstance";
 
 interface UserInfo {
   _id: string;
   fullName: string;
   email: string;
   avatar?: string;
-  branch?: string;
+  chapter?: string;
   year?: string;
 }
 
@@ -59,7 +59,7 @@ interface MentorRequest {
   style: string;
   preferredTimes: string;
   motivation: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
 }
@@ -71,18 +71,24 @@ export default function MentorRequestsPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<MentorRequest | null>(null);
-  const [selectedAction, setSelectedAction] = useState<'approved' | 'rejected'>('approved');
+  const [selectedRequest, setSelectedRequest] = useState<MentorRequest | null>(
+    null
+  );
+  const [selectedAction, setSelectedAction] = useState<"approved" | "rejected">(
+    "approved"
+  );
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [detailedRequest, setDetailedRequest] = useState<MentorRequest | null>(null);
+  const [detailedRequest, setDetailedRequest] = useState<MentorRequest | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/mentor/request?populate=userId');
+        const response = await api.get("/mentor/request?populate=userId");
         const data = response.data.data;
-        
+
         // Enhance requests with avatar URLs if userId info exists
         const enhancedRequests = data.map((request: MentorRequest) => {
           if (request.userId) {
@@ -90,29 +96,34 @@ export default function MentorRequestsPage() {
               ...request,
               userId: {
                 ...request.userId,
-                avatar: `https://api.dicebear.com/8.x/avataaars/png?seed=${request.userId.email || request.userId._id}`
-              }
+                avatar: `https://api.dicebear.com/8.x/avataaars/png?seed=${
+                  request.userId.email || request.userId._id
+                }`,
+              },
             };
           }
           return request;
         });
-        
+
         setRequests(enhancedRequests);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : 'Failed to fetch requests'
+          error instanceof Error ? error.message : "Failed to fetch requests"
         );
       } finally {
         setLoading(false);
       }
     };
 
-    if (status === 'authenticated' && session?.user?.role === 'admin') {
+    if (status === "authenticated" && session?.user?.role === "admin") {
       fetchRequests();
     }
   }, [status, session]);
 
-  const handleActionClick = (request: MentorRequest, action: 'approved' | 'rejected') => {
+  const handleActionClick = (
+    request: MentorRequest,
+    action: "approved" | "rejected"
+  ) => {
     setSelectedRequest(request);
     setSelectedAction(action);
     setOpenDialog(true);
@@ -125,16 +136,20 @@ export default function MentorRequestsPage() {
 
   const confirmAction = async () => {
     if (!selectedRequest) return;
-  
+
     try {
       setUpdatingId(selectedRequest._id);
-  
-      const res = await api.patch(`/mentor/request/${selectedRequest._id}/approve`, {
-        status: selectedAction,
-      });
-  
-      const updatedStatus = selectedAction === 'approved' ? 'approved' : 'rejected';
-  
+
+      const res = await api.patch(
+        `/mentor/request/${selectedRequest._id}/approve`,
+        {
+          status: selectedAction,
+        }
+      );
+
+      const updatedStatus =
+        selectedAction === "approved" ? "approved" : "rejected";
+
       setRequests((prev) =>
         prev.map((request) =>
           request._id === selectedRequest._id
@@ -142,7 +157,7 @@ export default function MentorRequestsPage() {
             : request
         )
       );
-  
+
       toast.success(`Request ${updatedStatus} successfully`);
     } catch (error: any) {
       const errMessage = error?.response?.data?.error || error.message;
@@ -154,7 +169,7 @@ export default function MentorRequestsPage() {
     }
   };
 
-  if (status === 'loading' || loading) {
+  if (status === "loading" || loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -162,7 +177,7 @@ export default function MentorRequestsPage() {
     );
   }
 
-  if (session?.user?.role !== 'admin') {
+  if (session?.user?.role !== "admin") {
     return (
       <div className="flex justify-center items-center h-screen">
         <Card className="w-full max-w-md">
@@ -192,8 +207,12 @@ export default function MentorRequestsPage() {
                   <TableRow>
                     <TableHead className="min-w-[150px]">User</TableHead>
                     <TableHead>Expertise</TableHead>
-                    <TableHead className="hidden sm:table-cell">Skills</TableHead>
-                    <TableHead className="hidden md:table-cell">Status</TableHead>
+                    <TableHead className="hidden sm:table-cell">
+                      Skills
+                    </TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Status
+                    </TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -212,25 +231,32 @@ export default function MentorRequestsPage() {
                             {request.userId ? (
                               <>
                                 <Image
-                                  src={request.userId.avatar || `https://api.dicebear.com/8.x/avataaars/png?seed=${request.userId._id}`}
+                                  src={
+                                    request.userId.avatar ||
+                                    `https://api.dicebear.com/8.x/avataaars/png?seed=${request.userId._id}`
+                                  }
                                   alt={request.userId.fullName}
                                   width={40}
                                   height={40}
                                   className="rounded-full"
                                 />
                                 <div>
-                                  <div className="font-medium">{request.userId.fullName}</div>
+                                  <div className="font-medium">
+                                    {request.userId.fullName}
+                                  </div>
                                   <div className="text-sm text-muted-foreground">
                                     {request.userId.email}
                                   </div>
                                 </div>
                               </>
                             ) : (
-                              <div className="text-muted-foreground">User not found</div>
+                              <div className="text-muted-foreground">
+                                User not found
+                              </div>
                             )}
                           </div>
                         </TableCell>
-                     
+
                         <TableCell className="font-medium">
                           {request.primaryExpertise}
                         </TableCell>
@@ -242,18 +268,20 @@ export default function MentorRequestsPage() {
                               </Badge>
                             ))}
                             {request.skills.length > 3 && (
-                              <Badge variant="outline">+{request.skills.length - 3}</Badge>
+                              <Badge variant="outline">
+                                +{request.skills.length - 3}
+                              </Badge>
                             )}
                           </div>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
                           <Badge
                             variant={
-                              request.status === 'pending'
-                                ? 'secondary'
-                                : request.status === 'approved'
-                                ? 'default'
-                                : 'destructive'
+                              request.status === "pending"
+                                ? "secondary"
+                                : request.status === "approved"
+                                ? "default"
+                                : "destructive"
                             }
                           >
                             {request.status}
@@ -271,19 +299,27 @@ export default function MentorRequestsPage() {
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                >
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
-                                  onClick={() => handleActionClick(request, 'approved')}
+                                  onClick={() =>
+                                    handleActionClick(request, "approved")
+                                  }
                                   disabled={updatingId === request._id}
                                 >
                                   Approve
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => handleActionClick(request, 'rejected')}
+                                  onClick={() =>
+                                    handleActionClick(request, "rejected")
+                                  }
                                   disabled={updatingId === request._id}
                                   className="text-red-600"
                                 >
@@ -308,12 +344,14 @@ export default function MentorRequestsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {selectedAction === 'approved' ? 'Approve Mentor Request?' : 'Reject Mentor Request?'}
+              {selectedAction === "approved"
+                ? "Approve Mentor Request?"
+                : "Reject Mentor Request?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {selectedAction === 'approved'
-                ? 'This will approve the userId as a mentor.'
-                : 'This will reject the mentor request.'}
+              {selectedAction === "approved"
+                ? "This will approve the userId as a mentor."
+                : "This will reject the mentor request."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -343,23 +381,32 @@ export default function MentorRequestsPage() {
               {detailedRequest.userId && (
                 <div className="flex items-center gap-4">
                   <Image
-                    src={detailedRequest.userId.avatar || `https://api.dicebear.com/8.x/avataaars/png?seed=${detailedRequest.userId._id}`}
+                    src={
+                      detailedRequest.userId.avatar ||
+                      `https://api.dicebear.com/8.x/avataaars/png?seed=${detailedRequest.userId._id}`
+                    }
                     alt={detailedRequest.userId.fullName}
                     width={80}
                     height={80}
                     className="rounded-full"
                   />
                   <div>
-                    <h2 className="text-xl font-semibold">{detailedRequest.userId.fullName}</h2>
-                    <p className="text-muted-foreground">{detailedRequest.userId.email}</p>
-                    {detailedRequest.userId.branch && (
+                    <h2 className="text-xl font-semibold">
+                      {detailedRequest.userId.fullName}
+                    </h2>
+                    <p className="text-muted-foreground">
+                      {detailedRequest.userId.email}
+                    </p>
+                    {detailedRequest.userId.chapter && (
                       <p className="text-sm mt-1">
-                        <span className="font-medium">Branch:</span> {detailedRequest.userId.branch}
+                        <span className="font-medium">Chapter:</span>{" "}
+                        {detailedRequest.userId.chapter}
                       </p>
                     )}
                     {detailedRequest.userId.year && (
                       <p className="text-sm">
-                        <span className="font-medium">Year:</span> {detailedRequest.userId.year}
+                        <span className="font-medium">Year:</span>{" "}
+                        {detailedRequest.userId.year}
                       </p>
                     )}
                   </div>
@@ -368,17 +415,25 @@ export default function MentorRequestsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Primary Expertise</h3>
-                  <p className="text-sm mt-1">{detailedRequest.primaryExpertise}</p>
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Primary Expertise
+                  </h3>
+                  <p className="text-sm mt-1">
+                    {detailedRequest.primaryExpertise}
+                  </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Mentoring Style</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Mentoring Style
+                  </h3>
                   <p className="text-sm mt-1">{detailedRequest.style}</p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Skills</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  Skills
+                </h3>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {detailedRequest.skills.map((skill, index) => (
                     <Badge key={index} variant="outline">
@@ -389,25 +444,33 @@ export default function MentorRequestsPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Preferred Times</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  Preferred Times
+                </h3>
                 <p className="text-sm mt-1">{detailedRequest.preferredTimes}</p>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground">Motivation</h3>
-                <p className="text-sm mt-2 whitespace-pre-line">{detailedRequest.motivation}</p>
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  Motivation
+                </h3>
+                <p className="text-sm mt-2 whitespace-pre-line">
+                  {detailedRequest.motivation}
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Status
+                  </h3>
                   <Badge
                     variant={
-                      detailedRequest.status === 'pending'
-                        ? 'secondary'
-                        : detailedRequest.status === 'approved'
-                        ? 'default'
-                        : 'destructive'
+                      detailedRequest.status === "pending"
+                        ? "secondary"
+                        : detailedRequest.status === "approved"
+                        ? "default"
+                        : "destructive"
                     }
                     className="mt-1"
                   >
@@ -415,9 +478,14 @@ export default function MentorRequestsPage() {
                   </Badge>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Submitted</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Submitted
+                  </h3>
                   <p className="text-sm mt-1">
-                    {format(new Date(detailedRequest.createdAt), 'MMM dd, yyyy HH:mm')}
+                    {format(
+                      new Date(detailedRequest.createdAt),
+                      "MMM dd, yyyy HH:mm"
+                    )}
                   </p>
                 </div>
               </div>

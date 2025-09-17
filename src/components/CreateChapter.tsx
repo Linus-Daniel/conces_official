@@ -23,20 +23,20 @@ interface SocialLink {
   url: string;
 }
 
-interface CreateBranchModalProps {
+interface CreateChapterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (chapter: any) => void;
 }
 
-const CreateBranchModal = ({
+const CreateChapterModal = ({
   isOpen,
   onClose,
   onSuccess,
-}: CreateBranchModalProps) => {
+}: CreateChapterModalProps) => {
   // Chapter fields
-  const [chapterName, setBranchName] = useState("");
-  const [chapterLocation, setBranchLocation] = useState("");
+  const [chapterName, setChapterName] = useState("");
+  const [chapterLocation, setChapterLocation] = useState("");
   const [motto, setMotto] = useState("");
   const [banner, setBanner] = useState("");
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
@@ -54,7 +54,7 @@ const CreateBranchModal = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Validation
-  const validateBranchData = () => {
+  const validateChapterData = () => {
     const newErrors: Record<string, string> = {};
 
     if (!chapterName.trim()) {
@@ -114,85 +114,84 @@ const CreateBranchModal = ({
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Validate based on active tab
-  if (activeTab === "chapter" && !validateBranchData()) {
-    return;
-  }
-
-  if (activeTab === "admin" && !validateAdminData()) {
-    return;
-  }
-
-  // If on chapter tab, move to admin tab
-  if (activeTab === "chapter") {
-    setActiveTab("admin");
-    return;
-  }
-
-  // Final submission from admin tab
-  setLoading(true);
-  setErrors({});
-
-  try {
-    // Combine chapter + admin into one payload
-    const payload = {
-      branchName: chapterName.trim(),
-      branchLocation: chapterLocation.trim(),
-      motto: motto.trim() || undefined,
-      banner: banner.trim() || undefined,
-      socialLinks:
-        socialLinks.filter((link) => link.name && link.url).length > 0
-          ? socialLinks.filter((link) => link.name && link.url)
-          : undefined,
-
-      admin: {
-         adminFullName,
-         adminEmail,
-         adminPhone,
-         adminPassword,
-        role: "chapter-admin",
-      },
-    };
-
-    const response = await api.post("/chapters", payload);
-
-    if (!response.data || !response.data.branch) {
-      throw new Error("Failed to create branch & admin");
+    // Validate based on active tab
+    if (activeTab === "chapter" && !validateChapterData()) {
+      return;
     }
 
-    // Success
-    toast.success("Branch and admin created successfully!");
-
-    // Call success callback
-    if (onSuccess) {
-      onSuccess(response.data.branch);
+    if (activeTab === "admin" && !validateAdminData()) {
+      return;
     }
 
-    // Reset form
-    resetForm();
+    // If on chapter tab, move to admin tab
+    if (activeTab === "chapter") {
+      setActiveTab("admin");
+      return;
+    }
 
-    // Close modal after short delay
-    setTimeout(() => {
-      onClose();
-    }, 1500);
-  } catch (err: any) {
-    console.error("Error creating branch:", err);
-    const errorMessage =
-      err.response?.data?.message || err.message || "Something went wrong";
-    toast.error(errorMessage);
-    setErrors({ submit: errorMessage });
-  } finally {
-    setLoading(false);
-  }
-};
+    // Final submission from admin tab
+    setLoading(true);
+    setErrors({});
 
+    try {
+      // Combine chapter + admin into one payload
+      const payload = {
+        chapterName: chapterName.trim(),
+        chapterLocation: chapterLocation.trim(),
+        motto: motto.trim() || undefined,
+        banner: banner.trim() || undefined,
+        socialLinks:
+          socialLinks.filter((link) => link.name && link.url).length > 0
+            ? socialLinks.filter((link) => link.name && link.url)
+            : undefined,
+
+        admin: {
+          adminFullName,
+          adminEmail,
+          adminPhone,
+          adminPassword,
+          role: "chapter-admin",
+        },
+      };
+
+      const response = await api.post("/chapters", payload);
+
+      if (!response.data || !response.data.chapter) {
+        throw new Error("Failed to create chapter & admin");
+      }
+
+      // Success
+      toast.success("Chapter and admin created successfully!");
+
+      // Call success callback
+      if (onSuccess) {
+        onSuccess(response.data.chapter);
+      }
+
+      // Reset form
+      resetForm();
+
+      // Close modal after short delay
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (err: any) {
+      console.error("Error creating chapter:", err);
+      const errorMessage =
+        err.response?.data?.message || err.message || "Something went wrong";
+      toast.error(errorMessage);
+      setErrors({ submit: errorMessage });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const resetForm = () => {
-    setBranchName("");
-    setBranchLocation("");
+    setChapterName("");
+    setChapterLocation("");
     setMotto("");
     setBanner("");
     setSocialLinks([]);
@@ -272,7 +271,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <button
             type="button"
             onClick={() => {
-              if (validateBranchData()) {
+              if (validateChapterData()) {
                 setActiveTab("admin");
               }
             }}
@@ -311,7 +310,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     id="chapterName"
                     value={chapterName}
                     onChange={(e) => {
-                      setBranchName(e.target.value);
+                      setChapterName(e.target.value);
                       if (errors.chapterName) {
                         const newErrors = { ...errors };
                         delete newErrors.chapterName;
@@ -349,7 +348,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     id="chapterLocation"
                     value={chapterLocation}
                     onChange={(e) => {
-                      setBranchLocation(e.target.value);
+                      setChapterLocation(e.target.value);
                       if (errors.chapterLocation) {
                         const newErrors = { ...errors };
                         delete newErrors.chapterLocation;
@@ -741,4 +740,4 @@ const handleSubmit = async (e: React.FormEvent) => {
   );
 };
 
-export default CreateBranchModal;
+export default CreateChapterModal;

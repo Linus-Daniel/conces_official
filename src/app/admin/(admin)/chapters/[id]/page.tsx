@@ -18,11 +18,11 @@ import {
 } from "react-icons/fi";
 import api from "@/lib/axiosInstance";
 
-interface Branch {
+interface Chapter {
   _id: string;
-  branchName: string;
+  chapterName: string;
   status: string;
-  branchLocation: string;
+  chapterLocation: string;
   institution: string;
   leader: {
     name: string;
@@ -58,21 +58,21 @@ interface Member {
 }
 
 // Custom hooks for data fetching
-const useBranchDetails = (id: string) => {
+const useChapterDetails = (id: string) => {
   return useQuery({
-    queryKey: ["branch", id],
+    queryKey: ["chapter", id],
     queryFn: async () => {
       const response = await api.get(`/chapters/${id}`);
-      return response.data.branch as Branch;
+      return response.data.chapter as Chapter;
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
-const useBranchResources = (id: string) => {
+const useChapterResources = (id: string) => {
   return useQuery({
-    queryKey: ["branch-resources", id],
+    queryKey: ["chapter-resources", id],
     queryFn: async () => {
       const response = await api.get(`/chapters/${id}/resources`);
       return response.data as Resource[];
@@ -82,16 +82,16 @@ const useBranchResources = (id: string) => {
   });
 };
 
-const useBranchMembers = (id: string) => {
+const useChapterMembers = (id: string) => {
   return useQuery({
-    queryKey: ["branch-members", id],
+    queryKey: ["chapter-members", id],
     queryFn: async () => {
       const response = await fetch(`/api/chapters/${id}/members`);
       if (!response.ok) {
         throw new Error("Failed to fetch members");
       }
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       return data.users as Member[];
     },
     enabled: !!id,
@@ -99,9 +99,9 @@ const useBranchMembers = (id: string) => {
   });
 };
 
-const useBranchProducts = (id: string) => {
+const useChapterProducts = (id: string) => {
   return useQuery({
-    queryKey: ["branch-products", id],
+    queryKey: ["chapter-products", id],
     queryFn: async () => {
       const response = await api.get(`/chapters/${id}/store/products/`);
       return response.data as Product[];
@@ -111,7 +111,7 @@ const useBranchProducts = (id: string) => {
   });
 };
 
-const BranchDetail = () => {
+const ChapterDetail = () => {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -119,35 +119,35 @@ const BranchDetail = () => {
 
   // React Query hooks
   const {
-    data: branch,
-    isLoading: branchLoading,
-    error: branchError,
-  } = useBranchDetails(id);
+    data: chapter,
+    isLoading: chapterLoading,
+    error: chapterError,
+  } = useChapterDetails(id);
 
   const {
     data: resources = [],
     isLoading: resourcesLoading,
     error: resourcesError,
-  } = useBranchResources(id);
+  } = useChapterResources(id);
 
   const {
     data: members = [],
     isLoading: membersLoading,
     error: membersError,
-  } = useBranchMembers(id);
+  } = useChapterMembers(id);
 
   const {
     data: products = [],
     isLoading: productsLoading,
     error: productsError,
-  } = useBranchProducts(id);
+  } = useChapterProducts(id);
 
   // Derived loading state
   const isLoading =
-    branchLoading || resourcesLoading || membersLoading || productsLoading;
+    chapterLoading || resourcesLoading || membersLoading || productsLoading;
 
   // Derived error state
-  const error = branchError || resourcesError || membersError || productsError;
+  const error = chapterError || resourcesError || membersError || productsError;
 
   // Stats calculation
   const stats = {
@@ -165,7 +165,7 @@ const BranchDetail = () => {
       color: "bg-blue-100 text-blue-600",
     },
     {
-      name: "Branch Products",
+      name: "Chapter Products",
       value: stats.products,
       icon: FiShoppingBag,
       color: "bg-amber-100 text-amber-600",
@@ -194,15 +194,15 @@ const BranchDetail = () => {
   }
 
   // Error state
-  if (error || !branch) {
+  if (error || !chapter) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Error Loading Branch
+            Error Loading Chapter
           </h2>
           <p className="text-gray-600 mb-4">
-            {error instanceof Error ? error.message : "Branch not found"}
+            {error instanceof Error ? error.message : "Chapter not found"}
           </p>
           <button
             onClick={() => router.back()}
@@ -218,8 +218,8 @@ const BranchDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>{branch.branchName} | CONCES Admin</title>
-        <meta name="description" content="Branch details" />
+        <title>{chapter.chapterName} | CONCES Admin</title>
+        <meta name="description" content="Chapter details" />
       </Head>
 
       <main className="flex-1 overflow-auto pb-20">
@@ -234,21 +234,21 @@ const BranchDetail = () => {
                 <FiArrowLeft className="mr-2" /> Back
               </button>
               <h1 className="text-2xl font-bold text-gray-900">
-                {branch.branchName}
+                {chapter.chapterName}
               </h1>
               <span
                 className={`ml-4 px-3 py-1 text-sm rounded-full ${
-                  branch.status === "Active"
+                  chapter.status === "Active"
                     ? "bg-green-100 text-green-800"
                     : "bg-red-100 text-red-800"
                 }`}
               >
-                {branch.status}
+                {chapter.status}
               </span>
             </div>
             <div className="flex items-center mt-2 text-gray-600">
               <FiMapPin className="mr-1" />
-              <span>{branch.branchLocation}</span>
+              <span>{chapter.chapterLocation}</span>
             </div>
           </div>
         </div>
@@ -304,44 +304,44 @@ const BranchDetail = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {/* Branch Information */}
+              {/* Chapter Information */}
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">
-                  Branch Information
+                  Chapter Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Institution</p>
                     <p className="text-gray-900 font-medium">
-                      {branch.institution}
+                      {chapter.institution}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Branch Leader</p>
+                    <p className="text-sm text-gray-500">Chapter Leader</p>
                     <div className="flex items-center mt-1">
                       <img
-                        src={branch.leader?.avatar}
-                        alt={branch.leader?.name}
+                        src={chapter.leader?.avatar}
+                        alt={chapter.leader?.name}
                         className="h-10 w-10 rounded-full mr-3"
                       />
                       <div>
                         <p className="text-gray-900 font-medium">
-                          {branch.leader?.name}
+                          {chapter.leader?.name}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {branch.leader?.email}
+                          {chapter.leader?.email}
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="md:col-span-2">
                     <p className="text-sm text-gray-500">Description</p>
-                    <p className="text-gray-900 mt-1">{branch.description}</p>
+                    <p className="text-gray-900 mt-1">{chapter.description}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Last Activity</p>
                     <p className="text-gray-900 font-medium">
-                      {branch.lastActivity}
+                      {chapter.lastActivity}
                     </p>
                   </div>
                 </div>
@@ -391,7 +391,7 @@ const BranchDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Branch Resources
+                  Chapter Resources
                 </h2>
                 {resourcesLoading && (
                   <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
@@ -441,7 +441,7 @@ const BranchDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Branch Products
+                  Chapter Products
                 </h2>
                 {productsLoading && (
                   <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
@@ -488,7 +488,7 @@ const BranchDetail = () => {
                     No products
                   </h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    No products are available for this branch.
+                    No products are available for this chapter.
                   </p>
                 </div>
               )}
@@ -499,7 +499,7 @@ const BranchDetail = () => {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Branch Members
+                  Chapter Members
                 </h2>
                 {membersLoading && (
                   <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
@@ -578,7 +578,7 @@ const BranchDetail = () => {
                     No members
                   </h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    This branch doesn't have any members yet.
+                    This chapter doesn't have any members yet.
                   </p>
                 </div>
               )}
@@ -590,4 +590,4 @@ const BranchDetail = () => {
   );
 };
 
-export default BranchDetail;
+export default ChapterDetail;

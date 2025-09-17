@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   const userRole = session?.user.role;
 
-  if (userRole !== "admin" && userRole !== "branch-admin") {
+  if (userRole !== "admin" && userRole !== "chapter-admin") {
     console.log("Attempt to fetch users by unauthorized user");
     return NextResponse.json(
       { error: "Unauthorized request" },
@@ -19,34 +19,34 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const branch = searchParams.get("branch");
+  const chapter = searchParams.get("chapter");
 
-  if (!branch) {
-    console.log("Missing branch parameter in query");
+  if (!chapter) {
+    console.log("Missing chapter parameter in query");
     return NextResponse.json(
-      { error: "Branch parameter is required" },
+      { error: "Chapter parameter is required" },
       { status: 400 }
     );
   }
 
   try {
-    const users = await User.find({ branch });
+    const users = await User.find({ chapter });
 
     if (!users.length) {
-      console.log("No users found for branch:", branch);
+      console.log("No users found for chapter:", chapter);
       return NextResponse.json(
-        { error: "No users found for the specified branch" },
+        { error: "No users found for the specified chapter" },
         { status: 404 }
       );
     }
 
-    console.log("Users fetched successfully for branch:", branch);
+    console.log("Users fetched successfully for chapter:", chapter);
     return NextResponse.json(
       { message: "Fetch successful", users },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error fetching branch users:", error);
+    console.error("Error fetching chapter users:", error);
     return NextResponse.json(
       { error: "Server error while fetching users" },
       { status: 500 }

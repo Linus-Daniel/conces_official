@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   if (
     session?.user?.role !== "admin" &&
-    session?.user?.role !== "branch-admin"
+    session?.user?.role !== "chapter-admin"
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

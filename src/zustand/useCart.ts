@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { toast } from 'react-toastify';
-import { getSession, signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation'; // optional for redirect
-import api from '@/lib/axiosInstance';
+import { create } from "zustand";
+import { toast } from "react-toastify";
+import { getSession, signIn } from "next-auth/react";
+import { useRouter } from "next/navigation"; // optional for redirect
+import api from "@/lib/axiosInstance";
 
 interface CartItem {
   product: {
@@ -14,7 +14,7 @@ interface CartItem {
   };
   quantity: number;
   price: number;
-  branch:string
+  chapter: string;
 }
 
 interface Cart {
@@ -38,10 +38,10 @@ const useCart = create<CartState>((set) => ({
   fetchCart: async () => {
     set({ loading: true });
     try {
-      const { data } = await api.get('/store/cart');
+      const { data } = await api.get("/store/cart");
       set({ cart: data, loading: false });
     } catch (err) {
-      toast.error('Failed to fetch cart');
+      toast.error("Failed to fetch cart");
       set({ loading: false });
     }
   },
@@ -53,16 +53,16 @@ const useCart = create<CartState>((set) => ({
     const session = await getSession();
     if (!session) {
       set({ loading: false });
-      toast.info('Please sign in to add to cart');
+      toast.info("Please sign in to add to cart");
       return signIn(); // Redirect to login page
     }
 
     try {
-      const { data } = await api.post('/store/cart', { productId, quantity });
+      const { data } = await api.post("/store/cart", { productId, quantity });
       set({ cart: data, loading: false });
-      toast.success('Added to cart');
+      toast.success("Added to cart");
     } catch (err) {
-      toast.error('Failed to add to cart');
+      toast.error("Failed to add to cart");
       set({ loading: false });
     }
   },
@@ -70,11 +70,11 @@ const useCart = create<CartState>((set) => ({
   removeFromCart: async (productId) => {
     set({ loading: true });
     try {
-      const { data } = await api.delete('/store/cart', { data: { productId } });
+      const { data } = await api.delete("/store/cart", { data: { productId } });
       set({ cart: data, loading: false });
-      toast.info('Item removed');
+      toast.info("Item removed");
     } catch (err) {
-      toast.error('Failed to remove item');
+      toast.error("Failed to remove item");
       set({ loading: false });
     }
   },
@@ -82,11 +82,11 @@ const useCart = create<CartState>((set) => ({
   updateQuantity: async (productId, quantity) => {
     set({ loading: true });
     try {
-      const { data } = await api.put('/store/cart', { productId, quantity });
+      const { data } = await api.put("/store/cart", { productId, quantity });
       set({ cart: data, loading: false });
-      toast.success('Quantity updated');
+      toast.success("Quantity updated");
     } catch (err) {
-      toast.error('Failed to update quantity');
+      toast.error("Failed to update quantity");
       set({ loading: false });
     }
   },

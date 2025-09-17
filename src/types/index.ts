@@ -5,13 +5,12 @@ export type Product = {
   image: string;
   price: number;
   rating: number;
-  images?:string[]
+  images?: string[];
   reviews: number;
   slug: string;
 };
 
-
-import { IconType } from 'react-icons';
+import { IconType } from "react-icons";
 
 export interface Category {
   name: string;
@@ -22,36 +21,33 @@ export interface Category {
   iconColor: string;
 }
 
-
 export interface Resource {
   _id: string;
   title: string;
   type: string;
-  featured:boolean;
+  featured: boolean;
   author: string;
   date: string;
-  content?:string;
-  category:string;
+  content?: string;
+  category: string;
   videoUrl?: string;
   duration?: string;
-  createdAt: string |Date
-  branch: string;
+  createdAt: string | Date;
+  chapter: string;
   description: string;
   thumbnail: string;
   fileUrl?: string;
   tags: string[];
-  views:number;
+  views: number;
   downloads?: number;
-  relatedResources?:string[];
+  relatedResources?: string[];
 }
-
-
 
 export interface IEvent {
   id: string;
   title: string;
-  category: 'spiritual' | 'academic' | 'career' | 'social' | string;
-  branch: {
+  category: "spiritual" | "academic" | "career" | "social" | string;
+  chapter: {
     _id: string;
     name: string;
   };
@@ -68,7 +64,7 @@ export interface IEvent {
   contactEmail: string;
   contactPhone: string;
   requirements?: string;
-  status: 'upcoming' | 'ongoing' | 'completed';
+  status: "upcoming" | "ongoing" | "completed";
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -77,35 +73,31 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'branch-admin' | 'student' | 'alumni';
-  branch?: string;
-
+  role: "admin" | "chapter-admin" | "student" | "alumni";
+  chapter?: string;
 }
 
-export interface Branch {
+export interface Chapter {
   id: string;
   name: string;
   location: string;
   members: number;
   admin?: User;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
 }
 
 export interface Prayer {
   _id: string;
   title: string;
   content: string;
-  creator:{
-    fullName:string;
-    image?:string;
-  }
+  creator: {
+    fullName: string;
+    image?: string;
+  };
   createdAt: string;
   status: "pending" | "approved" | "rejected";
-  prayedCount: number
+  prayedCount: number;
 }
-
-
-
 
 export interface Products {
   id: string;
@@ -128,8 +120,13 @@ export interface PaymentInfo {
   billingAddress: string;
 }
 
-
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'PAID';
+export type OrderStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED"
+  | "PAID";
 
 interface OrderItem {
   _id: string;
@@ -170,7 +167,6 @@ export interface Order {
   updatedAt: string;
 }
 
-
 export interface Application {
   _id: string;
   createdAt: string;
@@ -208,7 +204,7 @@ export interface StudentProfile {
   email: string;
   phone: string;
   institution: string;
-  branch: string;
+  chapter: string;
   role: "student" | string;
   password: string;
   createdAt: string;

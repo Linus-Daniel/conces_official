@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   FaBuilding,
   FaCheckCircle,
@@ -9,48 +9,44 @@ import {
   FaArrowDown,
   FaTrophy,
   FaBatteryQuarter,
-} from 'react-icons/fa';
+} from "react-icons/fa";
 
 const stats = [
   {
-    title: 'Total Branches',
+    title: "Total Chapters",
     value: 42,
     icon: <FaBuilding className="text-royal-600 text-xl" />,
-    iconBg: 'bg-royal-100',
+    iconBg: "bg-royal-100",
   },
   {
-    title: 'Active Branches',
+    title: "Active Chapters",
     value: 36,
     icon: <FaCheckCircle className="text-green-600 text-xl" />,
-    iconBg: 'bg-green-100',
+    iconBg: "bg-green-100",
     trend: {
       icon: <FaArrowUp />,
-      value: '86%',
-      textColor: 'text-green-600',
+      value: "86%",
+      textColor: "text-green-600",
     },
   },
   {
-    title: 'Branches w/o Leaders',
+    title: "Chapters w/o Leaders",
     value: 4,
     icon: <FaExclamationCircle className="text-red-600 text-xl" />,
-    iconBg: 'bg-red-100',
+    iconBg: "bg-red-100",
     trend: {
       icon: <FaArrowDown />,
-      value: '9.5%',
-      textColor: 'text-red-600',
+      value: "9.5%",
+      textColor: "text-red-600",
     },
   },
-
 ];
 
-const BranchSummary = () => {
+const ChapterSummary = () => {
   return (
     <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
       {stats.map((item, index) => (
-        <div
-          key={index}
-          className="bg-white overflow-hidden shadow rounded-lg"
-        >
+        <div key={index} className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center">
               <div className={`flex-shrink-0 rounded-md p-3 ${item.iconBg}`}>
@@ -62,11 +58,7 @@ const BranchSummary = () => {
                     {item.title}
                   </dt>
                   <dd className="flex items-baseline">
-                    <div
-                    
-                    >
-                      {item.value}
-                    </div>
+                    <div>{item.value}</div>
                     {item.trend && (
                       <div
                         className={`ml-2 text-sm flex items-center gap-1 ${item.trend.textColor}`}
@@ -85,4 +77,4 @@ const BranchSummary = () => {
   );
 };
 
-export default BranchSummary;
+export default ChapterSummary;

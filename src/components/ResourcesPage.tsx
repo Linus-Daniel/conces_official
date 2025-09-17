@@ -27,7 +27,7 @@ import {
 interface ResourcesComponentProps {
   resources: Resource[];
   userRole: string;
-  branch?: string;
+  chapter?: string;
   accountMode?: boolean;
 }
 
@@ -51,14 +51,14 @@ const FilterButton = ({
         : "bg-white text-gray-700 hover:bg-gray-100"
     }`}
   >
-    <Icon  /> {label}
+    <Icon /> {label}
   </button>
 );
 
 function ResourcesComponent({
   resources,
   userRole,
-  branch = "",
+  chapter = "",
   accountMode = false,
 }: ResourcesComponentProps) {
   const isStudent = useMemo(
@@ -67,7 +67,7 @@ function ResourcesComponent({
   );
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBranch, setSelectedBranch] = useState(branch);
+  const [selectedChapter, setSelectedChapter] = useState(chapter);
   const [selectedType, setSelectedType] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -75,9 +75,9 @@ function ResourcesComponent({
   const observer = useRef<IntersectionObserver | null>(null);
 
   // Memoized derived data
-  const branches = useMemo(
+  const chapteres = useMemo(
     () =>
-      Array.from(new Set(resources.map((resource) => resource.branch))).filter(
+      Array.from(new Set(resources.map((resource) => resource.chapter))).filter(
         Boolean
       ),
     [resources]
@@ -91,13 +91,12 @@ function ResourcesComponent({
     [resources]
   );
 
-
-  console.log(resources,"Resources From server componnents")
+  console.log(resources, "Resources From server componnents");
 
   const getUploadPath = useCallback((role: string) => {
     const paths: Record<string, string> = {
       admin: "/admin/resources/new",
-      "branch-admin": "/chapters/resources/new",
+      "chapter-admin": "/chapters/resources/new",
       alumni: "/alumni/resources/new",
     };
     return paths[role.toLowerCase()] || "/resources";
@@ -116,11 +115,11 @@ function ResourcesComponent({
         )
           return false;
       }
-      if (selectedBranch && resource.branch !== selectedBranch) return false;
+      if (selectedChapter && resource.chapter !== selectedChapter) return false;
       if (selectedType && resource.type !== selectedType) return false;
       return true;
     });
-  }, [resources, activeCategory, searchQuery, selectedBranch, selectedType]);
+  }, [resources, activeCategory, searchQuery, selectedChapter, selectedType]);
 
   // Infinite scroll implementation with better performance
   const lastResourceRef = useCallback(
@@ -163,18 +162,18 @@ function ResourcesComponent({
 
   const clearFilters = useCallback(() => {
     setSearchQuery("");
-    setSelectedBranch(branch);
+    setSelectedChapter(chapter);
     setSelectedType("");
     setActiveCategory("all");
-  }, [branch]);
+  }, [chapter]);
 
   const hasActiveFilters = useMemo(
     () =>
       searchQuery ||
-      selectedBranch !== branch ||
+      selectedChapter !== chapter ||
       selectedType ||
       activeCategory !== "all",
-    [searchQuery, selectedBranch, branch, selectedType, activeCategory]
+    [searchQuery, selectedChapter, chapter, selectedType, activeCategory]
   );
 
   // Memoized academic resources for better performance
@@ -246,17 +245,17 @@ function ResourcesComponent({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-royal-700 mb-1">
-                    Branch
+                    Chapter
                   </label>
                   <select
-                    value={selectedBranch}
-                    onChange={(e) => setSelectedBranch(e.target.value)}
+                    value={selectedChapter}
+                    onChange={(e) => setSelectedChapter(e.target.value)}
                     className="w-full rounded-lg border-royal-200 py-2 px-3 text-royal-800 bg-white focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none"
                   >
-                    <option value="">All Branches</option>
-                    {branches.map((branch) => (
-                      <option key={branch} value={branch}>
-                        {branch}
+                    <option value="">All Chapters</option>
+                    {chapteres.map((chapter) => (
+                      <option key={chapter} value={chapter}>
+                        {chapter}
                       </option>
                     ))}
                   </select>
@@ -348,10 +347,10 @@ function ResourcesComponent({
       isStudent,
       userRole,
       searchQuery,
-      selectedBranch,
+      selectedChapter,
       selectedType,
       showFilters,
-      branches,
+      chapteres,
       types,
       hasActiveFilters,
       clearFilters,
@@ -368,8 +367,7 @@ function ResourcesComponent({
     return AccountModeView;
   }
 
-
-  console.log(filteredResources,"Filtered Resources")
+  console.log(filteredResources, "Filtered Resources");
   // Standard mode UI
   return (
     <div>
@@ -413,17 +411,17 @@ function ResourcesComponent({
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
               <div className="w-full md:w-auto">
                 <label className="block text-sm font-medium text-royal-700 mb-1">
-                  Branch
+                  Chapter
                 </label>
                 <select
-                  value={selectedBranch}
-                  onChange={(e) => setSelectedBranch(e.target.value)}
+                  value={selectedChapter}
+                  onChange={(e) => setSelectedChapter(e.target.value)}
                   className="w-full md:w-48 rounded-lg border-royal-200 py-2 px-3 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none"
                 >
-                  <option value="">All Branches</option>
-                  {branches.map((branch) => (
-                    <option key={branch} value={branch}>
-                      {branch}
+                  <option value="">All Chapters</option>
+                  {chapteres.map((chapter) => (
+                    <option key={chapter} value={chapter}>
+                      {chapter}
                     </option>
                   ))}
                 </select>
@@ -505,7 +503,7 @@ function ResourcesComponent({
           <div className="mb-6 flex justify-between items-center">
             <p className="text-royal-700 text-sm font-medium">
               {filteredResources.length} resources found
-              {selectedBranch && ` in ${selectedBranch}`}
+              {selectedChapter && ` in ${selectedChapter}`}
             </p>
             <button
               onClick={clearFilters}

@@ -1,16 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IProduct } from './Product';
-import { IUser } from './User';
+import mongoose, { Schema, Document } from "mongoose";
+import { IProduct } from "./Product";
+import { IUser } from "./User";
 
 export interface ICartItem {
-  product: IProduct['_id'];
+  product: IProduct["_id"];
   quantity: number;
   price: number;
-  branch:string
+  chapter: string;
 }
 
 export interface ICart extends Document {
-  user: IUser['_id'];
+  user: IUser["_id"];
   items: ICartItem[];
   total: number;
   createdAt: Date;
@@ -19,12 +19,21 @@ export interface ICart extends Document {
 
 const CartSchema: Schema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      unique: true,
+    },
     items: [
       {
-        product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
         quantity: { type: Number, required: true, min: 1 },
-        branch:{type:String,required:true},
+        chapter: { type: String, required: true },
         price: { type: Number, required: true },
       },
     ],
@@ -34,12 +43,13 @@ const CartSchema: Schema = new Schema(
 );
 
 // Calculate total before saving
-CartSchema.pre<ICart>('save', function(next) {
+CartSchema.pre<ICart>("save", function (next) {
   this.total = this.items.reduce(
-    (sum, item) => sum + (item.price * item.quantity),
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
   next();
 });
 
-export default mongoose.models.Cart || mongoose.model<ICart>('Cart', CartSchema);
+export default mongoose.models.Cart ||
+  mongoose.model<ICart>("Cart", CartSchema);

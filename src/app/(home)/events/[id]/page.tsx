@@ -1,12 +1,26 @@
-"use client"
-import { useParams, useRouter } from 'next/navigation';
-import Head from 'next/head';
-import Link from 'next/link';
-import { FaArrowLeft, FaCalendar, FaCalendarCheck, FaCalendarDay, FaClipboardList, FaEnvelope, FaFacebook, FaLocationDot, FaShareNodes, FaTwitter, FaUsers, FaVideo, FaWhatsapp } from 'react-icons/fa6';
-import { useEffect, useState } from 'react';
-import { IEvent } from '@/types';
-import api from '@/lib/axiosInstance';
-import Image from 'next/image';
+"use client";
+import { useParams, useRouter } from "next/navigation";
+import Head from "next/head";
+import Link from "next/link";
+import {
+  FaArrowLeft,
+  FaCalendar,
+  FaCalendarCheck,
+  FaCalendarDay,
+  FaClipboardList,
+  FaEnvelope,
+  FaFacebook,
+  FaLocationDot,
+  FaShareNodes,
+  FaTwitter,
+  FaUsers,
+  FaVideo,
+  FaWhatsapp,
+} from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { IEvent } from "@/types";
+import api from "@/lib/axiosInstance";
+import Image from "next/image";
 
 const EventPage = () => {
   const router = useRouter();
@@ -22,7 +36,7 @@ const EventPage = () => {
         const response = await api.get(`/events/${id}`);
         setEvent(response.data);
       } catch (error) {
-        console.error('Error fetching event:', error);
+        console.error("Error fetching event:", error);
       } finally {
         setLoading(false);
       }
@@ -32,17 +46,26 @@ const EventPage = () => {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      spiritual: { bg: 'bg-green-100', text: 'text-green-800' },
-      academic: { bg: 'bg-blue-100', text: 'text-blue-800' },
-      career: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
-      social: { bg: 'bg-purple-100', text: 'text-purple-800' },
+      spiritual: { bg: "bg-green-100", text: "text-green-800" },
+      academic: { bg: "bg-blue-100", text: "text-blue-800" },
+      career: { bg: "bg-yellow-100", text: "text-yellow-800" },
+      social: { bg: "bg-purple-100", text: "text-purple-800" },
     };
-    return colors[category as keyof typeof colors] || { bg: 'bg-gray-100', text: 'text-gray-800' };
+    return (
+      colors[category as keyof typeof colors] || {
+        bg: "bg-gray-100",
+        text: "text-gray-800",
+      }
+    );
   };
 
   const formatDate = (dateString: string): string => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   if (loading) {
@@ -57,8 +80,13 @@ const EventPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-800">Event not found</h2>
-          <Link href="/events" className="mt-4 inline-flex items-center text-royal-600 hover:text-royal-800">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Event not found
+          </h2>
+          <Link
+            href="/events"
+            className="mt-4 inline-flex items-center text-royal-600 hover:text-royal-800"
+          >
             <FaArrowLeft className="mr-2" />
             Back to Events
           </Link>
@@ -79,7 +107,10 @@ const EventPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Back button */}
         <div className="mb-4 md:mb-6">
-          <Link href="/events" className="inline-flex items-center text-royal-600 hover:text-royal-800 text-sm md:text-base">
+          <Link
+            href="/events"
+            className="inline-flex items-center text-royal-600 hover:text-royal-800 text-sm md:text-base"
+          >
             <FaArrowLeft className="mr-2" />
             Back to Events
           </Link>
@@ -102,19 +133,28 @@ const EventPage = () => {
               </div>
             )}
           </div>
-          
+
           <div className="p-4 md:p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <span className={`${categoryColor.bg} ${categoryColor.text} text-xs px-2 py-1 rounded-full font-medium`}>
-                    {event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+                  <span
+                    className={`${categoryColor.bg} ${categoryColor.text} text-xs px-2 py-1 rounded-full font-medium`}
+                  >
+                    {event.category.charAt(0).toUpperCase() +
+                      event.category.slice(1)}
                   </span>
                   <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
-                    {event.branch ? event.branch.charAt(0).toUpperCase() + event.branch.slice(1) : "National"} Branch
+                    {event.chapter
+                      ? event.chapter.charAt(0).toUpperCase() +
+                        event.chapter.slice(1)
+                      : "National"}{" "}
+                    Chapter
                   </span>
                 </div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">{event.title}</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">
+                  {event.title}
+                </h1>
               </div>
               <div className="mt-3 md:mt-0">
                 <a
@@ -136,9 +176,12 @@ const EventPage = () => {
                     <FaCalendarDay className="text-royal-600" />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-500">Date & Time</h3>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Date & Time
+                    </h3>
                     <p className="text-sm text-gray-900 mt-1">
-                      {formatDate(event.date)}<br />
+                      {formatDate(event.date)}
+                      <br />
                       {event.time}
                     </p>
                   </div>
@@ -146,18 +189,24 @@ const EventPage = () => {
 
                 <div className="flex items-start mb-3 md:mb-4">
                   <div className="flex-shrink-0 pt-1">
-                    {event.location.includes('Online') ? (
+                    {event.location.includes("Online") ? (
                       <FaVideo className="text-royal-600" />
                     ) : (
                       <FaLocationDot className="text-royal-600" />
                     )}
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                    <p className="text-sm text-gray-900 mt-1">{event.location}</p>
-                    {!event.location.includes('Online') && (
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Location
+                    </h3>
+                    <p className="text-sm text-gray-900 mt-1">
+                      {event.location}
+                    </p>
+                    {!event.location.includes("Online") && (
                       <a
-                        href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                        href={`https://maps.google.com/?q=${encodeURIComponent(
+                          event.location
+                        )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center text-royal-600 hover:text-royal-800 text-xs mt-1"
@@ -175,8 +224,12 @@ const EventPage = () => {
                       <FaClipboardList className="text-royal-600" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-gray-500">Requirements</h3>
-                      <p className="text-sm text-gray-900 mt-1">{event.requirements}</p>
+                      <h3 className="text-sm font-medium text-gray-500">
+                        Requirements
+                      </h3>
+                      <p className="text-sm text-gray-900 mt-1">
+                        {event.requirements}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -188,8 +241,12 @@ const EventPage = () => {
                     <FaUsers className="text-royal-600" />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-500">Attendees</h3>
-                    <p className="text-sm text-gray-900 mt-1">{event.rsvps} people registered</p>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Attendees
+                    </h3>
+                    <p className="text-sm text-gray-900 mt-1">
+                      {event.rsvps} people registered
+                    </p>
                   </div>
                 </div>
 
@@ -198,9 +255,14 @@ const EventPage = () => {
                     <FaEnvelope className="text-royal-600" />
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-500">Contact</h3>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Contact
+                    </h3>
                     <p className="text-sm text-gray-900 mt-1">
-                      <a href={`mailto:${event.contactEmail}`} className="text-royal-600 hover:text-royal-800">
+                      <a
+                        href={`mailto:${event.contactEmail}`}
+                        className="text-royal-600 hover:text-royal-800"
+                      >
                         {event.contactEmail}
                       </a>
                       <br />
@@ -217,7 +279,9 @@ const EventPage = () => {
                     <h3 className="text-sm font-medium text-gray-500">Share</h3>
                     <div className="flex space-x-3 md:space-x-4 mt-1">
                       <a
-                        href={`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                        href={`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                          window.location.href
+                        )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-500"
@@ -226,7 +290,9 @@ const EventPage = () => {
                         <FaFacebook />
                       </a>
                       <a
-                        href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(event.title)}`}
+                        href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                          window.location.href
+                        )}&text=${encodeURIComponent(event.title)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-500"
@@ -235,7 +301,9 @@ const EventPage = () => {
                         <FaTwitter />
                       </a>
                       <a
-                        href={`whatsapp://send?text=${encodeURIComponent(`${event.title} - ${window.location.href}`)}`}
+                        href={`whatsapp://send?text=${encodeURIComponent(
+                          `${event.title} - ${window.location.href}`
+                        )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-gray-400 hover:text-gray-500"
@@ -244,7 +312,11 @@ const EventPage = () => {
                         <FaWhatsapp />
                       </a>
                       <a
-                        href={`mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent(`${event.description}\n\n${window.location.href}`)}`}
+                        href={`mailto:?subject=${encodeURIComponent(
+                          event.title
+                        )}&body=${encodeURIComponent(
+                          `${event.description}\n\n${window.location.href}`
+                        )}`}
                         className="text-gray-400 hover:text-gray-500"
                         aria-label="Share via Email"
                       >
@@ -261,7 +333,9 @@ const EventPage = () => {
         {/* Event Details */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6 md:mb-8">
           <div className="p-4 md:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 md:mb-4">Event Details</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3 md:mb-4">
+              Event Details
+            </h2>
             <div
               className="prose max-w-none text-gray-600 prose-sm md:prose-base"
               dangerouslySetInnerHTML={{ __html: event.longDescription }}
@@ -272,8 +346,12 @@ const EventPage = () => {
         {/* Registration CTA */}
         <div className="bg-royal-50 rounded-lg shadow-sm overflow-hidden mb-6 md:mb-8">
           <div className="p-4 md:p-6 text-center">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Ready to join us?</h2>
-            <p className="text-gray-600 mb-3 md:mb-4">Register now to secure your spot at this event</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Ready to join us?
+            </h2>
+            <p className="text-gray-600 mb-3 md:mb-4">
+              Register now to secure your spot at this event
+            </p>
             <a
               href={event.registrationLink}
               target="_blank"
@@ -289,7 +367,9 @@ const EventPage = () => {
         {/* Comments Section */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="p-4 md:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 md:mb-4">Comments ({event.comments})</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3 md:mb-4">
+              Comments ({event.comments})
+            </h2>
             <div className="space-y-3 md:space-y-4">
               {/* Sample comment */}
               <div className="flex">
@@ -303,18 +383,26 @@ const EventPage = () => {
                   />
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-900">Engr. John Adebayo</div>
-                  <div className="text-xs text-gray-500 mb-1 md:mb-2">May 5, 2025</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    Engr. John Adebayo
+                  </div>
+                  <div className="text-xs text-gray-500 mb-1 md:mb-2">
+                    May 5, 2025
+                  </div>
                   <p className="text-sm text-gray-600">
-                    Looking forward to this event! I've attended the last three prayer summits and they've been
-                    transformative for my engineering practice.
+                    Looking forward to this event! I've attended the last three
+                    prayer summits and they've been transformative for my
+                    engineering practice.
                   </p>
                 </div>
               </div>
 
               {/* Comment form */}
               <div className="mt-4 md:mt-6">
-                <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1 md:mb-2">
+                <label
+                  htmlFor="comment"
+                  className="block text-sm font-medium text-gray-700 mb-1 md:mb-2"
+                >
                   Add your comment
                 </label>
                 <textarea

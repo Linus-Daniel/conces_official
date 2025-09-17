@@ -18,16 +18,16 @@ interface Leader {
   role?: string;
 }
 
-interface Branch {
+interface Chapter {
   _id: string;
   id?: number | string; // Support both number and string IDs
-  branchName: string; // or 'name' depending on your API
+  chapterName: string; // or 'name' depending on your API
   name?: string; // fallback
   status?: "Active" | "Inactive" | "No Leader" | "Pending";
-  branchLocation: string; // or 'location'
+  chapterLocation: string; // or 'location'
   location?: string; // fallback
   leader?: Leader | null;
-  branchAdmin?: Leader | null; // Alternative field name
+  chapterAdmin?: Leader | null; // Alternative field name
   members?: number;
   totalMembers?: number; // Alternative field name
   events?: number;
@@ -39,30 +39,33 @@ interface Branch {
   description?: string;
 }
 
-interface BranchCardProps {
-  branch: Branch;
-  onAssignLeader?: (branchId: string) => void;
+interface ChapterCardProps {
+  chapter: Chapter;
+  onAssignLeader?: (chapterId: string) => void;
 }
 
-const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
+const ChapterCard: React.FC<ChapterCardProps> = ({
+  chapter,
+  onAssignLeader,
+}) => {
   // Data normalization - handle different field names
-  const normalizedBranch = {
-    id: branch._id || branch.id,
-    name: branch.branchName || branch.name || "Unnamed Branch",
-    location: branch.branchLocation || branch.location || "Location not set",
+  const normalizedChapter = {
+    id: chapter._id || chapter.id,
+    name: chapter.chapterName || chapter.name || "Unnamed Chapter",
+    location: chapter.chapterLocation || chapter.location || "Location not set",
     status:
-      branch.status ||
-      (branch.leader || branch.branchAdmin ? "Active" : "No Leader"),
-    leader: branch.leader || branch.branchAdmin || null,
-    members: branch.members || branch.totalMembers || 0,
-    events: branch.events || branch.upcomingEvents || 0,
+      chapter.status ||
+      (chapter.leader || chapter.chapterAdmin ? "Active" : "No Leader"),
+    leader: chapter.leader || chapter.chapterAdmin || null,
+    members: chapter.members || chapter.totalMembers || 0,
+    events: chapter.events || chapter.upcomingEvents || 0,
     lastActivity:
-      branch.lastActivity ||
-      branch.updatedAt ||
-      branch.createdAt ||
+      chapter.lastActivity ||
+      chapter.updatedAt ||
+      chapter.createdAt ||
       "No recent activity",
-    motto: branch.motto,
-    description: branch.description,
+    motto: chapter.motto,
+    description: chapter.description,
   };
 
   // Status color helper
@@ -126,30 +129,30 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
           <div className="flex-1">
             <div className="flex items-start gap-2 flex-wrap">
               <h3 className="text-lg font-semibold text-white">
-                {normalizedBranch.name}
+                {normalizedChapter.name}
               </h3>
               <span
                 className={`px-2 py-0.5 text-xs rounded-full font-medium border ${getStatusColor(
-                  normalizedBranch.status
+                  normalizedChapter.status
                 )}`}
               >
-                {normalizedBranch.status}
+                {normalizedChapter.status}
               </span>
             </div>
             <div className="flex items-center gap-1 mt-1">
               <FaMapMarkerAlt className="text-white/70 text-xs" />
               <p className="text-sm text-white/90">
-                {normalizedBranch.location}
+                {normalizedChapter.location}
               </p>
             </div>
-            {normalizedBranch.motto && (
+            {normalizedChapter.motto && (
               <p className="text-xs text-white/70 mt-1 italic">
-                "{normalizedBranch.motto}"
+                "{normalizedChapter.motto}"
               </p>
             )}
           </div>
           <Link
-            href={`/admin/chapters/${normalizedBranch.id}`}
+            href={`/admin/chapters/${normalizedChapter.id}`}
             className="inline-flex items-center text-sm bg-white text-royal-600 font-medium px-4 py-1.5 rounded-full hover:bg-royal-50 transition-colors whitespace-nowrap"
           >
             View Details
@@ -161,30 +164,30 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
       <div className="px-5 py-5 space-y-4">
         {/* Leader Info */}
         <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-          {normalizedBranch.leader ? (
+          {normalizedChapter.leader ? (
             <>
-              {normalizedBranch.leader.avatar && !imageError ? (
+              {normalizedChapter.leader.avatar && !imageError ? (
                 <img
                   className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
-                  src={normalizedBranch.leader.avatar}
-                  alt={normalizedBranch.leader.name}
+                  src={normalizedChapter.leader.avatar}
+                  alt={normalizedChapter.leader.name}
                   onError={() => setImageError(true)}
                 />
               ) : (
                 <div className="h-12 w-12 rounded-full bg-royal-600 flex items-center justify-center text-white font-semibold ring-2 ring-white shadow-sm">
-                  {getInitials(normalizedBranch.leader.name)}
+                  {getInitials(normalizedChapter.leader.name)}
                 </div>
               )}
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-900">
-                  {normalizedBranch.leader.name}
+                  {normalizedChapter.leader.name}
                 </p>
                 <p className="text-xs text-gray-600">
-                  {normalizedBranch.leader.email}
+                  {normalizedChapter.leader.email}
                 </p>
-                {normalizedBranch.leader.role && (
+                {normalizedChapter.leader.role && (
                   <p className="text-xs text-royal-600 font-medium mt-0.5">
-                    {normalizedBranch.leader.role}
+                    {normalizedChapter.leader.role}
                   </p>
                 )}
               </div>
@@ -200,7 +203,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
                 </p>
                 <button
                   onClick={() =>
-                    onAssignLeader?.(normalizedBranch.id as string)
+                    onAssignLeader?.(normalizedChapter.id as string)
                   }
                   className="text-xs text-royal-600 hover:text-royal-700 font-medium hover:underline transition-colors"
                 >
@@ -218,7 +221,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
               <div>
                 <p className="text-xs text-gray-600 font-medium">Members</p>
                 <p className="text-2xl font-bold text-green-700">
-                  {normalizedBranch.members.toLocaleString()}
+                  {normalizedChapter.members.toLocaleString()}
                 </p>
               </div>
               <FaUsers className="text-green-600 text-xl opacity-50" />
@@ -229,7 +232,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
               <div>
                 <p className="text-xs text-gray-600 font-medium">Events</p>
                 <p className="text-2xl font-bold text-royal-700">
-                  {normalizedBranch.events.toLocaleString()}
+                  {normalizedChapter.events.toLocaleString()}
                 </p>
               </div>
               <FaCalendarAlt className="text-royal-600 text-xl opacity-50" />
@@ -238,9 +241,9 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
         </div>
 
         {/* Description if available */}
-        {normalizedBranch.description && (
+        {normalizedChapter.description && (
           <div className="text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
-            <p className="line-clamp-2">{normalizedBranch.description}</p>
+            <p className="line-clamp-2">{normalizedChapter.description}</p>
           </div>
         )}
 
@@ -249,7 +252,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
           <FaClock className="text-gray-400" />
           <span>Last activity:</span>
           <span className="text-gray-700 font-medium">
-            {formatDate(normalizedBranch.lastActivity)}
+            {formatDate(normalizedChapter.lastActivity)}
           </span>
         </div>
       </div>
@@ -258,30 +261,31 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onAssignLeader }) => {
 };
 
 // Example usage with sample data
-export const BranchCardExample = () => {
+export const ChapterCardExample = () => {
   // Sample data that matches your API structure
-  const sampleBranches: Branch[] = [
+  const sampleChapters: Chapter[] = [
     {
       _id: "1",
-      branchName: "Lagos Main Branch",
-      branchLocation: "Victoria Island, Lagos",
+      chapterName: "Lagos Main Chapter",
+      chapterLocation: "Victoria Island, Lagos",
       status: "Active",
       leader: {
         name: "John Doe",
         email: "john.doe@example.com",
         avatar: "https://example.com/avatar.jpg",
-        role: "Branch President",
+        role: "Chapter President",
       },
       totalMembers: 245,
       upcomingEvents: 8,
       updatedAt: new Date().toISOString(),
       motto: "Unity in Faith",
-      description: "Our flagship branch serving the Lagos community since 2010",
+      description:
+        "Our flagship chapter serving the Lagos community since 2010",
     },
     {
       _id: "2",
-      branchName: "Abuja Branch",
-      branchLocation: "Wuse II, Abuja",
+      chapterName: "Abuja Chapter",
+      chapterLocation: "Wuse II, Abuja",
       status: "No Leader",
       leader: null,
       totalMembers: 120,
@@ -291,17 +295,17 @@ export const BranchCardExample = () => {
     },
   ];
 
-  const handleAssignLeader = (branchId: string) => {
-    console.log(`Assign leader for branch: ${branchId}`);
+  const handleAssignLeader = (chapterId: string) => {
+    console.log(`Assign leader for chapter: ${chapterId}`);
     // Handle leader assignment logic
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-      {sampleBranches.map((branch) => (
-        <BranchCard
-          key={branch._id}
-          branch={branch}
+      {sampleChapters.map((chapter) => (
+        <ChapterCard
+          key={chapter._id}
+          chapter={chapter}
           onAssignLeader={handleAssignLeader}
         />
       ))}
@@ -309,4 +313,4 @@ export const BranchCardExample = () => {
   );
 };
 
-export default BranchCard;
+export default ChapterCard;

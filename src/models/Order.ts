@@ -1,20 +1,20 @@
 // models/Order.ts
 
-import mongoose, { Schema, Document } from 'mongoose';
-import { IUser } from './User';
+import mongoose, { Schema, Document } from "mongoose";
+import { IUser } from "./User";
 
 export enum OrderStatus {
-  PENDING = 'PENDING',
-  PAID = 'PAID',
-  PROCESSING = 'PROCESSING',
-  SHIPPED = 'SHIPPED',
-  DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED',
+  PENDING = "PENDING",
+  PAID = "PAID",
+  PROCESSING = "PROCESSING",
+  SHIPPED = "SHIPPED",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
 }
 
 export interface IOrderItem {
   product: mongoose.Types.ObjectId;
-  branch: string; 
+  chapter: string;
   quantity: number;
   price: number;
 }
@@ -32,7 +32,7 @@ export interface IShippingDetails {
 }
 
 export interface IOrder extends Document {
-  user: IUser['_id'];
+  user: IUser["_id"];
   items: IOrderItem[];
   total: number;
   status: OrderStatus;
@@ -43,11 +43,15 @@ export interface IOrder extends Document {
 
 const OrderSchema: Schema = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     items: [
       {
-        product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-        branch: { type: String, required: true }, // NEW FIELD
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        chapter: { type: String, required: true }, // NEW FIELD
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
       },
@@ -73,4 +77,5 @@ const OrderSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+export default mongoose.models.Order ||
+  mongoose.model<IOrder>("Order", OrderSchema);

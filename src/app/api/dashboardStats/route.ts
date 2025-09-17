@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/next-auth";
 import User from "@/models/User";
 import Product from "@/models/Product";
 import PrayerRequest from "@/models/PrayerRequest";
-import Branch from "@/models/Chapter";
+import Chapter from "@/models/Chapter";
 import Events from "@/models/Events";
 
 export async function GET(request: NextRequest) {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const events = await Events.countDocuments();
     const users = await User.countDocuments();
 
-    const chapters = await Branch.countDocuments();
+    const chapters = await Chapter.countDocuments();
 
     return NextResponse.json({
       users,

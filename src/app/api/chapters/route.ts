@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import { authOptions } from "@/lib/next-auth";
 import { getServerSession } from "next-auth";
-import Branch from "@/models/Chapter";
+import Chapter from "@/models/Chapter";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
@@ -21,13 +21,13 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     const userRole = session?.user?.role;
 
-    const branches = await Branch.find().sort({ createdAt: -1 });
+    const chapteres = await Chapter.find().sort({ createdAt: -1 });
 
-    return NextResponse.json({ branches }, { status: 200 });
+    return NextResponse.json({ chapteres }, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch branches:", error);
+    console.error("Failed to fetch chapteres:", error);
     return NextResponse.json(
-      { error: "Failed to fetch branches" },
+      { error: "Failed to fetch chapteres" },
       { status: 500 }
     );
   }
@@ -48,22 +48,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log("Incoming payload:", body);
 
-    const {
-      branchName,
-      branchLocation,
-      status,
-      motto,
-      description,
-     
-    } = body;
+    const { chapterName, chapterLocation, status, motto, description } = body;
 
-    const { adminFullName, adminEmail, adminPassword, adminPhone } = body?.admin || {};
-      console.log("Admin details:");
-      console.log(body.admin)
+    const { adminFullName, adminEmail, adminPassword, adminPhone } =
+      body?.admin || {};
+    console.log("Admin details:");
+    console.log(body.admin);
     // Validation
-    if (!branchName?.trim() || !branchLocation?.trim()) {
+    if (!chapterName?.trim() || !chapterLocation?.trim()) {
       return NextResponse.json(
-        { error: "Branch name and location are required" },
+        { error: "Chapter name and location are required" },
         { status: 400 }
       );
     }
@@ -72,7 +66,6 @@ export async function POST(request: NextRequest) {
       !adminEmail?.trim() ||
       !adminPassword?.trim()
     ) {
-
       console.log("Validation failed for admin details");
       console.log({ adminFullName, adminEmail, adminPassword });
       return NextResponse.json(
@@ -81,13 +74,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check duplicate branch
-    const existingBranch = await Branch.findOne({
-      branchName: new RegExp(`^${branchName}$`, "i"),
+    // Check duplicate chapter
+    const existingChapter = await Chapter.findOne({
+      chapterName: new RegExp(`^${chapterName}$`, "i"),
     });
-    if (existingBranch) {
+    if (existingChapter) {
       return NextResponse.json(
-        { error: "Branch already exists" },
+        { error: "Chapter already exists" },
         { status: 409 }
       );
     }
@@ -101,58 +94,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create branch first
-    const branch = new Branch({
-      branchName,
-      branchLocation,
-      leader:{
-        name:adminFullName,
-        email:adminEmail,
-        phone:adminPhone,
-
+    // Create chapter first
+    const chapter = new Chapter({
+      chapterName,
+      chapterLocation,
+      leader: {
+        name: adminFullName,
+        email: adminEmail,
+        phone: adminPhone,
       },
       status,
       motto,
       description,
     });
-    await branch.save();
+    await chapter.save();
 
     // Hash password
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-    // Create branch admin
+    // Create chapter admin
     const adminUser = new User({
       fullName: adminFullName,
       email: adminEmail,
       phone: adminPhone,
       password: hashedPassword,
-      role: "branch-admin",
-      branch: branch._id,
+      role: "chapter-admin",
+      chapter: chapter._id,
       verified: true, // optional: mark verified
     });
     await adminUser.save();
 
-    // Update branch leader field
-    branch.leader = {
+    // Update chapter leader field
+    chapter.leader = {
       _id: adminUser._id.toString(),
       name: adminUser.fullName,
       email: adminUser.email,
       phone: adminUser.phone,
     };
-    await branch.save();
+    await chapter.save();
 
     return NextResponse.json(
       {
-        message: "Branch and branch admin created successfully",
-        branch,
+        message: "Chapter and chapter admin created successfully",
+        chapter,
         adminUser,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating branch + admin:", error);
+    console.error("Error creating chapter + admin:", error);
     return NextResponse.json(
-      { error: "Failed to create branch and admin" },
+      { error: "Failed to create chapter and admin" },
       { status: 500 }
     );
   }

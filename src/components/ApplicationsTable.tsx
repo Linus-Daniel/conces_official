@@ -13,7 +13,11 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { SelectContent, SelectTrigger, SelectValue } from "@radix-ui/react-select";
+import {
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@radix-ui/react-select";
 import { Select, SelectItem } from "./ui/select";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
@@ -21,8 +25,22 @@ import { Card } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { Table } from "./ui/table";
 import { Badge } from "./ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "./ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "./ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import { Input } from "./ui/input";
 import api from "@/lib/axiosInstance";
 
@@ -59,7 +77,7 @@ export interface StudentProfile {
   fullName: string;
   email: string;
   institution: string;
-  branch: string;
+  chapter: string;
   role: "student" | string;
 }
 
@@ -89,19 +107,20 @@ export interface WorkExperience {
 
 interface MentorshipApplicationsProps {
   userType: "mentor" | "student";
-  data:Application[]
+  data: Application[];
 }
 
 const MentorshipApplicationsPage = ({
   userType = "mentor",
-  data
+  data,
 }: MentorshipApplicationsProps) => {
   // const [applications, setApplications] = useState<Application[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [applications,setApplications] = useState<Application[]>(data || []);
+  const [applications, setApplications] = useState<Application[]>(data || []);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState<"approved" | "rejected">(
     "approved"
@@ -124,17 +143,16 @@ const MentorshipApplicationsPage = ({
         : 0,
   };
 
-  const getApplications = async ()=>{
-    try{
-        const response = await api.get("/mentorships/application");
-        console.log(response.data.mentorships, "applications data");
-        return response.data.mentorships;
-    }
-    catch(error) {
+  const getApplications = async () => {
+    try {
+      const response = await api.get("/mentorships/application");
+      console.log(response.data.mentorships, "applications data");
+      return response.data.mentorships;
+    } catch (error) {
       console.error("Error fetching applications:", error);
       // Optionally show an error toast or notification
     }
-  }
+  };
 
   const handleViewApplication = (app: Application) => {
     setSelectedApplication(app);
@@ -152,18 +170,19 @@ const MentorshipApplicationsPage = ({
     try {
       setIsUpdating(true);
       // Simulate API call
-      const response = await api.patch(`/mentorships/application/${selectedApplication._id}`, {
-        status: statusToUpdate,
-      })
-      console.log(response)
+      const response = await api.patch(
+        `/mentorships/application/${selectedApplication._id}`,
+        {
+          status: statusToUpdate,
+        }
+      );
+      console.log(response);
       const newApplications = await getApplications();
       setApplications(newApplications);
-    }
-    catch(error){
+    } catch (error) {
       console.error("Error updating application status:", error);
       // Optionally show an error toast or notification
-    }
-     finally {
+    } finally {
       setIsUpdating(false);
       setIsConfirmDialogOpen(false);
     }
@@ -531,7 +550,7 @@ const MentorshipApplicationsPage = ({
                 {selectedApplication.mentorship.name} -{" "}
                 {new Date(selectedApplication.createdAt).toLocaleDateString()}
               </DialogDescription>
-            </AlertDialogHeader >
+            </AlertDialogHeader>
 
             <div className="space-y-6 mt-4">
               <div className="flex items-start gap-4">

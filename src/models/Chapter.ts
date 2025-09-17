@@ -1,4 +1,4 @@
-// models/Branch.ts
+// models/Chapter.ts
 import mongoose, { Schema, Document } from "mongoose";
 
 interface ILeader {
@@ -8,15 +8,15 @@ interface ILeader {
   phone?: string;
 }
 
-export interface IBranch extends Document {
+export interface IChapter extends Document {
   id?: number | string;
-  branchName: string;
+  chapterName: string;
   name?: string;
   status?: "Active" | "Inactive" | "No Leader" | "Pending";
-  branchLocation: string;
+  chapterLocation: string;
   location?: string;
   leader?: ILeader | null;
-  branchAdmin?: ILeader | null;
+  chapterAdmin?: ILeader | null;
   lastActivity?: Date;
   motto?: string;
   description?: string;
@@ -24,29 +24,27 @@ export interface IBranch extends Document {
   updatedAt?: Date;
 }
 
-const LeaderSchema = new Schema<ILeader>(
-  {
-    // _id: { type: String, required: true },
-    name: { type: String, required: true },
-    email: { type: String },
-    phone: { type: String },
-  }
-);
+const LeaderSchema = new Schema<ILeader>({
+  // _id: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String },
+  phone: { type: String },
+});
 
-const BranchSchema = new Schema<IBranch>(
+const ChapterSchema = new Schema<IChapter>(
   {
     id: { type: Schema.Types.Mixed }, // string | number
-    branchName: { type: String, required: true, trim: true },
+    chapterName: { type: String, required: true, trim: true },
     name: { type: String, trim: true },
     status: {
       type: String,
       enum: ["Active", "Inactive", "No Leader", "Pending"],
       default: "Active",
     },
-    branchLocation: { type: String, required: true, trim: true },
+    chapterLocation: { type: String, required: true, trim: true },
     location: { type: String, trim: true },
     leader: { type: LeaderSchema, default: null },
-    branchAdmin: { type: LeaderSchema, default: null },
+    chapterAdmin: { type: LeaderSchema, default: null },
     lastActivity: { type: Date },
     motto: { type: String, trim: true },
     description: { type: String, trim: true },
@@ -54,4 +52,5 @@ const BranchSchema = new Schema<IBranch>(
   { timestamps: true }
 );
 
-export default mongoose.models.Branch || mongoose.model<IBranch>("Branch", BranchSchema);
+export default mongoose.models.Chapter ||
+  mongoose.model<IChapter>("Chapter", ChapterSchema);

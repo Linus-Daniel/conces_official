@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import BranchLayout from "@/components/layout/BranchLayout";
+import ChapterLayout from "@/components/layout/ChapterLayout";
 import "../../(home)/globals.css";
 import ProtectedPage from "@/components/ProtectedRoute";
 
 export const metadata: Metadata = {
-  title: "CONCES Branch Dashboard",
-  description: "Dashboard for CONCES branch management",
+  title: "CONCES Chapter Dashboard",
+  description: "Dashboard for CONCES chapter management",
 };
 export default function DashboardLayout({
   children,
@@ -15,9 +15,8 @@ export default function DashboardLayout({
   return (
     <html>
       <body className="antialiased">
-        <ProtectedPage expectedRole="branch-admin">
-
-        <BranchLayout>{children}</BranchLayout>
+        <ProtectedPage expectedRole="chapter-admin">
+          <ChapterLayout>{children}</ChapterLayout>
         </ProtectedPage>
       </body>
     </html>

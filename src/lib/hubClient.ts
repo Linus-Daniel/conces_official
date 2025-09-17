@@ -327,7 +327,7 @@ export interface CreateUserData {
   institution?: string;
   phone?: string;
   avatar?: string;
-  branch?: string;
+  chapter?: string;
 }
 
 export interface UpdateUserData {
@@ -338,7 +338,7 @@ export interface UpdateUserData {
   status?: string;
   phone?: string;
   avatar?: string;
-  branch?: string;
+  chapter?: string;
 }
 
 export interface CreateProjectData {

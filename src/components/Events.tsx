@@ -15,20 +15,20 @@ import api from "@/lib/axiosInstance";
 import { fi } from "zod/dist/types/v4/locales";
 
 interface EventsComponentProps {
-  branch: string; // User's branch to filter events initially
+  chapter: string; // User's chapter to filter events initially
   showFilters?: boolean; // Option to show/hide filters
   limit?: number; // Option to limit number of events shown
 }
 
 const EventsComponent = ({
-  branch,
+  chapter,
   showFilters = true,
   limit,
 }: EventsComponentProps) => {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past" | "all">(
     "upcoming"
   );
-  const [selectedBranch, setSelectedBranch] = useState<string>(branch || "");
+  const [selectedChapter, setSelectedChapter] = useState<string>(chapter || "");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [events, setEvents] = useState<IEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,9 +52,9 @@ const EventsComponent = ({
     fetchEvents();
   }, []);
 
-  // Get unique branches and categories from events
-  const branches = Array.from(
-    new Set(events.map((event) => event.branch))
+  // Get unique chapteres and categories from events
+  const chapteres = Array.from(
+    new Set(events.map((event) => event.chapter))
   ).filter(Boolean);
   const categories = Array.from(
     new Set(events.map((event) => event.category))
@@ -69,8 +69,9 @@ const EventsComponent = ({
       if (activeTab === "upcoming" && eventDate < today) return false;
       if (activeTab === "past" && eventDate >= today) return false;
 
-      // Filter by selected branch
-      if (selectedBranch && event.branch.name !== selectedBranch) return false;
+      // Filter by selected chapter
+      if (selectedChapter && event.chapter.name !== selectedChapter)
+        return false;
 
       // Filter by selected category
       if (selectedCategory && event.category !== selectedCategory) return false;
@@ -80,12 +81,12 @@ const EventsComponent = ({
     .slice(0, limit); // Apply limit if provided
 
   const clearFilters = () => {
-    setSelectedBranch(branch || "");
+    setSelectedChapter(chapter || "");
     setSelectedCategory("");
   };
 
   const hasActiveFilters =
-    selectedBranch !== (branch || "") || selectedCategory !== "";
+    selectedChapter !== (chapter || "") || selectedCategory !== "";
 
   if (isLoading) {
     return (
@@ -184,15 +185,15 @@ const EventsComponent = ({
                     <FaMapMarkerAlt className="text-sm" />
                   </div>
                   <select
-                    aria-label="Filter by branch"
-                    value={selectedBranch}
-                    onChange={(e) => setSelectedBranch(e.target.value)}
+                    aria-label="Filter by chapter"
+                    value={selectedChapter}
+                    onChange={(e) => setSelectedChapter(e.target.value)}
                     className="pl-10 pr-8 py-2 rounded-lg border-royal-200 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none appearance-none"
                   >
-                    <option value="">All Branches</option>
-                    {branches.map((branch,index) => (
-                      <option key={index} value={branch.name as string}>
-                        {branch.name}
+                    <option value="">All Chapters</option>
+                    {chapteres.map((chapter, index) => (
+                      <option key={index} value={chapter.name as string}>
+                        {chapter.name}
                       </option>
                     ))}
                   </select>
@@ -236,17 +237,17 @@ const EventsComponent = ({
                   <div>
                     <label className="block text-sm font-medium text-royal-700 mb-1 flex items-center gap-2">
                       <FaMapMarkerAlt />
-                      Branch
+                      Chapter
                     </label>
                     <select
-                      value={selectedBranch}
-                      onChange={(e) => setSelectedBranch(e.target.value)}
+                      value={selectedChapter}
+                      onChange={(e) => setSelectedChapter(e.target.value)}
                       className="w-full rounded-lg border-royal-200 py-2 px-3 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none"
                     >
-                      <option value="">All Branches</option>
-                      {branches.map((branch,index) => (
-                        <option key={index} value={branch.name}>
-                          {branch.name}
+                      <option value="">All Chapters</option>
+                      {chapteres.map((chapter, index) => (
+                        <option key={index} value={chapter.name}>
+                          {chapter.name}
                         </option>
                       ))}
                     </select>
@@ -291,7 +292,9 @@ const EventsComponent = ({
           <p className="text-royal-700 text-sm font-medium">
             {filteredEvents.length}{" "}
             {filteredEvents.length === 1 ? "event" : "events"} found
-            {selectedBranch && selectedBranch !== "" && ` in ${selectedBranch}`}
+            {selectedChapter &&
+              selectedChapter !== "" &&
+              ` in ${selectedChapter}`}
           </p>
 
           {hasActiveFilters && (
@@ -308,7 +311,7 @@ const EventsComponent = ({
         {/* Event List */}
         {filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((event,index) => (
+            {filteredEvents.map((event, index) => (
               <EventCard key={index} event={event} />
             ))}
           </div>

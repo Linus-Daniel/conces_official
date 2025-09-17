@@ -20,7 +20,7 @@ type Order = {
     quantity: number;
     price: number;
   }[];
-  branchTotal: number;
+  chapterTotal: number;
   status: string;
   createdAt: string;
   shippingDetails?: {
@@ -153,7 +153,7 @@ const Orders: FC<OrdersProps> = ({ orders }) => {
                     {order.items.length !== 1 ? "s" : ""}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                    ₦{order.branchTotal.toLocaleString()}
+                    ₦{order.chapterTotal.toLocaleString()}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <span
@@ -193,16 +193,18 @@ const Orders: FC<OrdersProps> = ({ orders }) => {
       </div>
 
       {selectedOrder && (
-  <Dialog
-    open={true}
-    onClose={() => setSelectedOrder(null)}
-    className="relative z-50"
-  >
+        <Dialog
+          open={true}
+          onClose={() => setSelectedOrder(null)}
+          className="relative z-50"
+        >
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            aria-hidden="true"
+          />
 
-<div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
-    
-    {/* Dialog Content */}
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
+          {/* Dialog Content */}
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
             <Dialog.Panel className="bg-card rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-border">
               <div className="sticky top-0 bg-card/90 backdrop-blur-sm p-6 border-b border-border flex justify-between items-center">
                 <div>
@@ -326,7 +328,7 @@ const Orders: FC<OrdersProps> = ({ orders }) => {
                           Subtotal
                         </span>
                         <span className="text-sm font-medium">
-                          ₦{selectedOrder.branchTotal.toLocaleString()}
+                          ₦{selectedOrder.chapterTotal.toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -340,7 +342,7 @@ const Orders: FC<OrdersProps> = ({ orders }) => {
                           Total
                         </span>
                         <span className="font-medium text-foreground">
-                          ₦{selectedOrder.branchTotal.toLocaleString()}
+                          ₦{selectedOrder.chapterTotal.toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -382,43 +384,42 @@ const Orders: FC<OrdersProps> = ({ orders }) => {
 
       {/* Image Zoom Modal */}
       <AnimatePresence>
-  {zoomedImage && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
-      onClick={handleCloseZoom}
-    >
-      <motion.div
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0.9 }}
-        transition={{ type: "spring", damping: 20, stiffness: 300 }}
-        className="relative max-w-full max-h-full"
-        onClick={(e) => e.stopPropagation()} // ✅ Prevent parent close
-      >
-        <button
-          onClick={handleCloseZoom}
-          className="absolute -top-10 right-0 p-2 text-white hover:text-gold-300 transition-colors"
-        >
-          <XIcon className="w-6 h-6" />
-        </button>
+        {zoomedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+            onClick={handleCloseZoom}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="relative max-w-full max-h-full"
+              onClick={(e) => e.stopPropagation()} // ✅ Prevent parent close
+            >
+              <button
+                onClick={handleCloseZoom}
+                className="absolute -top-10 right-0 p-2 text-white hover:text-gold-300 transition-colors"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
 
-        <div className="relative w-full h-full">
-          <Image
-            src={zoomedImage}
-            alt="Zoomed product"
-            width={800}
-            height={800}
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-          />
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
+              <div className="relative w-full h-full">
+                <Image
+                  src={zoomedImage}
+                  alt="Zoomed product"
+                  width={800}
+                  height={800}
+                  className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

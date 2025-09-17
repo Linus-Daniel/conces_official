@@ -10,27 +10,27 @@ import React from "react";
 const page = async () => {
   const session = await getServerSession(authOptions);
   const userRole = session?.user.role as string;
-  const branchId = session?.user.branch as string;
-  
-  console.log(branchId)
+  const chapterId = session?.user.chapter as string;
 
-  let branchName;
+  console.log(chapterId);
 
-  if (userRole === "branch-admin") {
+  let chapterName;
+
+  if (userRole === "chapter-admin") {
     try {
       const cookieStore = await cookies();
       const cookieHeader = cookieStore.toString(); // Convert cookies to header string
 
-      const response = await api.get(`/chapters/${branchId}`, {
+      const response = await api.get(`/chapters/${chapterId}`, {
         headers: {
           Cookie: cookieHeader,
         },
       });
-      console.log(response.data)
+      console.log(response.data);
 
-      branchName = response.data?.branch.branchName || "Unknown";
+      chapterName = response.data?.chapter.chapterName || "Unknown";
     } catch (error) {
-      console.error("Failed to fetch branch with axios + cookies:", error);
+      console.error("Failed to fetch chapter with axios + cookies:", error);
     }
   }
 
@@ -47,9 +47,9 @@ const page = async () => {
       <ProductForm
         categories={categories}
         userRole={userRole}
-        branch={branchName}
-        url="branch"
-        branchId={branchId}
+        chapter={chapterName}
+        url="chapter"
+        chapterId={chapterId}
       />
     </div>
   );
