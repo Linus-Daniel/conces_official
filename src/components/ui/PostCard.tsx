@@ -14,8 +14,25 @@ import {
 } from "lucide-react";
 import CommentsSection from "./CommentSections";
 
+export interface Post {
+  title: string;
+  content: string;
+  _id:string
+  author: {
+    name: string;
+    avatar: string;
+    role: string;
+  };
+  date: string;
+  type: "discussion" | "prayer" | "project" | "announcement";
+  likes: number;
+  comments: number;
+  images?: string[];
+  prayed?: number;
+}
+
 type PostCardProps = {
-  post: IPost;
+  post: Post;
   featured?: boolean;
 };
 
