@@ -163,10 +163,16 @@
 // export default UserDashboard;import Posts from '@/components/Community'
 import Posts from '@/components/Community';
 import api from '@/lib/axiosInstance';
+import { authOptions } from '@/lib/next-auth';
+import { getServerSession } from 'next-auth';
 import React from 'react'
 
 async function page() {
   let posts= [];
+  const session = await getServerSession(authOptions)
+  const user = session?.user
+  const userRole = user?.role
+  const authorized =  userRole === "admin" || "chapter-admin" 
   try{
     const response = api.get("/community/posts");
     const postDatas = (await response).data;
@@ -178,7 +184,7 @@ async function page() {
   }
   return (
     <div>
-      <Posts posts={posts} onlyPost/>
+      <Posts authorized={authorized as boolean} posts={posts} onlyPost/>
     </div>
   )
 }

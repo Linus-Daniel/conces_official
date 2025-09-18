@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(events);
     }
     // Only return approved events for public view
-    const events = await Event.find({ approved: true }).sort({ date: 1 });
+    const events = await Event.find({ approved: true }).sort({ date: 1 }).populate("chapter","name");
     return NextResponse.json(events);
   } catch (error) {
     console.error("Failed to fetch events:", error);

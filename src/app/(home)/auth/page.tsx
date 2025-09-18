@@ -14,11 +14,11 @@ async function getChapters() {
 }
 
 async function page() {
-  const chapteres = await getChapters();
+  const chapters = await getChapters();
   return (
     <div>
       <Suspense>
-        <AuthForm chapteres={chapteres} />
+        <AuthForm chapters={chapters} />
       </Suspense>
     </div>
   );

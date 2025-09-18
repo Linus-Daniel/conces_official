@@ -1,23 +1,24 @@
 "use client";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState, useCallback, useMemo } from "react";
 import {
   FaUser,
   FaEnvelope,
   FaPhone,
-  FaBuildingColumns,
   FaUserTag,
   FaLock,
   FaEye,
   FaChevronDown,
   FaGoogle,
   FaMicrosoft,
-  FaBell,
-} from "react-icons/fa6";
-import { FaTimes, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import { FaSpinner } from "react-icons/fa";
-import { useSearchParams } from "next/navigation";
+  FaTimes,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaSpinner,
+  FaQuestionCircle,
+} from "react-icons/fa";
+import { FaBuildingColumns } from "react-icons/fa6";
+import { useSearchParams, useRouter } from "next/navigation";
 import useAuthStore from "@/zustand/authStore";
-import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "@/lib/axiosInstance";
@@ -48,6 +49,7 @@ interface ForgotPasswordModalProps {
   isLoading: boolean;
 }
 
+// Optimized Email Verification Modal
 const EmailVerificationModal = ({
   isOpen,
   onClose,
@@ -65,6 +67,7 @@ const EmailVerificationModal = ({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close modal"
           >
             <FaTimes />
           </button>
@@ -75,7 +78,7 @@ const EmailVerificationModal = ({
             <FaCheckCircle className="text-green-600 text-2xl" />
           </div>
           <p className="text-gray-600 mb-2">
-            We&apos;ve sent a verification link to:
+            We've sent a verification link to:
           </p>
           <p className="font-semibold text-gray-900 mb-4">{email}</p>
           <p className="text-sm text-gray-500">
@@ -88,7 +91,7 @@ const EmailVerificationModal = ({
           <button
             onClick={onResend}
             disabled={isResending}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-full bg-conces-blue hover:bg-gold-600 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isResending ? (
               <>
@@ -99,20 +102,13 @@ const EmailVerificationModal = ({
               "Resend Verification Email"
             )}
           </button>
-
-          {/* <button
-            onClick={onClose}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
-          >
-            I&apos;ll Check My Email
-          </button> */}
         </div>
 
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
           <div className="flex items-start">
             <FaExclamationTriangle className="text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
             <div className="text-sm text-yellow-800">
-              <p className="font-medium">Can&apos;t find the email?</p>
+              <p className="font-medium">Can't find the email?</p>
               <p>
                 Check your spam folder or try resending the verification email.
               </p>
@@ -124,6 +120,7 @@ const EmailVerificationModal = ({
   );
 };
 
+// Optimized Forgot Password Modal
 const ForgotPasswordModal = ({
   isOpen,
   onClose,
@@ -133,29 +130,35 @@ const ForgotPasswordModal = ({
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, []);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
 
-    if (!email.trim()) {
-      setEmailError("Email is required");
-      return;
-    }
+      if (!email.trim()) {
+        setEmailError("Email is required");
+        return;
+      }
 
-    if (!emailRegex.test(email)) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
+      if (!emailRegex.test(email)) {
+        setEmailError("Please enter a valid email address");
+        return;
+      }
 
-    setEmailError("");
-    onSubmit(email);
-  };
+      setEmailError("");
+      onSubmit(email);
+    },
+    [email, emailRegex, onSubmit]
+  );
 
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (emailError) setEmailError("");
-  };
+  const handleEmailChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setEmail(e.target.value);
+      if (emailError) setEmailError("");
+    },
+    [emailError]
+  );
 
   if (!isOpen) return null;
 
@@ -167,6 +170,7 @@ const ForgotPasswordModal = ({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close modal"
           >
             <FaTimes />
           </button>
@@ -174,12 +178,12 @@ const ForgotPasswordModal = ({
 
         <div className="mb-6">
           <p className="text-gray-600 text-sm">
-            Enter your email address and we&apos;ll send you a link to reset
-            your password.
+            Enter your email address and we'll send you a link to reset your
+            password.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
@@ -194,7 +198,7 @@ const ForgotPasswordModal = ({
                 onChange={handleEmailChange}
                 className={`pl-10 w-full rounded-md border ${
                   emailError ? "border-red-300" : "border-gray-300"
-                } py-2 px-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                } py-2 px-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary`}
                 placeholder="your@email.com"
                 required
               />
@@ -206,9 +210,9 @@ const ForgotPasswordModal = ({
 
           <div className="space-y-3">
             <button
-              type="submit"
+              onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-primary-dark hover:bg-primary text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <>
@@ -221,40 +225,127 @@ const ForgotPasswordModal = ({
             </button>
 
             <button
-              type="button"
               onClick={onClose}
               className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-md transition-colors"
             >
               Cancel
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 };
 
-const getChapters = async () => {
-  try {
-    const response = await api.get("/chapter");
-    console.log(response.data);
-  } catch (error) {
-    console.log("Error Fetchin Chapters");
-    console.log("Error");
-  }
+// Password Strength Component
+const PasswordStrength = ({ password }: { password: string }) => {
+  const strength = useMemo(() => {
+    if (password.length === 0) return "";
+
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    if (score <= 2) return "weak";
+    if (score <= 4) return "medium";
+    return "strong";
+  }, [password]);
+
+  const getColor = () => {
+    switch (strength) {
+      case "weak":
+        return "bg-red-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "strong":
+        return "bg-green-500";
+      default:
+        return "bg-gray-200";
+    }
+  };
+
+  const getText = () => {
+    switch (strength) {
+      case "weak":
+        return "Weak";
+      case "medium":
+        return "Medium";
+      case "strong":
+        return "Strong";
+      default:
+        return "";
+    }
+  };
+
+  if (!strength) return null;
+
+  return (
+    <div className="mt-1">
+      <div className="flex items-center mt-1 gap-1">
+        <div
+          className={`h-1 w-1/4 rounded-full ${
+            strength === "weak" ? "bg-red-500" : "bg-royal-200"
+          }`}
+        />
+        <div
+          className={`h-1 w-1/4 rounded-full ${
+            strength === "medium" || strength === "strong"
+              ? "bg-yellow-500"
+              : "bg-royal-200"
+          }`}
+        />
+        <div
+          className={`h-1 w-1/4 rounded-full ${
+            strength === "strong" ? "bg-green-500" : "bg-royal-200"
+          }`}
+        />
+        <div className="h-1 w-1/4 bg-royal-200 rounded-full" />
+      </div>
+      <p className="text-xs text-royal-500 mt-1">
+        Password strength: {getText()}
+      </p>
+    </div>
+  );
 };
-const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
+
+// Chapter Help Component
+const ChapterHelp = () => {
+  const router = useRouter();
+
+  const handleContactClick = () => {
+    router.push("/contact-us?subject=chapter");
+  };
+
+  return (
+    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+      <div className="flex items-start">
+        <FaQuestionCircle className="text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
+        <div className="text-sm">
+          <p className="font-medium text-blue-800 mb-1">Chapter not listed?</p>
+          <p className="text-blue-700 mb-2">
+            Can't find your chapter in our list? We'd be happy to add it.
+          </p>
+          <button
+            onClick={handleContactClick}
+            className="text-gold-600 hover:text-gold-700 font-medium underline hover:no-underline transition-all"
+          >
+            Contact us to add your chapter
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Initialize activeTab based on URL params (works on both server and client)
   const mode = searchParams.get("mode");
-  const initialTab =
-    mode === "login"
-      ? "login"
-      : mode === "alumni-dashboard"
-      ? "alumni-dashboard"
-      : "signup";
+  const initialTab = mode === "login" ? "login" : "signup";
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [showPassword, setShowPassword] = useState(false);
@@ -267,7 +358,6 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
   const [verificationEmail, setVerificationEmail] = useState("");
   const [isResending, setIsResending] = useState(false);
 
-  // Get auth store methods and state
   const { register, login } = useAuthStore();
 
   const [formData, setFormData] = useState({
@@ -279,7 +369,6 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
     password: "",
     confirmPassword: "",
     terms: false,
-    captcha: false,
     chapter: "",
   });
 
@@ -289,57 +378,44 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
     rememberMe: false,
   });
 
-  const [passwordStrength, setPasswordStrength] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Email validation regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  // Phone validation regex (basic international format)
-  const phoneRegex = /^\+?[0-9\s\-]+$/;
+  // Memoized validation regexes
+  const emailRegex = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/, []);
+  const phoneRegex = useMemo(() => /^\+?[0-9\s\-]+$/, []);
 
-  // Validate form fields
-  const validateSignupForm = () => {
+  // Validate signup form
+  const validateSignupForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.fullname.trim()) {
-      newErrors.fullname = "Full name is required";
-    }
-
+    if (!formData.fullname.trim()) newErrors.fullname = "Full name is required";
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-
     if (formData.phone && !phoneRegex.test(formData.phone)) {
       newErrors.phone = "Please enter a valid phone number";
     }
-
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-
-    if (!formData.chapter) {
-      newErrors.chapter = "Please select a chapter";
-    }
-
-    if (!formData.terms) {
+    if (!formData.chapter) newErrors.chapter = "Please select a chapter";
+    if (!formData.terms)
       newErrors.terms = "You must agree to the terms and conditions";
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, emailRegex, phoneRegex]);
 
   // Validate login form
-  const validateLoginForm = () => {
+  const validateLoginForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
 
     if (!loginFormData.email.trim()) {
@@ -347,72 +423,71 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
     } else if (!emailRegex.test(loginFormData.email)) {
       newErrors.loginEmail = "Please enter a valid email address";
     }
-
-    if (!loginFormData.password) {
+    if (!loginFormData.password)
       newErrors.loginPassword = "Password is required";
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [loginFormData, emailRegex]);
 
   // Handle signup submission
-  const handleSignupSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSignupSubmit = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
 
-    if (!validateSignupForm()) return;
+      if (!validateSignupForm()) return;
 
-    setIsLoading(true);
-    setErrors({});
+      setIsLoading(true);
+      setErrors({});
 
-    try {
-      const userData = {
-        fullName: formData.fullname,
-        email: formData.email,
-        phone: formData.phone,
-        institution: formData.institution,
-        role: formData.role,
-        password: formData.password,
-        chapter: formData.chapter,
-      };
+      try {
+        const userData = {
+          fullName: formData.fullname,
+          email: formData.email,
+          phone: formData.phone,
+          institution: formData.institution,
+          role: formData.role,
+          password: formData.password,
+          chapter: formData.chapter,
+        };
 
-      await register(userData);
-      setVerificationEmail(formData.email);
-      setShowEmailVerificationModal(true);
+        await register(userData);
+        setVerificationEmail(formData.email);
+        setShowEmailVerificationModal(true);
 
-      // Reset form
-      setFormData({
-        fullname: "",
-        email: "",
-        phone: "",
-        institution: "",
-        role: "student",
-        password: "",
-        confirmPassword: "",
-        terms: false,
-        captcha: false,
-        chapter: "",
-      });
+        // Reset form
+        setFormData({
+          fullname: "",
+          email: "",
+          phone: "",
+          institution: "",
+          role: "student",
+          password: "",
+          confirmPassword: "",
+          terms: false,
+          chapter: "",
+        });
 
-      toast.success(
-        "Registration successful! Please check your email to verify your account."
-      );
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Registration failed";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        toast.success(
+          "Registration successful! Please check your email to verify your account."
+        );
+      } catch (err: any) {
+        const errorMessage =
+          err.response?.data?.message || "Registration failed";
+        toast.error(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [formData, validateSignupForm, register]
+  );
 
   // Handle resend verification
-  const handleResendVerification = async () => {
+  const handleResendVerification = useCallback(async () => {
     setIsResending(true);
 
     try {
-      await api.post("/api/resend-verification", {
-        email: verificationEmail,
-      });
+      await api.post("/api/resend-verification", { email: verificationEmail });
       toast.success("Verification email resent successfully!");
     } catch (err: any) {
       const errorMessage =
@@ -421,10 +496,10 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
     } finally {
       setIsResending(false);
     }
-  };
+  }, [verificationEmail]);
 
   // Handle forgot password
-  const handleForgotPassword = async (email: string) => {
+  const handleForgotPassword = useCallback(async (email: string) => {
     setIsLoading(true);
 
     try {
@@ -438,158 +513,110 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const handleTabChange = (tab: string) => {
+  const handleTabChange = useCallback((tab: string) => {
     setActiveTab(tab);
     setErrors({});
-  };
+  }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value, type } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === "checkbox" && e.target instanceof HTMLInputElement
-          ? e.target.checked
-          : value,
-    }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]:
+          type === "checkbox" && e.target instanceof HTMLInputElement
+            ? e.target.checked
+            : value,
+      }));
 
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-
-    if (name === "password") {
-      calculatePasswordStrength(value);
-    }
-  };
-
-  const handleLoginInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-
-    setLoginFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    // Clear error when user types
-    if (errors[`login${name.charAt(0).toUpperCase() + name.slice(1)}`]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[
-          `login${name.charAt(0).toUpperCase() + name.slice(1)}`
-        ];
-        return newErrors;
-      });
-    }
-  };
-  console.log(!chapteres);
-
-  const calculatePasswordStrength = (password: string) => {
-    if (password.length === 0) {
-      setPasswordStrength("");
-      return;
-    }
-
-    let strength = 0;
-
-    // Length check
-    if (password.length >= 8) strength++;
-    if (password.length >= 12) strength++;
-
-    // Complexity checks
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-    if (strength <= 2) {
-      setPasswordStrength("weak");
-    } else if (strength <= 4) {
-      setPasswordStrength("medium");
-    } else {
-      setPasswordStrength("strong");
-    }
-  };
-
-  const handleLoginSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (!validateLoginForm()) return;
-
-    setIsLoading(true);
-
-    try {
-      const userData = {
-        email: loginFormData.email,
-        password: loginFormData.password,
-      };
-
-      const role = (await login(
-        userData.email,
-        userData.password
-      )) as unknown as string;
-
-      toast.success("Login successful!");
-
-      // Redirect based on role
-      switch (role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "chapter-admin":
-          router.push("/chapter");
-          break;
-        case "alumni":
-          router.push("/alumni/dashboard");
-          break;
-        case "student":
-          router.push("/user");
-          break;
-        default:
-          toast.warn("Unrecognized role, redirecting to home");
-          router.push("/");
+      // Clear error when user types
+      if (errors[name]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Invalid email or password");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [errors]
+  );
 
-  const getPasswordStrengthColor = () => {
-    switch (passwordStrength) {
-      case "weak":
-        return "bg-red-500";
-      case "medium":
-        return "bg-yellow-500";
-      case "strong":
-        return "bg-green-500";
-      default:
-        return "bg-gray-200";
-    }
-  };
+  const handleLoginInputChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const { name, value, type, checked } = e.target;
 
-  const getPasswordStrengthText = () => {
-    switch (passwordStrength) {
-      case "weak":
-        return "Weak";
-      case "medium":
-        return "Medium";
-      case "strong":
-        return "Strong";
-      default:
-        return "";
-    }
-  };
+      setLoginFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+
+      // Clear error when user types
+      const errorKey = `login${name.charAt(0).toUpperCase() + name.slice(1)}`;
+      if (errors[errorKey]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[errorKey];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
+
+  const handleLoginSubmit = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+
+      if (!validateLoginForm()) return;
+
+      setIsLoading(true);
+
+      try {
+        const role = (await login(
+          loginFormData.email,
+          loginFormData.password
+        )) as unknown as string;
+
+        toast.success("Login successful!");
+
+        // Redirect based on role
+        switch (role) {
+          case "admin":
+            router.push("/admin");
+            break;
+          case "chapter-admin":
+            router.push("/chapter");
+            break;
+          case "alumni":
+            router.push("/alumni/dashboard");
+            break;
+          case "student":
+            router.push("/user");
+            break;
+          default:
+            toast.warn("Unrecognized role, redirecting to home");
+            router.push("/");
+        }
+      } catch (error) {
+        toast.error("Invalid email or password");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [loginFormData, validateLoginForm, login, router]
+  );
+
+  // Memoized chapter options
+  const chapterOptions = useMemo(() => {
+    return chapters.map((chapter) => (
+      <option key={chapter._id} value={chapter._id}>
+        {chapter.chapterName} - {chapter.chapterLocation}
+      </option>
+    ));
+  }, [chapters]);
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
@@ -623,7 +650,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
       />
 
       {/* Authentication Flow Tabs */}
-      <div className="w-full max-w-4xl mx-auto mt-8 px-4">
+      <div className="w-full max-w-4xl mx-auto pt-8 px-4">
         <div className="flex justify-center mb-8">
           <div className="flex space-x-2 bg-white rounded-lg shadow p-1">
             <button
@@ -631,7 +658,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
               className={`px-6 py-2 rounded-md transition-all ${
                 activeTab === "signup"
                   ? "bg-conces-blue text-white font-medium"
-                  : "text-gray-700 bg-slate-200 font-medium hover:bg-gray-100"
+                  : "text-royal-700 bg-slate-200 font-medium hover:bg-royal-100"
               }`}
             >
               Sign Up
@@ -641,7 +668,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
               className={`px-6 py-2 rounded-md transition-all ${
                 activeTab === "login"
                   ? "bg-conces-blue text-white font-medium"
-                  : "text-gray-700 font-medium bg-slate-200 hover:bg-gray-100"
+                  : "text-royal-700 font-medium bg-slate-200 hover:bg-royal-100"
               }`}
             >
               Log In
@@ -658,22 +685,19 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                 <h2 className="text-2xl font-bold text-conces-blue">
                   Create Your Account
                 </h2>
-
                 <p className="text-royal-500 mt-2">
                   Join our community and access role-specific features
                 </p>
               </div>
 
-              <form onSubmit={handleSignupSubmit}>
-                {/* Form fields remain the same... */}
+              <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  {/* Keep all the form fields from original */}
                   <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="fullname"
                     >
-                      Full Name
+                      Full Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -701,12 +725,13 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     )}
                   </div>
 
+                  {/* Email */}
                   <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="email"
                     >
-                      Email Address
+                      Email Address <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -732,9 +757,10 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     )}
                   </div>
 
+                  {/* Phone */}
                   <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="phone"
                     >
                       Phone Number
@@ -762,9 +788,10 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     )}
                   </div>
 
+                  {/* Institution */}
                   <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="institution"
                     >
                       Institution
@@ -785,12 +812,13 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  {/* Role */}
+                  <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="role"
                     >
-                      Select Your Role
+                      Select Your Role <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -803,36 +831,34 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                         onChange={handleInputChange}
                         className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500 appearance-none"
                       >
-                        <option value="student">student</option>
-                        <option value="alumni">alumni</option>
+                        <option value="student">Student</option>
+                        <option value="alumni">Alumni</option>
                       </select>
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
                         <FaChevronDown />
                       </div>
                     </div>
-                    <div
-                      id="role-description"
-                      className="mt-2 text-sm text-royal-500 italic"
-                    >
+                    <div className="mt-2 text-sm text-royal-500 italic">
                       <p>
-                        As a Student, you&apos;ll have access to courses,
-                        events, mentorship, and devotionals.
+                        As a Student, you'll have access to courses, events,
+                        mentorship, and devotionals.
                       </p>
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  {/* Chapter */}
+                  <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="chapter"
                     >
-                      Select Your Chapter
+                      Select Your Chapter{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
                         <FaBuildingColumns />
                       </div>
-
                       <select
                         id="chapter"
                         name="chapter"
@@ -842,18 +868,13 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                         required
                       >
                         <option value="">Select a chapter</option>
-                        {chapteres.map((chapter) => (
-                          <option key={chapter._id} value={chapter._id}>
-                            {chapter.chapterName} - {chapter.chapterLocation}
-                          </option>
-                        ))}
+                        {chapterOptions}
                       </select>
-
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-royal-400">
                         <FaChevronDown />
                       </div>
                     </div>
-                    {!formData.chapter && errors.chapter && (
+                    {errors.chapter && (
                       <p className="mt-1 text-sm text-red-600">
                         {errors.chapter}
                       </p>
@@ -861,14 +882,15 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                   </div>
                 </div>
 
-                {/* Password fields remain the same... */}
+                {/* Password fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Password */}
                   <div>
                     <label
-                      className="block text-sm font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="password"
                     >
-                      Password
+                      Password <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -901,46 +923,16 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                         {errors.password}
                       </p>
                     )}
-                    {passwordStrength && (
-                      <div className="mt-1">
-                        <div className="flex items-center mt-1">
-                          <div
-                            className={`h-1 w-1/4 rounded-full ${
-                              passwordStrength === "weak"
-                                ? "bg-red-500"
-                                : "bg-gray-200"
-                            }`}
-                          ></div>
-                          <div
-                            className={`h-1 w-1/4 rounded-full mx-1 ${
-                              passwordStrength === "medium" ||
-                              passwordStrength === "strong"
-                                ? "bg-yellow-500"
-                                : "bg-gray-200"
-                            }`}
-                          ></div>
-                          <div
-                            className={`h-1 w-1/4 rounded-full mx-1 ${
-                              passwordStrength === "strong"
-                                ? "bg-green-500"
-                                : "bg-gray-200"
-                            }`}
-                          ></div>
-                          <div className="h-1 w-1/4 bg-gray-200 rounded-full"></div>
-                        </div>
-                        <p className="text-xs text-royal-500 mt-1">
-                          Password strength: {getPasswordStrengthText()}
-                        </p>
-                      </div>
-                    )}
+                    <PasswordStrength password={formData.password} />
                   </div>
 
+                  {/* Confirm Password */}
                   <div>
                     <label
-                      className="block text-sm  font-medium text-gray-800 mb-1"
+                      className="block text-sm font-medium text-royal-700 mb-1"
                       htmlFor="confirm-password"
                     >
-                      Confirm Password
+                      Confirm Password <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -977,6 +969,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     )}
                   </div>
                 </div>
+                <ChapterHelp />
 
                 {/* Terms and conditions */}
                 <div className="mb-6">
@@ -993,7 +986,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     />
                     <label
                       htmlFor="terms"
-                      className="ml-2 block text-sm text-gray-800"
+                      className="ml-2 block text-sm text-royal-800"
                     >
                       I agree to the{" "}
                       <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
@@ -1010,46 +1003,9 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                   )}
                 </div>
 
-                {/* <div className="mb-6">
-                  <div className="bg-gray-100 p-4 rounded-md flex items-center justify-center">
-                    <div className="w-full max-w-xs">
-                      <p className="text-center text-sm text-gray-800 mb-2">
-                        Please verify you&apos;re human
-                      </p>
-                      <div
-                        className={`border ${
-                          errors.captcha ? "border-red-300" : "border-royal-300"
-                        } rounded-md bg-white p-3 flex items-center`}
-                      >
-                        <input
-                          type="checkbox"
-                          id="captcha"
-                          name="captcha"
-                          checked={formData.captcha}
-                          onChange={handleInputChange}
-                          className="h-4 w-4 text-gold-600 border-royal-300 rounded focus:ring-gold-500"
-                        />
-                        <span className="ml-3 text-sm text-gray-800">
-                          I&apos;m not a robot
-                        </span>
-                        <img
-                          src="https://www.gstatic.com/recaptcha/api2/logo_48.png"
-                          alt="reCAPTCHA"
-                          className="h-8 ml-auto"
-                        />
-                      </div>
-                      {errors.captcha && (
-                        <p className="mt-1 text-sm text-red-600 text-center">
-                          {errors.captcha}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div> */}
-
                 <div>
                   <button
-                    type="submit"
+                    onClick={handleSignupSubmit}
                     disabled={isLoading}
                     className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                   >
@@ -1062,17 +1018,8 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                       "Create Account"
                     )}
                   </button>
-                  {/* <p className="mt-4 text-center text-sm text-royal-600">
-                    Already have an account?{" "}
-                    <span
-                      className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer"
-                      onClick={() => handleTabChange("login")}
-                    >
-                      Log in
-                    </span>
-                  </p> */}
                 </div>
-              </form>
+              </div>
             </div>
           )}
 
@@ -1088,14 +1035,13 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                 </p>
               </div>
 
-              <form onSubmit={handleLoginSubmit}>
-                {/* Login form fields remain the same... */}
+              <div>
                 <div className="mb-4">
                   <label
-                    className="block text-sm font-medium text-gray-800 mb-1"
+                    className="block text-sm font-medium text-royal-700 mb-1"
                     htmlFor="login-email"
                   >
-                    Email Address
+                    Email Address <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-royal-400">
@@ -1126,10 +1072,10 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-1">
                     <label
-                      className="block text-sm font-medium text-gray-800"
+                      className="block text-sm font-medium text-royal-700"
                       htmlFor="login-password"
                     >
-                      Password
+                      Password <span className="text-red-500">*</span>
                     </label>
                     <button
                       type="button"
@@ -1184,7 +1130,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     />
                     <label
                       htmlFor="remember-me"
-                      className="ml-2 block text-sm text-gray-800"
+                      className="ml-2 block text-sm text-royal-800"
                     >
                       Remember me on this device
                     </label>
@@ -1193,7 +1139,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
 
                 <div className="mb-6">
                   <button
-                    type="submit"
+                    onClick={handleLoginSubmit}
                     disabled={isLoading}
                     className="w-full bg-gold-600 hover:bg-gold-700 text-white font-medium py-2.5 px-4 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                   >
@@ -1209,7 +1155,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                 </div>
 
                 <div className="relative flex items-center justify-center mb-6">
-                  <div className="border-t border-gray-300 absolute w-full"></div>
+                  <div className="border-t border-royal-300 absolute w-full"></div>
                   <div className="bg-white px-4 relative z-10 text-sm text-royal-500">
                     Or continue with
                   </div>
@@ -1218,14 +1164,14 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <button
                     type="button"
-                    className="flex items-center justify-center py-2 px-4 border border-royal-300 rounded-md shadow-sm bg-white text-gray-800 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-center py-2 px-4 border border-royal-300 rounded-md shadow-sm bg-white text-royal-800 hover:bg-gray-50 transition-colors"
                   >
                     <FaGoogle className="text-red-500 mr-2" />
                     Google
                   </button>
                   <button
                     type="button"
-                    className="flex items-center justify-center py-2 px-4 border border-royal-300 rounded-md shadow-sm bg-white text-gray-800 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-center py-2 px-4 border border-royal-300 rounded-md shadow-sm bg-white text-royal-800 hover:bg-gray-50 transition-colors"
                   >
                     <FaMicrosoft className="text-blue-500 mr-2" />
                     Microsoft
@@ -1233,7 +1179,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                 </div>
 
                 <p className="text-center text-sm text-royal-600">
-                  Don&apos;t have an account?{" "}
+                  Don't have an account?{" "}
                   <span
                     className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer"
                     onClick={() => handleTabChange("signup")}
@@ -1241,7 +1187,7 @@ const AuthForm = ({ chapteres = [] }: { chapteres?: IChapter[] }) => {
                     Sign up
                   </span>
                 </p>
-              </form>
+              </div>
             </div>
           )}
         </div>

@@ -25,8 +25,8 @@ const EventsComponent = ({
   showFilters = true,
   limit,
 }: EventsComponentProps) => {
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past" | "all">(
-    "upcoming"
+  const [activeTab, setActiveTab] = useState<"all" | "upcoming" | "past">(
+    "all"
   );
   const [selectedChapter, setSelectedChapter] = useState<string>(chapter || "");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -53,12 +53,14 @@ const EventsComponent = ({
   }, []);
 
   // Get unique chapteres and categories from events
-  const chapteres = Array.from(
+  const chapters = Array.from(
     new Set(events.map((event) => event.chapter))
   ).filter(Boolean);
   const categories = Array.from(
     new Set(events.map((event) => event.category))
   ).filter(Boolean);
+
+  console.log(chapters);
 
   const filteredEvents = events
     .filter((event) => {
@@ -148,15 +150,16 @@ const EventsComponent = ({
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
               <div className="flex space-x-2 mb-4 md:mb-0">
                 <button
-                  onClick={() => setActiveTab("upcoming")}
+                  onClick={() => setActiveTab("all")}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                    activeTab === "upcoming"
+                    activeTab === "all"
                       ? "text-white bg-conces-blue shadow-md"
                       : "text-royal-700 bg-royal-50 hover:bg-royal-100"
                   }`}
                 >
-                  Upcoming
+                  All
                 </button>
+
                 <button
                   onClick={() => setActiveTab("past")}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
@@ -167,15 +170,16 @@ const EventsComponent = ({
                 >
                   Past
                 </button>
+
                 <button
-                  onClick={() => setActiveTab("all")}
+                  onClick={() => setActiveTab("upcoming")}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                    activeTab === "all"
+                    activeTab === "upcoming"
                       ? "text-white bg-conces-blue shadow-md"
                       : "text-royal-700 bg-royal-50 hover:bg-royal-100"
                   }`}
                 >
-                  All
+                  Upcoming
                 </button>
               </div>
 
@@ -191,7 +195,7 @@ const EventsComponent = ({
                     className="pl-10 pr-8 py-2 rounded-lg border-royal-200 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none appearance-none"
                   >
                     <option value="">All Chapters</option>
-                    {chapteres.map((chapter, index) => (
+                    {chapters.map((chapter, index) => (
                       <option key={index} value={chapter.name as string}>
                         {chapter.name}
                       </option>
@@ -245,7 +249,7 @@ const EventsComponent = ({
                       className="w-full rounded-lg border-royal-200 py-2 px-3 text-royal-800 bg-royal-50 focus:border-conces-blue focus:ring-2 focus:ring-conces-blue/20 outline-none"
                     >
                       <option value="">All Chapters</option>
-                      {chapteres.map((chapter, index) => (
+                      {chapters.map((chapter, index) => (
                         <option key={index} value={chapter.name}>
                           {chapter.name}
                         </option>

@@ -99,7 +99,7 @@ function ResourcesComponent({
       "chapter-admin": "/chapters/resources/new",
       alumni: "/alumni/resources/new",
     };
-    return paths[role.toLowerCase()] || "/resources";
+    return paths[role?.toLowerCase()] || "/resources";
   }, []);
 
   // Optimized filter function

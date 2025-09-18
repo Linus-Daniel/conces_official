@@ -18,6 +18,7 @@ const navLinks = [
   { name: "Resources", href: "/resources" },
   { name: "Alumni", href: "/alumni" },
   { name: "Testimony", href: "/testimony" },
+  {name:"Talent Hub", href:"https://www.talenthub.conces.org"},
   { name: "Gallery", href: "/gallery" },
   { name: "Executives", href: "/executives" },
 ];

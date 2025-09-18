@@ -49,10 +49,12 @@ export type EventItem = {
 
 function Posts({
   posts,
+  authorized,
   onlyPost = false,
 }: {
   posts: Post[];
   onlyPost?: boolean;
+  authorized:boolean
 }) {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -145,7 +147,7 @@ function Posts({
                 <span>Filters</span>
               </button>
 
-              {!onlyPost && (
+              {!onlyPost && authorized && (
                 <button
                   onClick={() => setIsCreatePostModalOpen(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

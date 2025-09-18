@@ -12,10 +12,12 @@ import Testimonial from "@/components/home/Testimonials";
 import Anthem from "@/components/Anthem";
 import { ToastContainer } from "react-toastify";
 import StatementOfFaith from "@/components/home/Faith";
+import FAQPage from "@/components/home/Faq";
+import TalentHubSection from "@/components/home/Hub";
 
 function page() {
   return (
-    <div className="font-montserrat bg-gray-200 text-gray-800">
+    <div className="font-montserrat bg-gray-5 text-gray-800">
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -35,6 +37,7 @@ function page() {
       </Head>
       <Hero />
       <About />
+      <TalentHubSection />
       <StatementOfFaith />
       <Features />
       <Anthem />
@@ -47,6 +50,7 @@ function page() {
       <Testimonial />
 
       <Event />
+      <FAQPage />
 
       <CTA />
     </div>
