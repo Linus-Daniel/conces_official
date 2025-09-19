@@ -1,3 +1,4 @@
+// blog page for conces website
 "use client"
 import { useState } from 'react';
 import Head from 'next/head';

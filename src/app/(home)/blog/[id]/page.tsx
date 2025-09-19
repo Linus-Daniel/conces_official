@@ -1,3 +1,4 @@
+// /blog/[id] - Dynamic blog post page
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import Head from "next/head";
