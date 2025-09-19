@@ -2,19 +2,14 @@
 
 import { useEffect, useState } from "react";
 import PrayerRequestCard from "@/components/user/PrayerRequest";
+import PrayerRequestForm, {
+  PrayerRequestFormData,
+} from "@/components/PrayerRequestForm";
 import api from "@/lib/axiosInstance";
 import { useSession } from "next-auth/react";
 import { useSocketStore } from "@/zustand/socketStore";
 import { motion } from "framer-motion";
-import {
-  FiSend,
-  FiEdit2,
-  FiLoader,
-  FiAlertCircle,
-  FiPlusCircle,
-  FiHeart,
-  FiMessageSquare,
-} from "react-icons/fi";
+import { FiHeart } from "react-icons/fi";
 import { FaPray } from "react-icons/fa";
 
 type PrayerRequest = {
@@ -36,13 +31,8 @@ const PrayerWall = ({ initialPrayerRequests }: PrayerWallProps) => {
   const [prayerRequests, setPrayerRequests] = useState<PrayerRequest[]>(
     initialPrayerRequests
   );
-  const [newRequest, setNewRequest] = useState({
-    title: "",
-    content: "",
-    isAnonymous: false,
-  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const { data: session } = useSession();
   const { connect, disconnect, updates } = useSocketStore();
 
@@ -57,23 +47,22 @@ const PrayerWall = ({ initialPrayerRequests }: PrayerWallProps) => {
     setPrayerRequests(prayerRequests.filter((req) => req._id !== deletedId));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePrayerRequestSubmit = async (data: PrayerRequestFormData) => {
     setIsSubmitting(true);
-    setError("");
+    setSubmitError("");
 
     try {
       const response = await api.post(`/prayer-request`, {
-        title: newRequest.title,
-        content: newRequest.content,
-        isAnonymous: newRequest.isAnonymous,
+        title: data.title,
+        content: data.content,
+        isAnonymous: data.isAnonymous,
       });
 
       setPrayerRequests([response.data, ...prayerRequests]);
-      setNewRequest({ title: "", content: "", isAnonymous: false });
     } catch (err) {
       console.error("Error submitting prayer request:", err);
-      setError("Failed to submit prayer request. Please try again.");
+      setSubmitError("Failed to submit prayer request. Please try again.");
+      throw err; // Re-throw to let the form handle the error
     } finally {
       setIsSubmitting(false);
     }
@@ -109,120 +98,15 @@ const PrayerWall = ({ initialPrayerRequests }: PrayerWallProps) => {
       </motion.div>
 
       {/* Prayer Request Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-xl overflow-hidden mb-12 border border-gray-100"
-      >
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center mb-6">
-            <div className="p-2 rounded-full bg-indigo-50 mr-4 text-indigo-600">
-              <FiPlusCircle className="h-6 w-6" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800">
-              New Prayer Request
-            </h3>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700 mb-2 flex items-center"
-                >
-                  <FiEdit2 className="mr-2 text-gray-400" />
-                  Title
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={newRequest.title}
-                  onChange={(e) =>
-                    setNewRequest({ ...newRequest, title: e.target.value })
-                  }
-                  className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Brief title for your request"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="content"
-                  className="block text-sm font-medium text-gray-700 mb-2 flex items-center"
-                >
-                  <FiMessageSquare className="mr-2 text-gray-400" />
-                  Details
-                </label>
-                <textarea
-                  id="content"
-                  value={newRequest.content}
-                  onChange={(e) =>
-                    setNewRequest({ ...newRequest, content: e.target.value })
-                  }
-                  className="w-full px-4 py-3 text-base border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all min-h-[150px]"
-                  placeholder="Share your prayer request details..."
-                  required
-                />
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isAnonymous"
-                  checked={newRequest.isAnonymous}
-                  onChange={(e) =>
-                    setNewRequest({
-                      ...newRequest,
-                      isAnonymous: e.target.checked,
-                    })
-                  }
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="isAnonymous"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  Post anonymously
-                </label>
-              </div>
-            </div>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-red-50 text-red-600 rounded-lg text-sm flex items-start"
-              >
-                <FiAlertCircle className="mt-0.5 mr-2 flex-shrink-0" />
-                <span>{error}</span>
-              </motion.div>
-            )}
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center shadow-md hover:shadow-lg"
-              >
-                {isSubmitting ? (
-                  <>
-                    <FiLoader className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <FiSend className="mr-2" />
-                    Post Request
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </motion.div>
+      <div className="mb-12">
+        <PrayerRequestForm
+          onSubmit={handlePrayerRequestSubmit}
+          isSubmitting={isSubmitting}
+          error={submitError}
+          title="New Prayer Request"
+          description="Share your prayer needs with the community"
+        />
+      </div>
 
       {/* Prayer Requests List */}
       <div className="mb-8">

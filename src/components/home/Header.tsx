@@ -2,7 +2,7 @@
 
 import { Menu, User, X, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { User as UserInfo } from "next-auth";
 import useAuthStore from "@/zustand/authStore";
@@ -135,7 +135,65 @@ const Dropdown: React.FC<DropdownProps> = ({
   onClose,
 }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const isActive = isDropdownActive(pathname, section.items);
+
+  const handleLinkClick = useCallback(
+    (e: React.MouseEvent, href: string, external?: boolean) => {
+      if (external) {
+        // For external links, close immediately and let default behavior handle the navigation
+        onClose();
+        return;
+      }
+
+      // For internal links, prevent default and handle navigation manually
+      e.preventDefault();
+
+      // Close dropdown with a slight delay to ensure smooth animation
+      setTimeout(() => {
+        onClose();
+      }, 100);
+
+      // Navigate after dropdown starts closing
+      setTimeout(() => {
+        router.push(href);
+      }, 50);
+    },
+    [router, onClose]
+  );
+
+  // Enhanced click outside detection
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+
+      // Don't close if clicking within the dropdown
+      if (dropdownRef.current?.contains(target)) {
+        return;
+      }
+
+      // Don't close if clicking on a link that's still navigating
+      if (target.closest("a[href]")) {
+        return;
+      }
+
+      if (isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      // Add delay to avoid immediate closing
+      const timeoutId = setTimeout(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [isOpen, onClose]);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -167,7 +225,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                 target: "_blank",
                 rel: "noopener noreferrer",
               })}
-              onClick={onClose}
+              onClick={(e) => handleLinkClick(e, item.href, item.external)}
               className={`block px-4 py-2 text-sm transition-colors duration-150 ${
                 isActiveLink(pathname, item.href)
                   ? "bg-primary-light text-white"
@@ -244,14 +302,57 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
   onClose,
 }) => {
   const { logout } = useAuthStore();
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = useCallback(() => {
-    logout();
     onClose();
+    logout();
   }, [logout, onClose]);
 
+  const handleProfileClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+
+      setTimeout(() => {
+        onClose();
+      }, 100);
+
+      setTimeout(() => {
+        router.push(getDashboardUrl(user.role));
+      }, 50);
+    },
+    [router, user.role, onClose]
+  );
+
+  // Enhanced click outside detection for user dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+
+      if (dropdownRef.current?.contains(target)) {
+        return;
+      }
+
+      if (isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      const timeoutId = setTimeout(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [isOpen, onClose]);
+
   return (
-    <div className="relative user-dropdown">
+    <div className="relative user-dropdown" ref={dropdownRef}>
       <button
         onClick={onToggle}
         className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2"
@@ -272,7 +373,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
           </div>
           <Link
             href={getDashboardUrl(user.role)}
-            onClick={onClose}
+            onClick={handleProfileClick}
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
           >
             Profile
@@ -342,19 +443,43 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   user,
 }) => {
   const { logout } = useAuthStore();
+  const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(
     null
   );
 
   const handleLogout = useCallback(() => {
-    logout();
     onClose();
+    logout();
   }, [logout, onClose]);
 
   const handleMobileSectionToggle = (sectionName: string) => {
     setOpenMobileSection((prev) => (prev === sectionName ? null : sectionName));
   };
+
+  const handleMobileLinkClick = useCallback(
+    (e: React.MouseEvent, href: string, external?: boolean) => {
+      if (external) {
+        onClose();
+        return;
+      }
+
+      e.preventDefault();
+
+      // Close mobile section and menu
+      setOpenMobileSection(null);
+
+      setTimeout(() => {
+        onClose();
+      }, 100);
+
+      setTimeout(() => {
+        router.push(href);
+      }, 200);
+    },
+    [router, onClose]
+  );
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -381,11 +506,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       setOpenMobileSection(null);
     }
   }, [isOpen]);
-
-  const handleLinkClick = () => {
-    setOpenMobileSection(null);
-    onClose();
-  };
 
   return (
     <>
@@ -428,7 +548,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={handleLinkClick}
+                onClick={(e) => handleMobileLinkClick(e, link.href)}
                 className={`block px-4 py-3 rounded-md text-sm font-medium mb-1 transition-all duration-200 ${
                   isActiveLink(pathname, link.href)
                     ? "bg-primary-light text-white"
@@ -476,7 +596,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                             target: "_blank",
                             rel: "noopener noreferrer",
                           })}
-                          onClick={handleLinkClick}
+                          onClick={(e) =>
+                            handleMobileLinkClick(e, item.href, item.external)
+                          }
                           className={`block px-4 py-2 rounded-md text-sm transition-all duration-200 ${
                             isActiveLink(pathname, item.href)
                               ? "bg-primary text-white"
@@ -520,7 +642,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 </div>
                 <Link
                   href={getDashboardUrl(user.role)}
-                  onClick={onClose}
+                  onClick={(e) =>
+                    handleMobileLinkClick(e, getDashboardUrl(user.role))
+                  }
                   className="block w-full text-center px-4 py-2 mb-2 rounded-md text-sm font-medium text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white transition-all duration-200"
                 >
                   Profile
@@ -537,7 +661,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={onClose}
+                  onClick={(e) => handleMobileLinkClick(e, link.href)}
                   className={`block w-full text-center mb-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     link.className === "btn-outline"
                       ? "text-primary-dark border border-primary-dark hover:bg-primary-light hover:text-white"
@@ -576,7 +700,11 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 
   const handleUserDropdownToggle = useCallback(() => {
     setUserDropdownOpen((prev) => !prev);
-  }, []);
+    // Close nav dropdown when user dropdown opens
+    if (!userDropdownOpen) {
+      setOpenNavDropdown(null);
+    }
+  }, [userDropdownOpen]);
 
   const handleUserDropdownClose = useCallback(() => {
     setUserDropdownOpen(false);
@@ -584,37 +712,44 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 
   const handleNavDropdownToggle = useCallback((name: string) => {
     setOpenNavDropdown((prev) => (prev === name ? null : name));
+    // Close user dropdown when nav dropdown opens
+    setUserDropdownOpen(false);
   }, []);
 
   const handleNavDropdownClose = useCallback(() => {
     setOpenNavDropdown(null);
   }, []);
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Element;
-
-      // Close user dropdown
-      if (userDropdownOpen && !target.closest(".user-dropdown")) {
-        setUserDropdownOpen(false);
-      }
-
-      // Close nav dropdowns
-      if (openNavDropdown && !target.closest(`[aria-expanded="true"]`)) {
-        setOpenNavDropdown(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [userDropdownOpen, openNavDropdown]);
-
   // Close mobile menu and dropdowns on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setOpenNavDropdown(null);
+    setUserDropdownOpen(false);
   }, [pathname]);
+
+  // Global click outside handler with improved logic
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as Element;
+
+      // Don't interfere with dropdown internal handling
+      if (target.closest(".relative")) {
+        return;
+      }
+
+      // Close all dropdowns if clicking outside any dropdown area
+      if (
+        !target.closest('[role="navigation"]') &&
+        !target.closest(".user-dropdown")
+      ) {
+        setUserDropdownOpen(false);
+        setOpenNavDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleGlobalClick);
+    return () => document.removeEventListener("mousedown", handleGlobalClick);
+  }, []);
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">

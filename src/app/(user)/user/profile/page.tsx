@@ -1,5 +1,3 @@
-import AchievementItem from "@/components/user/AchievementItem";
-import ActivityMetric from "@/components/user/ActivitiesMetrics";
 import { FaCalendarAlt } from "react-icons/fa";
 import { FaBook, FaComments } from "react-icons/fa6";
 
@@ -164,47 +162,6 @@ const ProfileContent = () => (
             Save Changes
           </button>
         </form>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold mb-4">Your CONCES Activity</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <ActivityMetric
-            title="Events Attended"
-            value={8}
-            icon={<FaCalendarAlt className="text-conces-blue" />}
-          />
-          <ActivityMetric
-            title="Resources Downloaded"
-            value={15}
-            icon={<FaBook className="text-conces-gold" />}
-          />
-          <ActivityMetric
-            title="Forum Posts"
-            value={23}
-            icon={<FaComments className="text-conces-blue" />}
-          />
-        </div>
-
-        <h3 className="font-semibold mb-2">Recent Achievements</h3>
-        <div className="space-y-3">
-          <AchievementItem
-            title="2022 Hackathon Finalist"
-            date="December 2022"
-            description="Reached finals of the annual CONCES Engineering Hackathon"
-          />
-          <AchievementItem
-            title="Mentorship Program Completion"
-            date="October 2022"
-            description="Completed 3-month mentorship with Engr. Adeola Johnson"
-          />
-          <AchievementItem
-            title="Faith & Engineering Blog Contributor"
-            date="August 2022"
-            description="Published article on 'Ethical Decision Making in Engineering'"
-          />
-        </div>
       </div>
     </div>
   </div>
