@@ -41,7 +41,7 @@ export default function CartItemCard({ item }:any) {
         <div className="flex justify-between">
           <h3 className="text-lg font-medium text-royal-900">{item.product.name}</h3>
           <p className="text-lg font-bold text-royal-900">
-            ${(item.product.price * item.quantity).toFixed(2)}
+            ₦{(item.product.price * item.quantity).toFixed(2)}
           </p>
         </div>
 

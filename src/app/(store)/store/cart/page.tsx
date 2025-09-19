@@ -45,19 +45,19 @@ export default function RoyalCartPage() {
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">${total.toFixed(2)}</span>
+                  <span className="font-medium">₦{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">${shipping.toFixed(2)}</span>
+                  <span className="font-medium">₦{shipping.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">${tax.toFixed(2)}</span>
+                  <span className="font-medium">₦{tax.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-4 flex justify-between text-lg font-bold text-royal-900">
                   <span>Total</span>
-                  <span>${grandTotal.toFixed(2)}</span>
+                  <span>₦{grandTotal.toFixed(2)}</span>
                 </div>
               </div>
               <Link

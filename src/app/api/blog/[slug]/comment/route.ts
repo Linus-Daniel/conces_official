@@ -5,10 +5,10 @@ import Blog from "@/models/Blog";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+  { params }: { params: Promise<{ slug: string }> }) {
   try {
     await dbConnect();
+    const {slug} = await params;
 
     const body = await request.json();
     const { author, content } = body;
@@ -20,7 +20,7 @@ export async function POST(
       );
     }
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const blog = await Blog.findOne({ slug:slug });
 
     if (!blog) {
       return NextResponse.json(

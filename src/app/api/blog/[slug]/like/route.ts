@@ -6,12 +6,13 @@ import Blog from "@/models/Blog";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
-) {
+  { params }: { params: Promise<{ slug: string }> })  {
+
+    const {slug} = await params
   try {
     await dbConnect();
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const blog = await Blog.findOne({ slug: slug });
 
     if (!blog) {
       return NextResponse.json(
