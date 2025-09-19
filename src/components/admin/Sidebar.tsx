@@ -17,6 +17,7 @@ import {
   FaChevronUp,
   FaCrown,
   FaUserGraduate,
+  FaBlog,
 } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 import { IoLibrarySharp } from "react-icons/io5";
@@ -47,7 +48,7 @@ const menuItems = [
   },
   {
     label: "Talent Hub",
-    icon:GiBrain,
+    icon: GiBrain,
     subItems: [
       { link: "/admin/hub/overview", label: "Dashboard" },
 
@@ -57,6 +58,8 @@ const menuItems = [
   },
   { link: "/admin/chapters", label: "Chapters", icon: FaMapMarkerAlt },
   { link: "/admin/resources", label: "Resources", icon: IoLibrarySharp },
+  { link: "/admin/blogs", label: "Blogs", icon: FaBlog },
+
   { link: "/admin/mentorship", label: "Mentorship", icon: FaBook },
   { link: "/admin/executives", label: "Executives", icon: FaCrown },
 

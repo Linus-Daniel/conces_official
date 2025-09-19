@@ -244,3 +244,49 @@ export interface WorkExperience {
   endDate?: string;
   description?: string;
 }
+
+
+// types/blog.ts - TypeScript types for API responses
+export interface BlogFormData {
+  title: string;
+  excerpt: string;
+  content: string;
+  slug?: string;
+  category: "spiritual" | "technical" | "career" | "general";
+  tags: string[];
+  featuredImage: string;
+  featured: boolean;
+  published: boolean;
+  publishedAt?: string;
+  author: {
+    name: string;
+    avatar?: string;
+    role?: string;
+    bio?: string;
+  };
+  relatedPosts?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+}
+
+export interface BlogListItem {
+  _id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  featuredImage: string;
+  featured: boolean;
+  published: boolean;
+  publishedAt: string;
+  readTime: number;
+  author: {
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
+  views: number;
+  likes: number;
+  createdAt: string;
+  updatedAt: string;
+}
