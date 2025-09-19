@@ -1,5 +1,3 @@
-// Simple approach: Use NextAuth session directly
-// admin/src/lib/auth.ts (Updated - No JWT library needed)
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { verifyPassword } from "@/lib/hash";

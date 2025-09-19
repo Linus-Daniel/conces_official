@@ -21,8 +21,7 @@ export async function GET(
 
     let event = null;
 
-    event = await Event.findOne({ _id: id }).populate('chapter',"name");
-
+    event = await Event.findOne({ _id: id }).populate('chapter', 'chapterName');
     const allEvents = await Event.find({}, { id: 1, _id: 1, title: 1 }).limit(
       5
     );

@@ -21,13 +21,14 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     const userRole = session?.user?.role;
 
-    const chapteres = await Chapter.find().sort({ createdAt: -1 });
+    const chapters = await Chapter.find().sort({ createdAt: -1 });
+    console.log(chapters)
 
-    return NextResponse.json({ chapteres }, { status: 200 });
+    return NextResponse.json({ chapters }, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch chapteres:", error);
+    console.error("Failed to fetch chapters:", error);
     return NextResponse.json(
-      { error: "Failed to fetch chapteres" },
+      { error: "Failed to fetch chapters" },
       { status: 500 }
     );
   }

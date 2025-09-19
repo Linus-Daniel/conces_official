@@ -50,7 +50,7 @@ export interface IEvent {
   category: "spiritual" | "academic" | "career" | "social" | string;
   chapter: {
     _id: string;
-    name: string;
+    chapterName: string;
   };
   date: string;
   time: string;

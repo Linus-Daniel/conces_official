@@ -28,11 +28,11 @@ export async function GET(req: NextRequest) {
       console.log("Admin user detected, fetching all events");
       const events = await Event.find()
         .sort({ date: 1 })
-        .populate("chapter", "name");
+        .populate("chapter", "chapterName");
       return NextResponse.json(events);
     }
-    // Only return approved events for public view
-    const events = await Event.find({ approved: true }).sort({ date: 1 }).populate("chapter","name");
+
+    const events = await Event.find({ approved: true }).sort({ date: 1 }).populate("chapter","chapterName");
     return NextResponse.json(events);
   } catch (error) {
     console.error("Failed to fetch events:", error);

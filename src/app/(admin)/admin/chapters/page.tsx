@@ -45,30 +45,6 @@ const ChapterOversight = () => {
 
   console.log(chapteres);
 
-  const handleCreateChapter = (newChapter: {
-    name: string;
-    location: string;
-    institution: string;
-  }) => {
-    const chapter = {
-      id: chapteres.length + 1,
-      name: newChapter.name,
-      status: "Active",
-      location: newChapter.location,
-      institution: newChapter.institution,
-      activity: "No Activity",
-      leader: {
-        name: "No Leader Assigned",
-        email: "",
-        avatar: "",
-      },
-      members: 0,
-      events: 0,
-      lastActivity: "Just created",
-    };
-    setChapters([...chapteres, chapter]);
-  };
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <Head>

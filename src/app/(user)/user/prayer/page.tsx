@@ -1,6 +1,5 @@
 import PrayerWall from '@/components/user/PrayerWall';
 import api from '@/lib/axiosInstance';
-import axios from 'axios';
 
 const getPrayerRequests = async () => {
   try {

@@ -148,8 +148,8 @@ const EventPage = () => {
                   </span>
                   <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
                     {event?.chapter
-                      ? event?.chapter?.name.charAt(0).toUpperCase() +
-                        event.chapter.name.slice(1)
+                      ? event?.chapter?.chapterName.charAt(0).toUpperCase() +
+                        event.chapter.chapterName.slice(1)
                       : "National"}{" "}
                   </span>
                   {/* Registration Status Badge */}

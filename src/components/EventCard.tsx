@@ -32,7 +32,7 @@ const EventCard = (event: IEvent) => {
                   {event.category}
                 </span>
                 <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
-                  {event.chapter.name}
+                  {event.chapter.chapterName}
                 </span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900">

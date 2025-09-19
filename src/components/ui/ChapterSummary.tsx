@@ -7,8 +7,6 @@ import {
   FaArrowUp,
   FaExclamationCircle,
   FaArrowDown,
-  FaTrophy,
-  FaBatteryQuarter,
 } from "react-icons/fa";
 
 const stats = [

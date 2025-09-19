@@ -51,7 +51,7 @@ const ChapterCard: React.FC<ChapterCardProps> = ({
   // Data normalization - handle different field names
   const normalizedChapter = {
     id: chapter._id || chapter.id,
-    name: chapter.chapterName || chapter.name || "Unnamed Chapter",
+    name: chapter.chapterName || chapter.chapterName || "Unnamed Chapter",
     location: chapter.chapterLocation || chapter.location || "Location not set",
     status:
       chapter.status ||

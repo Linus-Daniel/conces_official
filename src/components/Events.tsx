@@ -72,7 +72,7 @@ const EventsComponent = ({
       if (activeTab === "past" && eventDate >= today) return false;
 
       // Filter by selected chapter
-      if (selectedChapter && event.chapter.name !== selectedChapter)
+      if (selectedChapter && event.chapter.chapterName !== selectedChapter)
         return false;
 
       // Filter by selected category
@@ -196,8 +196,8 @@ const EventsComponent = ({
                   >
                     <option value="">All Chapters</option>
                     {chapters.map((chapter, index) => (
-                      <option key={index} value={chapter.name as string}>
-                        {chapter.name}
+                      <option key={index} value={chapter.chapterName as string}>
+                        {chapter.chapterName}
                       </option>
                     ))}
                   </select>
@@ -250,15 +250,15 @@ const EventsComponent = ({
                     >
                       <option value="">All Chapters</option>
                       {chapters.map((chapter, index) => (
-                        <option key={index} value={chapter.name}>
-                          {chapter.name}
+                        <option key={index} value={chapter.chapterName}>
+                          {chapter.chapterName}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-royal-700 mb-1 flex items-center gap-2">
+                    <label className=" text-sm font-medium text-royal-700 mb-1 flex items-center gap-2">
                       <FaTags />
                       Category
                     </label>
