@@ -347,7 +347,7 @@ console.log(subject)
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <section className="bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white py-20">
+      <section className="bg-gradient-to-br from-royal-600 to-royal-900 text-white py-20">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-5xl font-bold mb-6">Get in Touch</h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
@@ -623,7 +623,7 @@ console.log(subject)
             </div>
 
             {/* Office Information */}
-            <div className="bg-gradient-to-br from-primary to-primary-light text-white rounded-3xl p-6">
+            <div className="bg-gradient-to-tr from-30% from-royal-700 to-gold-500 text-white rounded-3xl p-6">
               <h3 className="text-xl font-bold mb-4">CONCES Headquarters</h3>
               <div className="space-y-3">
                 <div className="flex items-start space-x-3">

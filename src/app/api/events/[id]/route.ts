@@ -19,42 +19,14 @@ export async function GET(
     console.log("🔍 Fetching event with ID:", id);
     console.log("🔍 ID type:", typeof id, "ID length:", id.length);
 
-    // Debug: Try multiple ways to find the event
     let event = null;
 
-    // Method 1: Try with custom 'id' field
-    event = await Event.findOne({ id: id });
-    console.log(
-      "🔍 Method 1 (custom id field):",
-      event ? "FOUND" : "NOT FOUND"
-    );
+    event = await Event.findOne({ _id: id }).populate('chapter',"name");
 
-    // Method 2: Try with MongoDB _id field (if it's a valid ObjectId)
-    if (!event && mongoose.Types.ObjectId.isValid(id)) {
-      event = await Event.findById(id).populate('chapter',' name');
-      console.log("🔍 Method 2 (MongoDB _id):", event ? "FOUND" : "NOT FOUND");
-    }
-
-    // Method 3: Try with _id as string
-    if (!event) {
-      event = await Event.findOne({ _id: id });
-      console.log(
-        "🔍 Method 3 (_id as string):",
-        event ? "FOUND" : "NOT FOUND"
-      );
-    }
-
-    // Debug: Show all events and their ID formats
     const allEvents = await Event.find({}, { id: 1, _id: 1, title: 1 }).limit(
       5
     );
-    console.log("🔍 Sample events in database:");
-    allEvents.forEach((e) => {
-      console.log("  - Title:", e.title);
-      console.log("    Custom ID:", e.id, "(type:", typeof e.id, ")");
-      console.log("    MongoDB _id:", e._id, "(type:", typeof e._id, ")");
-      console.log("    ---");
-    });
+
 
     if (!event) {
       return NextResponse.json(

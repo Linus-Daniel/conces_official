@@ -746,7 +746,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
                         className={`pl-10 w-full rounded-md border ${
                           errors.email ? "border-red-300" : "border-royal-300"
                         } py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500`}
-                        placeholder="your@email.com"
+                        placeholder="example@gmail.com"
                         required
                       />
                     </div>
@@ -807,7 +807,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
                         value={formData.institution}
                         onChange={handleInputChange}
                         className="pl-10 w-full rounded-md border border-royal-300 py-2 px-3 text-royal-900 placeholder-royal-400 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-gold-500"
-                        placeholder="University Name"
+                        placeholder="Institution Name"
                       />
                     </div>
                   </div>
@@ -1154,7 +1154,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
                   </button>
                 </div>
 
-                <div className="relative flex items-center justify-center mb-6">
+                {/* <div className="relative flex items-center justify-center mb-6">
                   <div className="border-t border-royal-300 absolute w-full"></div>
                   <div className="bg-white px-4 relative z-10 text-sm text-royal-500">
                     Or continue with
@@ -1176,7 +1176,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
                     <FaMicrosoft className="text-blue-500 mr-2" />
                     Microsoft
                   </button>
-                </div>
+                </div> */}
 
                 <p className="text-center text-sm text-royal-600">
                   Don't have an account?{" "}
