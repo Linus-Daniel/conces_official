@@ -49,7 +49,7 @@ function ErrorState({ error }: { error: Error }) {
       </div>
       <h3 className="text-lg font-semibold mb-2">Unable to load events</h3>
       <p className="text-gray-600 text-sm">
-        {error.message || "Please try again later"}
+        { "Please try again later"}
       </p>
     </div>
   );

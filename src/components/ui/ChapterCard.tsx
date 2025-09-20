@@ -41,14 +41,11 @@ interface Chapter {
 
 interface ChapterCardProps {
   chapter: Chapter;
-  onAssignLeader?: (chapterId: string) => void;
 }
 
 const ChapterCard: React.FC<ChapterCardProps> = ({
   chapter,
-  onAssignLeader,
 }) => {
-  // Data normalization - handle different field names
   const normalizedChapter = {
     id: chapter._id || chapter.id,
     name: chapter.chapterName || chapter.chapterName || "Unnamed Chapter",
@@ -164,7 +161,7 @@ const ChapterCard: React.FC<ChapterCardProps> = ({
       <div className="px-5 py-5 space-y-4">
         {/* Leader Info */}
         <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-          {normalizedChapter.leader ? (
+          {normalizedChapter.leader && (
             <>
               {normalizedChapter.leader.avatar && !imageError ? (
                 <img
@@ -192,26 +189,7 @@ const ChapterCard: React.FC<ChapterCardProps> = ({
                 )}
               </div>
             </>
-          ) : (
-            <>
-              <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                <FaUser className="text-gray-400 text-lg" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  No Leader Assigned
-                </p>
-                <button
-                  onClick={() =>
-                    onAssignLeader?.(normalizedChapter.id as string)
-                  }
-                  className="text-xs text-royal-600 hover:text-royal-700 font-medium hover:underline transition-colors"
-                >
-                  Assign Leader →
-                </button>
-              </div>
-            </>
-          )}
+          ) }
         </div>
 
         {/* Stats Grid */}
@@ -306,7 +284,6 @@ export const ChapterCardExample = () => {
         <ChapterCard
           key={chapter._id}
           chapter={chapter}
-          onAssignLeader={handleAssignLeader}
         />
       ))}
     </div>

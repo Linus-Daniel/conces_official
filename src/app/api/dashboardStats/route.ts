@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const products = await Product.countDocuments();
 
     // Fetch prayer request count
-    const prayerRequestCount = await PrayerRequest.countDocuments();
+    const prayers = await PrayerRequest.countDocuments();
 
     // Fetch event count
     const events = await Events.countDocuments();
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       users,
       products,
-      prayerRequestCount,
+      prayers,
       events,
       chapters,
     });

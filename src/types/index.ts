@@ -245,6 +245,20 @@ export interface WorkExperience {
   description?: string;
 }
 
+interface Chapters {
+  _id: string;
+  chapterName: string;
+}
+
+export interface Album {
+  id: number;
+  title: string;
+  images: string[];
+  description: string;
+  date: string; // ISO date string
+  tags: string[];
+  chapter: Chapters;
+}
 
 // types/blog.ts - TypeScript types for API responses
 export interface BlogFormData {
