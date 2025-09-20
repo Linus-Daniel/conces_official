@@ -239,7 +239,7 @@ const EventsComponent = ({
               <div className="md:hidden mt-4 pt-4 border-t border-royal-200">
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-royal-700 mb-1 flex items-center gap-2">
+                    <label className=" text-sm font-medium text-royal-700 mb-1 flex items-center gap-2">
                       <FaMapMarkerAlt />
                       Chapter
                     </label>

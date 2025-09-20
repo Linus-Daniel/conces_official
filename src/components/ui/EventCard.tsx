@@ -1,23 +1,15 @@
 "use client";
 import React from "react";
-import {
-  FaLocationDot,
-  FaUserCheck,
-  FaComments,
-  FaPen,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaLocationDot, FaUserCheck, FaComments } from "react-icons/fa6";
 import { IEvent } from "@/types";
 import { FaCalendarAlt } from "react-icons/fa";
 import Link from "next/link";
 
 interface EventCardProps {
   event: IEvent;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
+const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const statusColors = {
     upcoming: "bg-blue-100 text-blue-800",
     ongoing: "bg-green-100 text-green-800",
@@ -40,104 +32,101 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-      {event.image && (
-        <div className="relative h-48 w-full">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+      {/* Image Section - Fixed Height */}
+      <div className="relative h-48 w-full bg-gray-100">
+        {event.image ? (
           <img
             src={event.image}
             alt={event.title}
             className="w-full h-full object-cover"
           />
-          {event.featured && (
-            <span className="absolute top-2 left-2 bg-royal-800 text-white px-2 py-1 text-xs font-semibold rounded">
-              FEATURED
-            </span>
-          )}
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-royal-50 to-royal-100">
+            <span className="text-6xl opacity-20 text-royal-600">📅</span>
+          </div>
+        )}
+        {event.featured && (
+          <span className="absolute top-2 left-2 bg-royal-800 text-white px-2 py-1 text-xs font-semibold rounded">
+            FEATURED
+          </span>
+        )}
+      </div>
 
-      <div className="p-4 md:p-6">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex flex-wrap gap-2">
-            <span
-              className={`text-xs px-2 py-1 rounded-full font-medium ${getCategoryColor(
-                event.category
-              )}`}
-            >
-              {event.category}
-            </span>
+      {/* Content Section - Flex Grow */}
+      <div className="p-4 md:p-6 flex flex-col flex-grow">
+        {/* Tags Section - Fixed Height */}
+        <div className="flex flex-wrap gap-2 mb-3 min-h-[28px]">
+          <span
+            className={`text-xs px-2 py-1 rounded-full font-medium ${getCategoryColor(
+              event.category
+            )}`}
+          >
+            {event.category}
+          </span>
+          {event.chapter?.chapterName && (
             <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full font-medium">
               {event.chapter.chapterName}
             </span>
-          </div>
-
-          <div className="flex gap-2">
-            {onEdit && (
-              <button
-                onClick={() => onEdit(event.id)}
-                className="text-gray-500 hover:text-royal-600 transition-colors"
-                aria-label="Edit event"
-              >
-                <FaPen size={14} />
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={() => onDelete(event.id)}
-                className="text-gray-500 hover:text-red-600 transition-colors"
-                aria-label="Delete event"
-              >
-                <FaTrash size={14} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          {event.title}
-        </h3>
-
-        <div className="flex items-center text-sm text-gray-600 mb-1">
-          <FaCalendarAlt className="mr-2 text-royal-600" />
-          <span>
-            {event.date} • {event.time}
+          )}
+          <span
+            className={`text-xs px-2 py-1 rounded-full font-medium ml-auto ${
+              statusColors[event.status]
+            }`}
+          >
+            {event.status}
           </span>
         </div>
 
-        <div className="flex items-center text-sm text-gray-600 mb-3">
-          <FaLocationDot className="mr-2 text-royal-600" />
-          <span>{event.location}</span>
+        {/* Title - Fixed Min Height */}
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[56px]">
+          {event.title}
+        </h3>
+
+        {/* Date & Location */}
+        <div className="space-y-1 mb-3">
+          <div className="flex items-center text-sm text-gray-600">
+            <FaCalendarAlt className="mr-2 text-royal-600 flex-shrink-0" />
+            <span className="truncate">
+              {event.date} • {event.time}
+            </span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <FaLocationDot className="mr-2 text-royal-600 flex-shrink-0" />
+            <span className="truncate">{event.location}</span>
+          </div>
         </div>
 
-        <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
+        {/* Description - Fixed Height */}
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[40px]">
+          {event.description}
+        </p>
 
-        <div className="flex flex-wrap justify-between items-center gap-3">
-          <div className="flex gap-4">
-            <div className="flex items-center text-sm text-gray-600">
-              <FaUserCheck className="mr-1 text-royal-600" />
-              <span>{event.rsvps} RSVPs</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-600">
-              <FaComments className="mr-1 text-royal-600" />
-              <span>{event.comments} Comments</span>
+        {/* Spacer - Pushes bottom content down */}
+        <div className="flex-grow"></div>
+
+        {/* Stats Section - Always at Bottom */}
+        <div className="pt-4 mt-auto border-t border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex gap-4">
+              <div className="flex items-center text-sm text-gray-600">
+                <FaUserCheck className="mr-1 text-royal-600" />
+                <span>{event.rsvps || 0} RSVPs</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-600">
+                <FaComments className="mr-1 text-royal-600" />
+                <span>{event.comments || 0} Comments</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <span
-              className={`text-xs px-2 py-1 rounded-full ${
-                statusColors[event.status]
-              }`}
-            >
-              {/* {event.status.charAt(0).toUpperCase() + event.status.slice(1)} */}
-            </span>
-            <Link
-              href={`/events/${event._id}`}
-              className="inline-flex text-white text-royal-white items-center px-3 py-1.5  border border-transparent rounded-md shadow-sm text-xs font-medium  bg-royal-600 hover:bg-royal-700 transition-colors"
-            >
-              View Details
-            </Link>
-          </div>
+          {/* Button - Always Full Width at Bottom */}
+          <Link
+            href={`/events/${event._id}`}
+            className="block w-full text-center px-4 py-2 bg-royal-600 text-white font-medium rounded-md shadow-sm hover:bg-royal-700 transition-colors"
+          >
+            View Details
+          </Link>
         </div>
       </div>
     </div>

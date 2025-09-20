@@ -1,8 +1,41 @@
-import React from 'react';
-import { ArrowRight, Users, Briefcase, TrendingUp, Star, ExternalLink, Rocket, Target, Globe, Zap } from 'lucide-react';
-import Link from 'next/link';
-
-const TalentHubSection = () => {
+import React from "react";
+import {
+  ArrowRight,
+  Users,
+  Briefcase,
+  TrendingUp,
+  Star,
+  ExternalLink,
+  Rocket,
+  Target,
+  Globe,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+const talent = [
+  {
+    name: "Linus Daniel",
+    role: "Software Engineer",
+    rating: 5,
+    avatar: "S",
+    color: "bg-purple-500",
+  },
+  {
+    name: "Gift Michael",
+    role: "Product Manager",
+    rating: 4.8,
+    avatar: "M",
+    color: "bg-blue-500",
+  },
+  {
+    name: "Joel Clement",
+    role: "Safety Engineer",
+    rating:3 ,
+    avatar: "F",
+    color: "bg-green-500",
+  },
+];
+const TalentHubPromoSection = () => {
   return (
     <section className="py-16 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
       {/* Background Pattern */}
@@ -30,23 +63,44 @@ const TalentHubSection = () => {
                 </span>
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed">
-                CONCES members now have access to our dedicated talent platform where you can showcase your skills, connect with opportunities, and build your professional network.
+                CONCES members now have access to our dedicated talent platform
+                where you can showcase your skills, connect with opportunities,
+                and build your professional network.
               </p>
             </div>
 
             {/* Features Grid */}
             <div className="grid sm:grid-cols-2 gap-4">
               {[
-                { icon: <Users className="w-5 h-5" />, text: "Professional Profiles", color: "text-blue-500" },
-                { icon: <Briefcase className="w-5 h-5" />, text: "Job Opportunities", color: "text-green-500" },
-                { icon: <TrendingUp className="w-5 h-5" />, text: "Career Growth", color: "text-purple-500" },
-                { icon: <Target className="w-5 h-5" />, text: "Project Showcase", color: "text-orange-500" }
+                {
+                  icon: <Users className="w-5 h-5" />,
+                  text: "Professional Profiles",
+                  color: "text-blue-500",
+                },
+                {
+                  icon: <Briefcase className="w-5 h-5" />,
+                  text: "Job Opportunities",
+                  color: "text-green-500",
+                },
+                {
+                  icon: <TrendingUp className="w-5 h-5" />,
+                  text: "Career Growth",
+                  color: "text-purple-500",
+                },
+                {
+                  icon: <Target className="w-5 h-5" />,
+                  text: "Project Showcase",
+                  color: "text-orange-500",
+                },
               ].map((feature, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg border border-gray-100">
-                  <div className={`${feature.color}`}>
-                    {feature.icon}
-                  </div>
-                  <span className="text-gray-700 font-medium">{feature.text}</span>
+                <div
+                  key={index}
+                  className="flex items-center space-x-3 p-3 bg-white/60 rounded-lg border border-gray-100"
+                >
+                  <div className={`${feature.color}`}>{feature.icon}</div>
+                  <span className="text-gray-700 font-medium">
+                    {feature.text}
+                  </span>
                 </div>
               ))}
             </div>
@@ -54,14 +108,14 @@ const TalentHubSection = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Link
-                href="https://talenthub.conces.org"
-                target="_blank"
+                href="https://talenthub.conces.org/talents"
+                target="_blank noopener"
                 className="group inline-flex items-center justify-center px-8 py-4 bg-primary-dark text-white font-semibold rounded-xl hover:bg-primary-dark/90 transform hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Explore TalentHub
                 <ExternalLink className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
-              
+
               <Link
                 href="https://talenthub.conces.org/auth?mode=signup"
                 target="_blank"
@@ -107,22 +161,38 @@ const TalentHubSection = () => {
 
                 {/* Profile Cards */}
                 <div className="space-y-4">
-                  {[
-                    { name: "Sarah Chen", role: "Software Engineer", rating: "4.9", avatar: "S", color: "bg-purple-500" },
-                    { name: "Michael Adebayo", role: "Product Designer", rating: "4.8", avatar: "M", color: "bg-blue-500" },
-                    { name: "Fatima Hassan", role: "Data Scientist", rating: "5.0", avatar: "F", color: "bg-green-500" }
-                  ].map((profile, index) => (
-                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                      <div className={`w-10 h-10 ${profile.color} rounded-full flex items-center justify-center text-white font-semibold`}>
+                  {talent.map((profile, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <div
+                        className={`w-10 h-10 ${profile.color} rounded-full flex items-center justify-center text-white font-semibold`}
+                      >
                         {profile.avatar}
                       </div>
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900">{profile.name}</div>
-                        <div className="text-sm text-gray-600">{profile.role}</div>
+                        <div className="font-medium text-gray-900">
+                          {profile.name}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {profile.role}
+                        </div>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium text-gray-700">{profile.rating}</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              profile.rating >= star
+                                ? "text-yellow-400 fill-current"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-sm font-medium text-gray-700 ml-2">
+                          {profile.rating}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -131,7 +201,9 @@ const TalentHubSection = () => {
                 {/* Bottom CTA */}
                 <div className="pt-4 border-t border-gray-100">
                   <div className="text-center">
-                    <div className="text-sm text-gray-600 mb-2">Join the community</div>
+                    <div className="text-sm text-gray-600 mb-2">
+                      Join the community
+                    </div>
                     <div className="w-full bg-primary-light/20 rounded-lg py-2 px-4 text-primary-dark font-medium text-sm">
                       Create Your Profile →
                     </div>
@@ -158,13 +230,26 @@ const TalentHubSection = () => {
           <div className="inline-flex items-center space-x-2 px-6 py-3 bg-white rounded-full shadow-lg border border-gray-100">
             <div className="flex -space-x-2">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold ${i === 1 ? 'bg-purple-500' : i === 2 ? 'bg-blue-500' : i === 3 ? 'bg-green-500' : 'bg-orange-500'}`}>
+                <div
+                  key={i}
+                  className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold ${
+                    i === 1
+                      ? "bg-purple-500"
+                      : i === 2
+                      ? "bg-blue-500"
+                      : i === 3
+                      ? "bg-green-500"
+                      : "bg-orange-500"
+                  }`}
+                >
                   {String.fromCharCode(64 + i)}
                 </div>
               ))}
             </div>
             <div className="text-sm">
-              <span className="font-medium text-gray-900">500+ CONCES members</span>
+              <span className="font-medium text-gray-900">
+                500+ CONCES members
+              </span>
               <span className="text-gray-600"> already using TalentHub</span>
             </div>
           </div>
@@ -174,4 +259,4 @@ const TalentHubSection = () => {
   );
 };
 
-export default TalentHubSection;
+export default TalentHubPromoSection;

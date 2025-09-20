@@ -1,4 +1,5 @@
 "use client"
+import StatementOfFaith from "@/components/home/Faith";
 import { useState } from "react";
 
 export default function AboutPage() {
@@ -26,7 +27,7 @@ export default function AboutPage() {
       <div className="sticky top-0 z-40 bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex overflow-x-auto scrollbar-hide -mb-px">
-            {["history", "mission", "pillars", "team"].map((tab) => (
+            {["history", "mission", "pillars", "faith"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -39,7 +40,7 @@ export default function AboutPage() {
                 {tab === "history" && "Our History"}
                 {tab === "mission" && "Mission & Vision"}
                 {tab === "pillars" && "Our Pillars"}
-                {tab === "team" && "Our Team"}
+                {tab === "faith" && "Statemet of faith"}
               </button>
             ))}
           </div>
@@ -426,46 +427,9 @@ export default function AboutPage() {
         )}
 
         {/* Team Section */}
-        {activeTab === "team" && (
+        {activeTab === "faith" && (
           <section className="space-y-12">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-conces-blue mb-4">
-                Our Team
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Dedicated professionals and volunteers passionate about
-                engineering education and Christian values
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="p-8 md:p-12">
-                <div className="max-w-3xl mx-auto text-center">
-                  <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                    CONCES is led by a team of dedicated professionals and
-                    volunteers who are passionate about engineering education
-                    and Christian values. Our team includes chapter leaders
-                    across various institutions, alumni mentors, and an
-                    executive board.
-                  </p>
-                  <button className="bg-conces-blue hover:bg-conces-dark-blue text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-md hover:shadow-lg">
-                    Meet the Team
-                  </button>
-                </div>
-              </div>
-              <div className="bg-gray-50 p-6 text-center">
-                <p className="text-gray-500">
-                  Interested in joining our team?{" "}
-                  <a
-                    href="#"
-                    className="text-conces-blue font-medium hover:underline"
-                  >
-                    Contact us
-                  </a>{" "}
-                  to learn about volunteer opportunities.
-                </p>
-              </div>
-            </div>
+            <StatementOfFaith />
           </section>
         )}
       </div>

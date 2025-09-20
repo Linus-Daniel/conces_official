@@ -38,19 +38,15 @@ function page() {
       <Hero />
       <About />
       <TalentHubSection />
-      <StatementOfFaith />
       <Features />
       <Anthem />
 
       <Shop />
       <Donate />
 
-      <Sponsor />
-
-      <Testimonial />
-
       <Event />
-      <FAQPage />
+      <Sponsor />
+      <Testimonial />
 
       <CTA />
     </div>

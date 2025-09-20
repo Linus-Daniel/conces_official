@@ -438,67 +438,6 @@ const EventPage = () => {
             )}
           </div>
         </div>
-
-        {/* Comments Section */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="p-4 md:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 md:mb-4">
-              Comments ({event.comments})
-            </h2>
-            <div className="space-y-3 md:space-y-4">
-              {/* Sample comment */}
-              <div className="flex">
-                <div className="flex-shrink-0 mr-3">
-                  <Image
-                    className="h-8 w-8 md:h-10 md:w-10 rounded-full"
-                    src="https://randomuser.me/api/portraits/men/32.jpg"
-                    alt="User avatar"
-                    width={40}
-                    height={40}
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">
-                    Engr. John Adebayo
-                  </div>
-                  <div className="text-xs text-gray-500 mb-1 md:mb-2">
-                    May 5, 2025
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    {event.hasRegistration
-                      ? "Looking forward to this event! I've registered and can't wait to join the community."
-                      : "Great to see an open event! I'll definitely be there - love that no registration is needed."}
-                  </p>
-                </div>
-              </div>
-
-              {/* Comment form */}
-              <div className="mt-4 md:mt-6">
-                <label
-                  htmlFor="comment"
-                  className="block text-sm font-medium text-gray-700 mb-1 md:mb-2"
-                >
-                  Add your comment
-                </label>
-                <textarea
-                  id="comment"
-                  name="comment"
-                  rows={3}
-                  className="shadow-sm focus:ring-royal-500 focus:border-royal-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Share your thoughts about this event..."
-                ></textarea>
-                <div className="mt-2 flex justify-end">
-                  <button
-                    type="button"
-                    className="inline-flex items-center px-3 py-1 md:px-4 md:py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-royal-600 hover:bg-royal-700 focus:outline-none"
-                  >
-                    Post Comment
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
     </>
   );

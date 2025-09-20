@@ -151,29 +151,6 @@ function Donate() {
               </button>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
-              <div className="flex items-start">
-                <FaQuoteLeft className="text-gold-400 text-3xl mr-4 mt-1" />
-                <div>
-                  <p className="text-gray-200 italic mb-4">
-                    "The scholarship I received helped me complete my final year project, which is now being used by my local church for community development."
-                  </p>
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
-                      <img
-                        src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-9.jpg"
-                        alt="Student"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">Oluwaseun Adeyemi</p>
-                      <p className="text-gray-300 text-sm">Electrical Engineering, UNILAG</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="relative rounded-xl overflow-hidden shadow-xl h-80">

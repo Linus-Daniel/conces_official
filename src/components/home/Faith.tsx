@@ -6,7 +6,7 @@ interface ExpandedState {
   [key: number]: boolean;
 }
 
-export default function ApostolicCreed() {
+export default function StatementOfFaith() {
   const [expandedItems, setExpandedItems] = useState<ExpandedState>({});
 
   const toggleExpanded = (index: number): void => {

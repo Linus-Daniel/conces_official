@@ -11,7 +11,7 @@ function About() {
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">What is <span className="text-royal-700">CONCES</span>?</h2>
                 <div className="w-20 h-1 bg-gold-400 mx-auto mb-8"></div>
                 <p className="max-w-3xl mx-auto text-gray-600 text-lg">
-                    The Conference of Nigerian Christian Engineering Students and Alumni is a faith-based professional network that bridges spiritual values with engineering excellence.
+                    The Conference of Nigerian Christian Engineering Students and alumni is a faith-based professional network that bridges spiritual values with engineering excellence.
                 </p>
             </div>
 

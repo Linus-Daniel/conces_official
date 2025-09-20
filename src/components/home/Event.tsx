@@ -1,146 +1,169 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
+import { IEvent } from "@/types";
+import EventCard from "../ui/EventCard";
+import api from "@/lib/axiosInstance";
 
-const eventsData = [
-  {
-    id: "event-1",
-    title: "Renewable Energy Solutions Workshop",
-    date: "Sep 15, 2025",
-    time: "10:00 AM - 2:00 PM",
-    type: "Workshop",
-    description:
-      "Learn practical skills for implementing sustainable energy solutions in underserved communities.",
-    location: "University of Lagos",
-    imageUrl:
-      "https://storage.googleapis.com/uxpilot-auth.appspot.com/fe568f5f4b-6023f8bab46c6f7178f3.png",
-    imageAlt:
-      "engineering workshop in Nigerian university setting, students learning together",
-    actionText: "Register Now",
-    actionLink: "/register/renewable-energy-workshop",
-  },
-  {
-    id: "event-2",
-    title: "Engineers' Prayer & Bible Study",
-    date: "Sep 20, 2023",
-    time: "6:00 PM - 7:30 PM",
-    type: "Devotional",
-    description:
-      "Weekly virtual gathering for prayer, Bible study, and fellowship focused on engineering challenges.",
-    location: "Zoom Meeting",
-    imageUrl:
-      "https://storage.googleapis.com/uxpilot-auth.appspot.com/0233902786-78ce2c4f6bf1ee0ebab0.png",
-    imageAlt:
-      "prayer meeting in engineering lab, Nigerian students praying together",
-    actionText: "Join Online",
-    actionLink: "/join/prayer-study",
-    isVirtual: true,
-  },
-  {
-    id: "event-3",
-    title: "Annual CONCES National Conference",
-    date: "Oct 5-7, 2023",
-    time: "3-Day Event",
-    type: "Conference",
-    description:
-      "Join hundreds of Christian engineers for networking, learning, and spiritual growth.",
-    location: "Covenant University",
-    imageUrl:
-      "https://storage.googleapis.com/uxpilot-auth.appspot.com/2aab9a5249-143fa64e0261f5d8ddb5.png",
-    imageAlt:
-      "engineering conference in Nigeria, professional setting with presentations",
-    actionText: "Learn More",
-    actionLink: "/conference/annual-conces-2023",
-  },
-];
+// Constants
+const EVENTS_TO_DISPLAY = 4;
+const QUERY_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
-const EventCard = ({ event }:{event:any}) => {
+// Extract API call outside component
+async function fetchEvents(): Promise<IEvent[]> {
+  const { data } = await api.get<IEvent[]>("/events");
+  return data;
+}
+
+// Loading skeleton component
+function EventCardSkeleton() {
   return (
-    <div
-      id={event.id}
-      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 overflow-hidden"
-    >
-      <div className="relative h-48">
-        <img
-          className="w-full h-full object-cover"
-          src={event.imageUrl}
-          alt={event.imageAlt}
-        />
-        <div className="absolute top-4 left-4 bg-royal-700 text-white rounded-lg px-3 py-1 text-sm font-bold">
-          {event.date}
-        </div>
-      </div>
-      <div className="p-6">
-        <div className="flex items-center mb-3">
-          <span className="text-xs font-medium bg-royal-100 text-royal-700 px-2 py-1 rounded">
-            {event.type}
-          </span>
-          <span className="text-xs text-gray-500 ml-auto">{event.time}</span>
-        </div>
-        <h3 className="font-bold text-lg mb-2">{event.title}</h3>
-        <p className="text-gray-600 text-sm mb-4">{event.description}</p>
-        {!event.isVirtual && (
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-500">{event.location}</span>
-            <Link
-              href={event.actionLink}
-              className="text-royal-600 font-medium hover:text-royal-800 text-sm cursor-pointer"
-            >
-              {event.actionText}
-            </Link>
-          </div>
-        )}
-        {event.isVirtual && (
-          <div className="text-center">
-            <Link
-              href={event.actionLink}
-              className="text-royal-600 font-medium hover:text-royal-800 text-sm cursor-pointer"
-            >
-              {event.actionText}
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-function Event() {
-  return (
-    <div>
-      <section id="events" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1 bg-royal-100 text-royal-700 font-medium rounded-full text-sm mb-4">
-              Stay Updated
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Upcoming <span className="text-royal-700">Events</span> & News
-            </h2>
-            <div className="w-20 h-1 bg-gold-400 mx-auto mb-8"></div>
-            <p className="max-w-3xl mx-auto text-gray-600 text-lg">
-              Stay connected with the latest happenings, workshops, conferences,
-              and devotionals in the CONCES community.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {eventsData.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href={"/events"}
-              className="inline-block px-6 py-3 bg-royal-600 text-white font-bold rounded-lg hover:bg-royal-700 transition shadow hover:shadow-lg cursor-pointer"
-            >
-              View All Events
-            </Link>
-          </div>
-        </div>
-      </section>
+    <div className="animate-pulse">
+      <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
     </div>
   );
 }
 
-export default Event;
+// Error component
+function ErrorState({ error }: { error: Error }) {
+  return (
+    <div className="text-center py-12">
+      <div className="text-red-500 mb-4">
+        <svg
+          className="w-12 h-12 mx-auto"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <h3 className="text-lg font-semibold mb-2">Unable to load events</h3>
+      <p className="text-gray-600 text-sm">
+        {error.message || "Please try again later"}
+      </p>
+    </div>
+  );
+}
+
+// Empty state component
+function EmptyState() {
+  return (
+    <div className="text-center py-12">
+      <div className="text-gray-400 mb-4">
+        <svg
+          className="w-16 h-16 mx-auto"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+      </div>
+      <h3 className="text-lg font-semibold mb-2">No events scheduled</h3>
+      <p className="text-gray-600">Check back later for upcoming events</p>
+    </div>
+  );
+}
+
+function Events() {
+  const {
+    data: events = [],
+    error,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["events"],
+    queryFn: fetchEvents,
+    staleTime: QUERY_STALE_TIME,
+    gcTime: QUERY_STALE_TIME * 2, // formerly cacheTime
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+
+  // Get limited events for display
+  const displayEvents = events.slice(0, EVENTS_TO_DISPLAY);
+
+  return (
+    <section id="events" className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-1 bg-royal-100 text-royal-700 font-medium rounded-full text-sm mb-4">
+            Stay Updated
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Upcoming <span className="text-royal-700">Events</span> & News
+          </h2>
+          <div className="w-20 h-1 bg-gold-400 mx-auto mb-8"></div>
+          <p className="max-w-3xl mx-auto text-gray-600 text-lg">
+            Stay connected with the latest happenings, workshops, conferences,
+            and devotionals in the CONCES community.
+          </p>
+        </div>
+
+        {/* Events Grid */}
+        <div className="min-h-[200px]">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
+              {[...Array(EVENTS_TO_DISPLAY)].map((_, index) => (
+                <EventCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : isError ? (
+            <ErrorState error={error as Error} />
+          ) : displayEvents.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mb-12">
+              {displayEvents.map((event) => (
+                <EventCard key={event.id || event._id} event={event} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* View All Button - Only show if there are events */}
+        {!isLoading && !isError && displayEvents.length > 0 && (
+          <div className="text-center">
+            <Link
+              href="/events"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-royal-600 text-white font-bold rounded-lg hover:bg-royal-700 transition-all duration-200 shadow hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              View All Events
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+export default Events;
