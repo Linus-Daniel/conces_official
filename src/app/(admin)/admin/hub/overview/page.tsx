@@ -30,33 +30,32 @@ export default function AdminDashboard() {
       const { data: SkillsData, isLoading: loadingSkills } = useHubSkills();
       const loading = lodaingUsers || loadingProjects || loadingSkills;
       console.log(userDatas, SkillsData, projectData);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [stats, setStats] = useState<Stats>({
-    totalUsers: userDatas?.users.length || 0,
-    totalSkills: projectData?.projects.length || 0,
-    totalProjects: SkillsData?.skills.length || 0,  
-  });
 
+      const totalUsers = userDatas?.users.length || 0;
+      const totalProjects = projectData?.projects.length || 0;
+      const totalSkills = SkillsData?.skills.length || 0;
+  console.log(totalUsers, totalProjects, totalSkills)
+  const [activeTab, setActiveTab] = useState("overview");
 
 
   const statCards = [
     {
       title: "Total Users",
-      value: stats.totalUsers,
+      value: totalUsers,
       icon: FiUsers,
       color: "bg-blue-100 text-blue-600",
       href: "/admin/users",
     },
     {
       title: "Skills",
-      value: stats.totalSkills,
+      value: totalSkills,
       icon: FiAward,
       color: "bg-purple-100 text-purple-600",
       href: "/admin/skills",
     },
     {
       title: "Projects",
-      value: stats.totalProjects,
+      value: totalProjects,
       icon: FiBriefcase,
       color: "bg-amber-100 text-amber-600",
       href: "/admin/projects",

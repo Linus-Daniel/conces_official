@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import Link from "next/link";
 import axios from "axios";
+import { useHubSkills } from "@/hooks/useHubData";
 
 interface Skill {
   _id: string;
@@ -38,9 +39,8 @@ interface Pagination {
 }
 
 export default function SkillsManagement() {
-  const [skills, setSkills] = useState<Skill[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {data,isLoading} = useHubSkills();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [pagination, setPagination] = useState<Pagination>({
@@ -51,69 +51,11 @@ export default function SkillsManagement() {
   });
   const [error, setError] = useState("");
 
-  const fetchSkills = async (page = 1, search = "", category = "") => {
-    try {
-      setLoading(true);
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: pagination.limit.toString(),
-        ...(search && { search }),
-        ...(category && { category }),
-      });
-
-      const response = axios.get(`http://localhost:3001/api/admin/skills?${queryParams.toString()}`);
-      const { data } = await response;
-        setSkills(data.skills);
+  const skills = data?.skills ||[];
+  
+  console.log(skills);
 
 
-    } catch (err) {
-      setError("Failed to fetch skills");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSkills();
-  }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchSkills(1, searchTerm, selectedCategory);
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    fetchSkills(1, searchTerm, category);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= pagination.pages) {
-      fetchSkills(newPage, searchTerm, selectedCategory);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this skill?")) return;
-
-    try {
-      const response = await fetch(`/api/admin/skills/${id}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        // Refresh the list
-        fetchSkills(pagination.page, searchTerm, selectedCategory);
-      } else {
-        const data = await response.json();
-        setError(data.error || "Failed to delete skill");
-      }
-    } catch (err) {
-      setError("Failed to delete skill");
-      console.error(err);
-    }
-  };
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -156,7 +98,7 @@ export default function SkillsManagement() {
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6 border border-gray-100">
           <form
-            onSubmit={handleSearch}
+            // onSubmit={handleSearch}
             className="flex flex-col sm:flex-row gap-4"
           >
             <div className="flex-1 relative">
@@ -178,7 +120,7 @@ export default function SkillsManagement() {
               <select
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 value={selectedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value)}
+                // onChange={(e) => handleCategoryChange(e.target.value)}
               >
                 <option value="">All Categories</option>
                 {categories.map((category) => (
@@ -206,12 +148,12 @@ export default function SkillsManagement() {
 
         {/* Skills Grid */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-          {loading ? (
+          {isLoading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading skills...</p>
             </div>
-          ) : skills.length === 0 ? (
+          ) : skills?.length === 0 ? (
             <div className="p-8 text-center">
               <FiAward className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-lg font-medium text-gray-900">
@@ -226,7 +168,7 @@ export default function SkillsManagement() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                {skills.map((skill) => (
+                {skills?.map((skill) => (
                   <div
                     key={skill._id}
                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -272,11 +214,7 @@ export default function SkillsManagement() {
                       <span>{skill.endorsements} endorsements</span>
                     </div>
 
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
-                      <FiUser className="mr-1 h-4 w-4" />
-                      <span>{skill.user.name}</span>
-                    </div>
-
+                   
                     <div className="flex justify-end space-x-2">
                       <Link
                         href={`/admin/skills/${skill._id}/edit`}
@@ -285,7 +223,7 @@ export default function SkillsManagement() {
                         <FiEdit className="h-5 w-5" />
                       </Link>
                       <button
-                        onClick={() => handleDelete(skill._id)}
+                        // onClick={() => handleDelete(skill._id)}
                         className="text-red-600 hover:text-red-900 p-1"
                       >
                         <FiTrash2 className="h-5 w-5" />
@@ -323,7 +261,7 @@ export default function SkillsManagement() {
                         aria-label="Pagination"
                       >
                         <button
-                          onClick={() => handlePageChange(pagination.page - 1)}
+                          // onClick={() => handlePageChange(pagination.page - 1)}
                           disabled={pagination.page === 1}
                           className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${
                             pagination.page === 1
@@ -339,7 +277,7 @@ export default function SkillsManagement() {
                         ).map((pageNum) => (
                           <button
                             key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
+                            // onClick={() => handlePageChange(pageNum)}
                             className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                               pagination.page === pageNum
                                 ? "z-10 bg-purple-600 border-purple-600 text-white"
@@ -350,7 +288,7 @@ export default function SkillsManagement() {
                           </button>
                         ))}
                         <button
-                          onClick={() => handlePageChange(pagination.page + 1)}
+                          // onClick={() => handlePageChange(pagination.page + 1)}
                           disabled={pagination.page === pagination.pages}
                           className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${
                             pagination.page === pagination.pages
