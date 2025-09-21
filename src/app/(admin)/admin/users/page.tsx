@@ -15,7 +15,7 @@ const page = async () => {
   const users = await getUsers();
   return (
     <div>
-      <UsersManagement users={users} />
+      <UsersManagement users={users} userRole="admin" />
     </div>
   );
 };
