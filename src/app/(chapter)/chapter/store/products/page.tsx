@@ -37,7 +37,7 @@ export default async function AdminProductsPage({
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Products</h2>
         <Button asChild>
-          <Link href="/admin/store/products/new">Add Product</Link>
+          <Link href="/chapter/store/products/create">Add Product</Link>
         </Button>
       </div>
 

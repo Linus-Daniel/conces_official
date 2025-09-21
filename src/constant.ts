@@ -93,11 +93,11 @@ export const sidebarLinks: SidebarLink[] = [
     ],
   },
 
-  {
-    name: "Settings & Profile",
-    href: "/chapter/settings",
-    icon: Cog,
-  },
+  // {
+  //   name: "Settings & Profile",
+  //   href: "/chapter/settings",
+  //   icon: Cog,
+  // },
 ];
 
 export const product: Products[] = [

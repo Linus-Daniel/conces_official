@@ -98,6 +98,7 @@ const menuItems: MenuItem[] = [
       { link: "/admin/hub/overview", label: "Dashboard", icon: FaChartLine },
       { link: "/admin/hub/users", label: "Talent Pool" },
       { link: "/admin/hub/skills", label: "Skills" },
+      {link: "/admin/hub/projects", label: "Projects" },
     ],
   },
   { link: "/admin/chapters", label: "Chapters", icon: FaMapMarkerAlt },

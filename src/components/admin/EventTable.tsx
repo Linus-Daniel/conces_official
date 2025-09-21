@@ -282,7 +282,7 @@ export default function EventTable({
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/events/${event._id}`}>Edit</Link>
+                      <Link href={`/${userRole=="admin"?"admin":"chapter"}/events/${event._id}`}>Edit</Link>
                     </Button>
                     <Button variant="destructive" size="sm">
                       Delete

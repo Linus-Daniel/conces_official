@@ -12,21 +12,11 @@ type SidebarProps = {
 export default function Sidebar({ onCreatePost }: SidebarProps) {
   return (
     <div className="w-full md:w-1/4 space-y-6">
-<CreatePostButton onCreatePost={() => console.log('Post modal opened')} />
 
 
       <PrayerWall />
       
-      <div className="bg-gradient-to-r from-royal-DEFAULT to-royal-dark rounded-lg p-4 md:p-5 text-white">
-        <h3 className="font-bold text-lg mb-2">Join Mentorship Program</h3>
-        <p className="text-sm mb-4 text-gray-100">
-          Connect with experienced Christian engineers who can guide your
-          spiritual and professional growth.
-        </p>
-        <button className="bg-gold hover:bg-gold-dark text-white py-2 px-4 rounded-lg text-sm font-medium transition duration-300">
-          Apply Now
-        </button>
-      </div>
+      
     </div>
   );
 }

@@ -19,7 +19,7 @@ declare module "next-auth" {
     role: string;
     phone: string;
     institution: string;
-    chapter: string;
+    chapter: string ;
     avatar: string;
   }
 }

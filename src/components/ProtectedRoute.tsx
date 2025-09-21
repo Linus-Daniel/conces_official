@@ -12,6 +12,9 @@ export default async function ProtectedPage({
   children,
 }: ProtectedPageProps) {
   const session = await getServerSession(authOptions);
+  console.log(session?.user.role,"Current user Role")
+  const authorized = session?.user.role === expectedRole;
+  console.log(authorized,"Authorized")
 
   if (!session) {
     redirect("/auth");

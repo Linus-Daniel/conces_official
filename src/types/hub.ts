@@ -39,7 +39,10 @@ export interface User {
 export interface Project {
   _id: string;
   title: string;
-  userId: string;
+  userId: {
+    email:string;
+    _id:string
+  };
   description: string;
   githubLink?: string;
   thumbnail?: string;
@@ -51,7 +54,10 @@ export interface Project {
 
 export interface Skill {
   _id: string;
-  user: string;
+  user: {
+    email:string;
+    _id:string
+  };
   category: string;
   name: string;
   level: "Beginner" | "Intermediate" | "Advanced" | "Expert";

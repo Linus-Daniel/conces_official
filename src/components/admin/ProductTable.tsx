@@ -75,6 +75,8 @@ export function ProductTable({
     userRole,
   });
 
+  console.log(products)
+
   // 🔥 Create reusable table components
   const { ApprovalBadge, ApprovalActions, SelectAllCheckbox, ItemCheckbox } =
     createApprovalComponents<ApprovalableProduct>(approvalSystem);

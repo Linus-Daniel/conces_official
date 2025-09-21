@@ -11,6 +11,7 @@ const page = async () => {
   const session = await getServerSession(authOptions);
   const userRole = session?.user.role as string;
   const chapterId = session?.user.chapter as string;
+  console.log(chapterId,"chapterId");
 
   console.log(chapterId);
 

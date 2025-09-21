@@ -39,7 +39,7 @@ type SortConfig = {
   direction: "asc" | "desc";
 };
 
-export default function UsersManagement({ users }: { users: User[] }) {
+export default function UsersManagement({ users,userRole }: { users: User[], userRole:string }) {
   // State
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -174,55 +174,15 @@ export default function UsersManagement({ users }: { users: User[] }) {
 
       {/* Advanced Filters */}
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium flex items-center">
-            <FaFilter className="mr-2" /> Filters
-          </h3>
-          <div className="flex gap-2">
-            {savedFilters.length > 0 && (
-              <select
-                className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
-                onChange={(e) => {
-                  const preset = savedFilters.find(
-                    (f) => f.fullName === e.target.value
-                  );
-                  if (preset) {
-                    setActiveFilterPreset(preset.fullName);
-                    // Apply preset filters
-                    const { filters } = preset;
-                    setSearchTerm(filters.searchTerm);
-                    setSelectedRole(filters.selectedRole);
-                    setSelectedStatus(filters.selectedStatus);
-                    setSelectedChapters(filters.selectedChapters);
-                    setDateRange(filters.dateRange);
-                  }
-                }}
-                value={activeFilterPreset || ""}
-              >
-                <option value="">Saved Filters</option>
-                {savedFilters.map((filter, index) => (
-                  <option key={index} value={filter.fullName}>
-                    {filter.fullName}
-                  </option>
-                ))}
-              </select>
-            )}
-            <button
-              onClick={saveFilterPreset}
-              className="flex items-center text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg"
-            >
-              <FaSave className="mr-1" /> Save Current
-            </button>
-          </div>
-        </div>
+      
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {/* Search */}
-          <div className="relative">
+          <div className="relative xs:col-span-2 md:col-span-1">
             <input
               type="text"
               placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent text-base sm:text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -230,8 +190,12 @@ export default function UsersManagement({ users }: { users: User[] }) {
           </div>
 
           {/* Role Filter */}
+          {
+            (userRole === "admin") &&(
+
+
           <select
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent text-base sm:text-sm"
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
           >
@@ -240,10 +204,12 @@ export default function UsersManagement({ users }: { users: User[] }) {
             <option value="chapter-admin">Chapter Admin</option>
             <option value="user">User</option>
           </select>
+            )
+          }
 
           {/* Status Filter */}
           <select
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent text-base sm:text-sm"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
@@ -253,40 +219,34 @@ export default function UsersManagement({ users }: { users: User[] }) {
           </select>
 
           {/* Date Range */}
-          <div className="flex gap-2">
-            <input
-              type="date"
-              placeholder="From"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full"
-              value={dateRange.start || ""}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, start: e.target.value })
-              }
-            />
-            <input
-              type="date"
-              placeholder="To"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full"
-              value={dateRange.end || ""}
-              onChange={(e) =>
-                setDateRange({ ...dateRange, end: e.target.value })
-              }
-            />
+          <div className="flex gap-2 xs:col-span-2 md:col-span-1">
+            <div className="flex-1">
+              <input
+                type="date"
+                placeholder="From"
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full text-base sm:text-sm"
+                value={dateRange.start || ""}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, start: e.target.value })
+                }
+              />
+            </div>
+           
           </div>
         </div>
 
         {/* Chapter Multi-select (appears when chapter-admin is selected) */}
-        {(selectedRole === "chapter-admin" || selectedRole === "all") && (
+        {(userRole === "admin") && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Chapters
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {["Lagos", "Abuja", "Port Harcourt"].map((chapter, index) => (
                 <label key={index} className="inline-flex items-center">
                   <input
                     type="checkbox"
-                    className="rounded border-gray-300 text-royal-DEFAULT focus:ring-royal-DEFAULT"
+                    className="rounded border-gray-300 text-royal-DEFAULT focus:ring-royal-DEFAULT h-4 w-4"
                     checked={selectedChapters.includes(chapter)}
                     onChange={() => {
                       setSelectedChapters((prev) =>
@@ -361,7 +321,7 @@ export default function UsersManagement({ users }: { users: User[] }) {
                   ].map((column) => (
                     <th
                       key={column.key}
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500  uppercase tracking-wider cursor-pointer"
                       onClick={() => requestSort(column.key as keyof User)}
                     >
                       <div className="flex items-center">

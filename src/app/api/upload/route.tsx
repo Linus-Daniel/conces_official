@@ -1,3 +1,4 @@
+// /api/upload
 import { NextResponse } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
 import { getServerSession } from 'next-auth';

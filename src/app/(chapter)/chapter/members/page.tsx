@@ -19,9 +19,10 @@ const page = async () => {
   const id = session?.user.chapter as string;
   console.log(id);
   const users = await getUsers(id);
+  const userRole = session?.user.role;
   return (
     <div>
-      <UsersManagement users={users} />
+      <UsersManagement users={users} userRole={userRole as string} />
     </div>
   );
 };
