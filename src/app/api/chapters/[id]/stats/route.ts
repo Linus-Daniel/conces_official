@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/next-auth";
 import User from "@/models/User";
 import Product from "@/models/Product";
 import PrayerRequest from "@/models/PrayerRequest";
+import Resource from "@/models/Resources";
 import Events from "@/models/Events";
 
 export async function GET(request: NextRequest,{params}:{params:Promise<{id:string}>}) {
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest,{params}:{params:Promise<{id:stri
 
     // Fetch prayer request count
     const prayers = await PrayerRequest.find({chapter:id}).countDocuments();
+    const resources = await Resource.find({chapter:id}).countDocuments();
 
     // Fetch event count
     const events = await Events.find({chapter:id}).countDocuments();
@@ -36,6 +38,7 @@ export async function GET(request: NextRequest,{params}:{params:Promise<{id:stri
       products,
       prayers,
       events,
+      resources
     });
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);

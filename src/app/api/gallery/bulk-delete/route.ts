@@ -1,8 +1,6 @@
-
-
 // app/api/gallery/bulk-delete/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import Gallery from "@/models/Gallery";
+import Gallery from "@/models/Album";
 import dbConnect from "@/lib/dbConnect";
 
 export async function DELETE(request: NextRequest) {

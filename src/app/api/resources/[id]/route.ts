@@ -67,7 +67,7 @@ export async function PUT(
     const body = await req.json();
 
     // If this is an approval action and user is not admin, prevent it
-    if (body.approved !== undefined && user.role !== "admin") {
+    if (body.approved !== undefined && user.role !== "admin" && user.role !== "chapter-admin") {
       return NextResponse.json(
         { error: "Only admins can approve resources" },
         { status: 403 }

@@ -5,11 +5,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Posts from "@/components/Community";
 import api from "@/lib/axiosInstance";
 import {
-  Users,
-  TrendingUp,
+
   Activity,
-  MessageSquare,
-  Calendar,
   AlertCircle,
   Loader2,
   RefreshCw,
@@ -36,15 +33,7 @@ export type Post = {
   images?: string[];
   prayed?: number;
 };
-// Type definitions
-interface StatData {
-  id: number;
-  name: string;
-  value: string | number;
-  change?: string;
-  changeType?: "increase" | "decrease" | "neutral";
-  icon?: JSX.Element;
-}
+
 
 interface Stats{
   users:number;
@@ -53,23 +42,6 @@ interface Stats{
   events:number;
 }
 
-
-interface DashboardData {
-  posts: Post[];
-  stats: Stats
-}
-
-// Icon mapping for stats
-const getStatIcon = (statName: string) => {
-  const iconMap: Record<string, JSX.Element> = {
-    "Total Members": <Users className="w-5 h-5" />,
-    "Active Users": <Activity className="w-5 h-5" />,
-    Posts: <MessageSquare className="w-5 h-5" />,
-    Events: <Calendar className="w-5 h-5" />,
-    Growth: <TrendingUp className="w-5 h-5" />,
-  };
-  return iconMap[statName] || <Activity className="w-5 h-5" />;
-};
 
 // Skeleton loader component
 const StatSkeleton = () => (
@@ -184,12 +156,17 @@ const DashboardPage = () => {
   const totalEvents = stats.events || 0;
   const totalPrayers = stats.prayers || 0;
   const totalProducts = stats.products || 0;
+  const totalResources = stats.products || 0;
+
+  
 
     const statsData = [
-      { id: 1, name: 'Total Users', value: totalUsers, icon: <FaUsers className="text-2xl" />, change: '+12%', changeType: 'increase' },
-      { id: 2, name: 'Prayer Requests', value:totalPrayers, icon: <FaPray className="text-2xl" />, change: '+5%', changeType: 'increase' },
-      { id: 3, name: 'Store Products', value: totalProducts, icon: <FaStore className="text-2xl" />, change: '+3%', changeType: 'increase' },
-      { id: 4, name: 'Upcoming Events', value:totalEvents,  icon: <FaCalendarAlt className="text-2xl" />, change: '+2', changeType: 'increase' }
+      { id: 1, name: 'Total Users', value: totalUsers, icon: <FaUsers className="text-2xl" />, },
+      { id: 2, name: 'Prayer Requests', value:totalPrayers, icon: <FaPray className="text-2xl" />,  },
+      { id: 3, name: 'Store Products', value: totalProducts, icon: <FaStore className="text-2xl" />,  },
+      { id: 4, name: 'Upcoming Events', value:totalEvents,  icon: <FaCalendarAlt className="text-2xl" />, change: '+2', },
+      { id: 4, name: 'Resources', value:totalResources,  icon: <FaCalendarAlt className="text-2xl" />, change: '+2', }
+
     ];
 
   // Loading state for entire page
@@ -269,7 +246,6 @@ const DashboardPage = () => {
             </div>
           </div>
         </div>
-
         {/* Error Alert */}
         {isError && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -291,7 +267,6 @@ const DashboardPage = () => {
             </div>
           </div>
         )}
-
         {/* Stats Grid with Loading Overlay */}
         <div className="relative">
           {/* Loading Overlay */}
@@ -301,70 +276,57 @@ const DashboardPage = () => {
             </div>
           )}
 
-          {!stats && (
+          {/* Show stats grid when we have data OR when loading for the first time */}
+          {(stats || isLoading) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
-              {statsData.map((stat, index) => (
-                <div
-                  key={stat.id}
-                  className="group bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:scale-105 hover:border-gray-200"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-600 mb-2">
-                        {stat.name}
-                      </p>
-                      <p className="text-3xl font-bold text-gray-900 mb-2 tabular-nums">
-                        {stat.value}
-                      </p>
-                      {stat.change && (
-                        <div className="flex items-center gap-1">
-                          <span
-                            className={`text-sm font-medium tabular-nums ${
-                              stat.changeType === "increase"
-                                ? "text-emerald-600"
-                                : stat.changeType === "decrease"
-                                ? "text-red-600"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {stat.change}
-                          </span>
-                          <span
-                            className={`text-lg ${
-                              stat.changeType === "increase"
-                                ? "text-emerald-500"
-                                : stat.changeType === "decrease"
-                                ? "text-red-500"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {stat.changeType === "increase"
-                              ? "↑"
-                              : stat.changeType === "decrease"
-                              ? "↓"
-                              : "→"}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+              {isLoading && !stats
+                ? // Show skeleton loaders when loading
+                  [...Array(4)].map((_, i) => <StatSkeleton key={i} />)
+                : // Show actual stats when data is available
+                  statsData.map((stat, index) => (
                     <div
-                      className={`p-3 rounded-xl transition-colors duration-300 ${
-                        index % 3 === 0
-                          ? "bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 group-hover:from-blue-200 group-hover:to-blue-300"
-                          : index % 3 === 1
-                          ? "bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 group-hover:from-purple-200 group-hover:to-purple-300"
-                          : "bg-gradient-to-br from-amber-100 to-amber-200 text-amber-700 group-hover:from-amber-200 group-hover:to-amber-300"
-                      }`}
+                      key={stat.id}
+                      className="group bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 hover:scale-105 hover:border-gray-200"
                     >
-                      {stat.icon}
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-600 mb-2">
+                            {stat.name}
+                          </p>
+                          <p className="text-3xl font-bold text-gray-900 mb-2 tabular-nums">
+                            {stat.value}
+                          </p>
+                       
+                        </div>
+                        <div
+                          className={`p-3 rounded-xl transition-colors duration-300 ${
+                            index % 3 === 0
+                              ? "bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 group-hover:from-blue-200 group-hover:to-blue-300"
+                              : index % 3 === 1
+                              ? "bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 group-hover:from-purple-200 group-hover:to-purple-300"
+                              : "bg-gradient-to-br from-amber-100 to-amber-200 text-amber-700 group-hover:from-amber-200 group-hover:to-amber-300"
+                          }`}
+                        >
+                          {stat.icon}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  ))}
             </div>
           )}
         </div>
-
+        {/* No Stats Message - only show if not loading and no stats and user has chapter */}
+        {!isLoading && !stats && user?.chapter && (
+          <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Activity className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-600 font-medium">No statistics available</p>
+            <p className="text-gray-500 text-sm mt-2">
+              Stats will appear here once data is available for your chapter
+            </p>
+          </div>
+        )}
         {/* No Stats Message */}
         {!isLoading && !stats && user?.chapter && (
           <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8 text-center">
@@ -377,7 +339,6 @@ const DashboardPage = () => {
             </p>
           </div>
         )}
-
         {/* Posts Section with Loading State */}
         <div className="relative bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           {isRefetching && posts.length > 0 && (
@@ -387,7 +348,6 @@ const DashboardPage = () => {
           )}
           <Posts authorized={authorized} posts={posts} />
         </div>
-
         {/* Prefetch hint for better UX */}
         {posts.length === 0 && !isLoading && (
           <div className="mt-4 text-center text-sm text-gray-500">

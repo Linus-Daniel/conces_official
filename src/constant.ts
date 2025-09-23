@@ -240,7 +240,7 @@ export const executives = [
   },
 ];
 
-export const gallery = [
+export const albums = [
   {
     id: 1,
     title: "Aji",

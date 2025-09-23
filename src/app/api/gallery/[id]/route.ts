@@ -1,8 +1,7 @@
-
 // app/api/gallery/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import  dbConnect  from "@/lib/dbConnect";
-import Gallery from "@/models/Gallery";
+import dbConnect from "@/lib/dbConnect";
+import Gallery from "@/models/Album";
 
 interface Params {
   id: string;
@@ -10,12 +9,12 @@ interface Params {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{id:string}> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
 
-    const {id} = await params
+    const { id } = await params;
     const image = await Gallery.findById(id);
     if (!image) {
       return NextResponse.json({ error: "Image not found" }, { status: 404 });
@@ -33,13 +32,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{id:string}> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
 
     const body = await request.json();
-    const id = (await params).id
+    const id = (await params).id;
 
     const updatedImage = await Gallery.findByIdAndUpdate(id, body, {
       new: true,
@@ -66,11 +65,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{id:string}> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
-    const {id} = await params
+    const { id } = await params;
 
     const deletedImage = await Gallery.findByIdAndDelete(id);
 

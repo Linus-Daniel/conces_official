@@ -1,7 +1,7 @@
 // app/api/gallery/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect  from "@/lib/dbConnect";
-import Gallery from "@/models/Gallery";
+import dbConnect from "@/lib/dbConnect";
+import Gallery from "@/models/Album";
 
 export async function GET(request: NextRequest) {
   try {

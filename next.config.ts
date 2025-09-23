@@ -17,7 +17,6 @@ module.exports = withPWA({
       "https://api.dicebear.com",
       "via.placeholder.com",
       "images.unsplash.com",
-      "images.unsplash.com",
     ],
   },
 });
