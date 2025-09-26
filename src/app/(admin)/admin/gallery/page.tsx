@@ -77,7 +77,7 @@ const useAlbums = (chapterId: string | undefined) => {
     queryFn: async () => {
       if (!chapterId) throw new Error("No chapter ID provided");
       const response = await api.get(`/gallery/albums`);
-      return response.data.albums as Album[];
+      return response.data as Album[];
     },
     enabled: !!chapterId,
     staleTime: 1000 * 60 * 5,
@@ -86,6 +86,8 @@ const useAlbums = (chapterId: string | undefined) => {
     retry: 2,
   });
 };
+
+
 
 // Image upload component
 const ImageUploader = ({
@@ -259,7 +261,7 @@ const AlbumCard = ({
         <div className="absolute inset-0 bg-black/50 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity">
             <Link
-              href={`/album/${album._id}`}
+              href={`/admin/gallery/${album._id}`}
               className="bg-white text-gray-800 p-2 rounded-full hover:bg-gray-100 transition-colors"
             >
               <Eye className="w-4 h-4" />
@@ -574,7 +576,7 @@ const AdminAlbumsPage = () => {
   const [selectedChapter, setSelectedChapter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
-
+console.log(albums)
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {

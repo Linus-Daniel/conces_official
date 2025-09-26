@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       query.category = category;
     }
 
-    const albums = await Album.find(query)
+    const albums = await Album.find()
       .populate("chapter", "chapterName")
       .sort({ date: -1 })
       .lean();

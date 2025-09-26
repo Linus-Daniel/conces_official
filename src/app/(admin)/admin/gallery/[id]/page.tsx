@@ -60,7 +60,7 @@ const useAlbum = (id: string) => {
   return useQuery({
     queryKey: ["album", id],
     queryFn: async () => {
-      const response = await api.get(`/albums/${id}`);
+      const response = await api.get(`/gallery/albums/${id}`);
       return response.data as Album;
     },
     enabled: !!id,
@@ -111,11 +111,11 @@ const ImageModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center">
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 z-10 p-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-all"
+        className="absolute top-4 right-4 z-10 p-2 bg-white/20 hover:bg-opacity-30 rounded-full transition-all"
       >
         <X className="w-6 h-6 text-white" />
       </button>
@@ -125,13 +125,13 @@ const ImageModal = ({
         <>
           <button
             onClick={onPrev}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-all"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-white/20 hover:bg-opacity-30 rounded-full transition-all"
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
           <button
             onClick={onNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full transition-all"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-3 bg-white/20 hover:bg-opacity-30 rounded-full transition-all"
           >
             <ChevronRight className="w-6 h-6 text-white" />
           </button>
@@ -140,7 +140,7 @@ const ImageModal = ({
 
       {/* Image counter */}
       {images.length > 1 && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white bg-opacity-20 px-4 py-2 rounded-full text-white">
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white/20 px-4 py-2 rounded-full text-white">
           {currentIndex + 1} / {images.length}
         </div>
       )}
@@ -157,7 +157,7 @@ const ImageModal = ({
       {/* Thumbnail strip */}
       {images.length > 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-          <div className="flex gap-2 bg-white bg-opacity-20 p-2 rounded-lg max-w-screen-sm overflow-x-auto">
+          <div className="flex gap-2 bg-white/20 p-2 rounded-lg max-w-screen-sm overflow-x-auto">
             {images.map((image, index) => (
               <button
                 key={index}
@@ -221,7 +221,7 @@ const ShareModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
@@ -536,7 +536,7 @@ const AlbumDetailPage = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
 
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity">
                         <button
                           onClick={(e) => {
@@ -551,7 +551,7 @@ const AlbumDetailPage = () => {
                     </div>
 
                     {/* Image number */}
-                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                    <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                       {index + 1}
                     </div>
                   </div>

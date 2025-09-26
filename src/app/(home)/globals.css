@@ -176,3 +176,9 @@ input::placeholder{
     @apply bg-background text-foreground;
   }
 }
+
+.v{
+  color:rgb(62, 62, 62) ;
+  margin-right: 10px;
+  font-weight: bold;
+}
