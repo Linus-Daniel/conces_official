@@ -1,5 +1,7 @@
 import { AlumniFormData } from '@/types/alumni';
 import { Globe, Linkedin, Twitter, Github } from 'lucide-react';
+
+import { FaXTwitter } from 'react-icons/fa6';
 export default function Step5SocialReview({ 
   formData,
   updateFormData 
@@ -47,7 +49,7 @@ export default function Step5SocialReview({
           {/* Twitter */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Twitter className="h-4 w-4 text-[#1DA1F2]" />
+              <FaXTwitter className="h-4 w-4 text-[#1DA1F2]" />
               Twitter
             </label>
             <div className="flex rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-royal-600">

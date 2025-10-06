@@ -13,10 +13,10 @@ import {
   FaShare,
   FaBookOpen,
   FaFacebook,
-  FaTwitter,
   FaLinkedin,
   FaLink,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import api from "@/lib/axiosInstance";
 
 // Define TypeScript interfaces for our blog data
@@ -53,10 +53,9 @@ interface BlogPost {
 
 const BlogPostPage = () => {
   const router = useRouter();
-  const param = useParams()
-  const slug = param.slug
-  console.log(slug)
-
+  const param = useParams();
+  const slug = param.slug;
+  console.log(slug);
 
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -73,10 +72,9 @@ const BlogPostPage = () => {
         setLoading(true);
         const response = await api.get(`/blog/${slug}`);
 
-        
-        const data = response.data.blog
+        const data = response.data.blog;
 
-        console.log(data)
+        console.log(data);
         setBlogPost(data);
         setRelatedPosts(data.relatedPosts || []);
 
@@ -110,7 +108,9 @@ const BlogPostPage = () => {
       if (isLiked) {
         localStorage.setItem(
           "likedPosts",
-          JSON.stringify(likedPosts.filter((id: string) => id !== blogPost?._id))
+          JSON.stringify(
+            likedPosts.filter((id: string) => id !== blogPost?._id)
+          )
         );
       } else {
         localStorage.setItem(
@@ -120,7 +120,7 @@ const BlogPostPage = () => {
       }
 
       // Send like to API
-      await api.post(`/blog/${slug}/like`, { liked: !isLiked })
+      await api.post(`/blog/${slug}/like`, { liked: !isLiked });
     } catch (err) {
       console.error("Error updating like:", err);
       // Revert on error
@@ -349,7 +349,7 @@ const BlogPostPage = () => {
               className="p-2 text-gray-600 hover:text-blue-400 transition-colors"
               aria-label="Share on Twitter"
             >
-              <FaTwitter size={18} />
+              <FaXTwitter size={18} />
             </button>
             <button
               onClick={() => sharePost("linkedin")}
@@ -426,32 +426,6 @@ const BlogPostPage = () => {
             </div>
           </div>
         )}
-
-        {/* Newsletter Subscription */}
-        <div className="bg-royal-50 rounded-lg p-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Stay Updated
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Subscribe to our newsletter to receive new articles, event
-              updates, and resources for Christian engineers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
-              />
-              <button className="px-6 py-2 bg-royal-600 text-white font-medium rounded-md hover:bg-royal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 transition-colors">
-                Subscribe
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-3">
-              We respect your privacy. Unsubscribe at any time.
-            </p>
-          </div>
-        </div>
       </article>
     </>
   );

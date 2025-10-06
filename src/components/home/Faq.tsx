@@ -28,7 +28,7 @@ const FAQPage = () => {
       category: "joining",
       question: "Who can join CONCES?",
       answer:
-        "CONCES is open to all Nigerian Christian engineering students and alumni. This includes current students in any engineering discipline and graduates working in engineering or related fields.",
+        "CONCES is open to all Nigerian Christian engineering and technology  students and alumni. This includes current students in any engineering discipline and graduates working in engineering or related fields.",
     },
     {
       id: 2,
@@ -407,9 +407,9 @@ const FAQPage = () => {
                 <p className="text-white/90 mb-4 text-sm">
                   Connect with thousands of Christian engineers
                 </p>
-                <button className="bg-gold-600 hover:bg-gold-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                <Link href={`/auth?mode=signup`} className="bg-gold-600 hover:bg-gold-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
                   Get Started
-                </button>
+                </Link>
               </div>
             </div>
           </div>

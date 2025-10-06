@@ -12,7 +12,7 @@ import {
   FaFacebook,
   FaLocationDot,
   FaShareNodes,
-  FaTwitter,
+  FaXTwitter,
   FaUsers,
   FaVideo,
   FaWhatsapp,
@@ -351,7 +351,7 @@ const EventPage = () => {
                         className="text-gray-400 hover:text-gray-500"
                         aria-label="Share on Twitter"
                       >
-                        <FaTwitter />
+                        <FaXTwitter />
                       </a>
                       <a
                         href={`whatsapp://send?text=${encodeURIComponent(

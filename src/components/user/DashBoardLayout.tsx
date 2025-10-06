@@ -22,9 +22,10 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import {SocketProvider} from "../../context/SocketContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import useAuthStore from "@/zustand/authStore";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -33,7 +34,9 @@ type LayoutProps = {
 const DashboardLayout = ({ children }: LayoutProps) => {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const queryClient =new  QueryClient()
+  const queryClient =new  QueryClient();
+  const {logout} = useAuthStore()
+  
 
   const navItems = [
     { icon: <FaUser />, name: "Dashboard", link: "/user/" },
@@ -41,8 +44,8 @@ const DashboardLayout = ({ children }: LayoutProps) => {
     { icon: <FaBook />, name: "Resources", link: "/user/resources" },
     { icon: <FaChalkboardTeacher />, name: "Mentorship", link: "/user/mentorship" },
     { icon: <FaPrayingHands />, name: "Prayer Wall", link: "/user/prayer" },
-    { icon: <FaShoppingCart />, name: "store", link: "/store" },
-    { icon: <FaShoppingBag />, name: "orders", link: "/user/orders" },
+    { icon: <FaShoppingCart />, name: "Store", link: "/store" },
+    { icon: <FaShoppingBag />, name: "Orders", link: "/user/orders" },
 
   ];
 
@@ -115,7 +118,7 @@ const DashboardLayout = ({ children }: LayoutProps) => {
                 <span className="text-sm">Settings</span>
               </div>
             </Link>
-            <Link href="/user/logout">
+            <button onClick={logout}>
               <div
                 className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-conces-blue-dark transition-colors ${
                   pathname === "/user/logout"
@@ -126,7 +129,7 @@ const DashboardLayout = ({ children }: LayoutProps) => {
                 <FaSignOutAlt className="text-xl mr-3" />
                 <span className="text-sm">Logout</span>
               </div>
-            </Link>
+            </button>
           </div>
         </aside>
 

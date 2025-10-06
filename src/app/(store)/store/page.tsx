@@ -2,6 +2,7 @@ import CategorySection from '@/components/store/CategorySection';
 import DonationBanner from '@/components/store/Donate';
 import FeaturedProducts from '@/components/store/Products';
 import { IProduct } from '@/models/Product';
+import ProductsPage from './products/page';
 
 
 
@@ -38,9 +39,8 @@ export default async function StorePage() {
 
   return (
     <>
-      <CategorySection />
-      <FeaturedProducts products={products} />
-      <DonationBanner />
+      {/* <CategorySection /> */}
+      <ProductsPage products={products} />
     </>
   );
 }

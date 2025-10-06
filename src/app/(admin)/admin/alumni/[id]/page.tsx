@@ -6,13 +6,15 @@ import { useParams, useRouter } from "next/navigation";
 import {
   FiArrowLeft,
   FiLinkedin,
-  FiTwitter,
+  
   FiGithub,
   FiGlobe,
   FiMail,
   FiUser,
+
 } from "react-icons/fi";
 import Link from "next/link";
+import { FaXTwitter } from "react-icons/fa6";
 
 interface Alumni {
   _id: string;
@@ -206,7 +208,7 @@ export default function AlumniProfileView() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center text-gray-600 hover:text-blue-400"
                     >
-                      <FiTwitter className="mr-1" /> Twitter
+                      <FaXTwitter className="mr-1" /> Twitter
                     </a>
                   )}
 

@@ -19,7 +19,6 @@ import {
   Eye,
   EyeOff,
   Shield,
-  Upload,
   RefreshCw,
 } from "lucide-react";
 import api from "@/lib/axiosInstance";
@@ -47,8 +46,8 @@ const useUserProfile = () => {
   return useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
-      const response = await api.get("/user/profile");
-      return response.data as UserProfile;
+      const response = await api.get("/users/profile");
+      return response.data.userProfile as UserProfile;
     },
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
@@ -163,6 +162,7 @@ const AvatarUpload = ({
 const UserSettingsPage = () => {
   const { data: session, update: updateSession } = useSession();
   const queryClient = useQueryClient();
+  const  user = session?.user
 
   // Fetch user profile
   const {
@@ -173,6 +173,7 @@ const UserSettingsPage = () => {
     refetch,
   } = useUserProfile();
 
+  console.log(userProfile)
   // Form states
   const [profileForm, setProfileForm] = useState({
     fullName: "",
@@ -214,8 +215,8 @@ const UserSettingsPage = () => {
   // Profile update mutation
   const profileMutation = useMutation({
     mutationFn: async (data: typeof profileForm) => {
-      const response = await api.put("/user/profile", data);
-      return response.data;
+      const response = await api.put(`/users/${user?.id}`, data);
+      return response.data.userProfile;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["userProfile"], data);
@@ -398,15 +399,7 @@ const UserSettingsPage = () => {
 
                 {/* Role and Status Badges */}
                 <div className="flex flex-wrap justify-center gap-2 mt-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(
-                      userProfile.role
-                    )}`}
-                  >
-                    {userProfile.role.charAt(0).toUpperCase() +
-                      userProfile.role.slice(1)}
-                  </span>
-
+                 
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       userProfile.verified

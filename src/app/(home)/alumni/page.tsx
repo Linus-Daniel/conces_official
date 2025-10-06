@@ -179,10 +179,10 @@ const AlumniPage = () => {
                   <p className="mt-4 text-sm text-gray-600 line-clamp-3">
                     {person.bio}
                   </p>
-                  <div className="mt-4 flex justify-between items-center">
+                  <div className="mt-4 flex justify-between  items-center">
                     <a
                       href={`mailto:${person.contact}`}
-                      className="text-sm text-royal-600 hover:text-royal-800"
+                      className="text-sm text-royal-600 flex items-center  hover:text-royal-800"
                     >
                       <FaEnvelope className="fa-solid fa-envelope mr-1" />{" "}
                       Contact
@@ -191,7 +191,7 @@ const AlumniPage = () => {
                       onClick={() => {
                         setSelectedAlumni(person.id);
                       }}
-                      className="text-sm cursor-pointer font-medium text-royal-600 hover:text-royal-800"
+                      className="text-sm cursor-pointer flex items-center font-medium text-royal-600 hover:text-royal-800"
                     >
                       View profile{" "}
                       <FaArrowRight className="fa-solid fa-arrow-right ml-1" />
@@ -529,17 +529,7 @@ const AlumniPage = () => {
               <FaUserGroup className="fa-solid fa-user-group mr-2" />
               Network
             </button>
-            <button
-              onClick={() => setActiveTab("talks")}
-              className={`whitespace-nowrap flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "talks"
-                  ? "border-royal-500 text-royal-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <FaChalkboardUser className="fa-solid fa-chalkboard-user mr-2" />
-              Talks
-            </button>
+        
             <button
               onClick={() => setActiveTab("mentorship")}
               className={`whitespace-nowrap py-4 px-1 flex items-center border-b-2 font-medium text-sm ${
@@ -627,45 +617,7 @@ const AlumniPage = () => {
         {/* Content */}
         {renderContent()}
 
-        {/* Alumni Success Stories */}
-        {activeTab === "network" && (
-          <div className="mt-12 bg-royal-50 rounded-lg p-8">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Alumni Success Stories
-              </h2>
-              <div className="mb-6">
-                <blockquote className="text-lg text-gray-700">
-                  "The CONCES alumni network connected me with mentors who
-                  guided me through my early career decisions. Today, I'm proud
-                  to give back by mentoring current students."
-                </blockquote>
-                <div className="mt-4 flex items-center justify-center">
-                  <img
-                    className="h-12 w-12 rounded-full"
-                    src="https://randomuser.me/api/portraits/women/33.jpg"
-                    alt="Dr. Funmi Adeleke"
-                  />
-                  <div className="ml-3 text-left">
-                    <p className="text-sm font-medium text-gray-900">
-                      Dr. Funmi Adeleke
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Class of 2010, Director at NNPC
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <Link
-                href="/alumni/stories"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-royal-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500"
-              >
-                Read More Stories{" "}
-                <FaArrowRight className="fa-solid fa-arrow-right ml-1" />
-              </Link>
-            </div>
-          </div>
-        )}
+
 
         <AlumniProfileModal
           isOpen={selectedAlumni !== null}

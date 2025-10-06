@@ -104,7 +104,7 @@ const TestimonyPage = () => {
       ) : (
         <div className="text-center text-gray-500 mt-12">
           <p>You must be logged in to share a testimony.</p>
-          <Button className="mt-4" onClick={() => router.push('/auth/signin')}>
+          <Button className="mt-4" onClick={() => router.push(`/auth?mode=signin`)}>
             Login to Share
           </Button>
         </div>

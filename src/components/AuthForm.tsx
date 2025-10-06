@@ -989,10 +989,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
                       className="ml-2 block text-sm text-royal-800"
                     >
                       I agree to the{" "}
-                      <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
-                        Terms of Service
-                      </span>{" "}
-                      and{" "}
+                    
                       <span className="text-gold-600 hover:text-gold-700 font-medium cursor-pointer">
                         Privacy Policy
                       </span>

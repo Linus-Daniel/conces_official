@@ -1,4 +1,4 @@
-import { FaTwitter, FaLinkedin } from "react-icons/fa";
+import { FaXTwitter, FaLinkedin } from "react-icons/fa";
 
 export default function ExecutiveCard({ executive }: { executive: any }) {
   return (
@@ -19,7 +19,7 @@ export default function ExecutiveCard({ executive }: { executive: any }) {
             href={executive.social.twitter}
             className="text-gray-500 hover:text-primary transition-colors"
           >
-            <FaTwitter className="text-xl" />
+            <FaXTwitter className="text-xl" />
           </a>
           <a
             href={executive.social.linkedin}

@@ -27,12 +27,10 @@ export default function Hero() {
                         Where spiritual growth meets technical excellence. Join a community that nurtures both your faith and engineering career.
                     </p>
                     <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
-                        <span className="px-8 py-3 bg-gold-500 text-royal-900 font-bold rounded-lg hover:bg-gold-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
-                            Join as Student
-                        </span>
-                        <span className="px-8 py-3 bg-white/20 backdrop-blur-sm text-white font-bold rounded-lg hover:bg-white/30 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
-                            Join as Alumnus
-                        </span>
+                        <Link href={`/auth?mode=signup`} className="px-8 py-3 bg-gold-500 text-royal-900 font-bold rounded-lg hover:bg-gold-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
+                            Join us
+                        </Link>
+                        
                     </div>
                 </div>
                 <div className="w-full md:w-1/2 flex justify-center">

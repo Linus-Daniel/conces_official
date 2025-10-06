@@ -25,11 +25,11 @@ const footerSections: FooterSection[] = [
   {
     title: "Shop",
     links: [
-      { label: "All Products", href: "/products" },
-      { label: "Apparel", href: "/apparel" },
-      { label: "Cloths", href: "/accessories" },
-      { label: "Books", href: "/books" },
-      { label: "Gadgets", href: "/gift-cards" },
+      { label: "All Products", href: "/store?category=products" },
+      { label: "Apparel", href: "/store?category=apparel" },
+      { label: "Cloths", href: "/store?category=accessories" },
+      { label: "Books", href: "/store?category=books" },
+      { label: "Gadgets", href: "/store?category=gift-cards" },
     ],
   },
   {

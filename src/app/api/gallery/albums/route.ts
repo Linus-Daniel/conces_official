@@ -12,9 +12,6 @@ export async function GET(request: NextRequest) {
     await dbConnect();
     const chapter = await Chapter.findOne().lean();
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const chapterId = searchParams.get("chapter");
@@ -24,8 +21,8 @@ export async function GET(request: NextRequest) {
 
     if (chapterId && chapterId !== "all") {
       query.chapter = chapterId;
-    } else if (session.user.chapter) {
-      query.chapter = session.user.chapter;
+    } else if (session?.user.chapter) {
+      query.chapter = session?.user.chapter;
     }
 
     if (category && category !== "all") {

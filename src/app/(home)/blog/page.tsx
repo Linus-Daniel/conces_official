@@ -312,31 +312,6 @@ const BlogPage = () => {
           )}
         </div>
 
-        {/* Newsletter Subscription */}
-        <div className="mt-16 bg-royal-50 rounded-lg p-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Stay Updated
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Subscribe to our newsletter to receive new articles, event
-              updates, and resources for Christian engineers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-royal-500 focus:border-royal-500"
-              />
-              <button className="px-6 py-2 bg-royal-600 text-white font-medium rounded-md hover:bg-royal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 transition-colors">
-                Subscribe
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-3">
-              We respect your privacy. Unsubscribe at any time.
-            </p>
-          </div>
-        </div>
       </main>
     </>
   );

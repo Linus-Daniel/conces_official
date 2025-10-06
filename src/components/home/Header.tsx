@@ -33,6 +33,7 @@ const MAIN_NAV_LINKS: NavLink[] = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
   { name: "Events", href: "/events" },
+  {name:"Contact us",href:"/contact-us"}
 ];
 
 const DROPDOWN_SECTIONS: DropdownSection[] = [

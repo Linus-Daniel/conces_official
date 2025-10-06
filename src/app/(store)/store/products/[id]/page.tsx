@@ -12,12 +12,13 @@ import {
   FaWhatsapp,
   FaFacebookF,
   FaInstagram,
-  FaTwitter,
   FaCcVisa,
   FaCcMastercard,
   FaShieldAlt,
   FaMoneyBillWave,
+  FaCheck,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axiosInstance";
 import useCart from "@/zustand/useCart";
@@ -45,21 +46,106 @@ const fetchProduct = async (id: string): Promise<IProduct> => {
   return response.data;
 };
 
-// Loading spinner component
-const LoadingSpinner = () => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div className="flex flex-col items-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-conces-blue"></div>
-      <p className="mt-4 text-lg text-gray-600">Loading product details...</p>
-    </div>
-  </div>
+// Skeleton Loader Component
+const ProductSkeleton = () => (
+  <main className="bg-gray-50">
+    {/* Breadcrumb Skeleton */}
+    <nav className="bg-gray-100 py-3 px-4">
+      <div className="container mx-auto">
+        <div className="h-4 w-64 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    </nav>
+
+    {/* Product Section Skeleton */}
+    <section className="py-8 px-4">
+      <div className="container mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Image Gallery Skeleton */}
+          <div className="w-full lg:w-1/2">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
+              <div className="relative aspect-square w-full bg-gray-200 animate-pulse"></div>
+            </div>
+            {/* Thumbnails Skeleton */}
+            <div className="flex gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-20 h-20 bg-gray-200 rounded-lg animate-pulse"
+                ></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Product Info Skeleton */}
+          <div className="w-full lg:w-1/2">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              {/* Title Skeleton */}
+              <div className="h-8 w-3/4 bg-gray-200 rounded animate-pulse mb-4"></div>
+
+              {/* Price Skeleton */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+
+              {/* Description Skeleton */}
+              <div className="space-y-2 mb-6">
+                <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+
+              {/* Info Box Skeleton */}
+              <div className="h-16 w-full bg-gray-100 rounded mb-6 animate-pulse"></div>
+
+              {/* Quantity Selector Skeleton */}
+              <div className="mb-6">
+                <div className="h-4 w-20 bg-gray-200 rounded animate-pulse mb-2"></div>
+                <div className="h-10 w-36 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+
+              {/* Button Skeleton */}
+              <div className="h-12 w-full bg-gray-200 rounded animate-pulse mb-6"></div>
+
+              {/* Social Share Skeleton */}
+              <div className="flex items-center gap-4">
+                <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
+                <div className="flex gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-5 w-5 bg-gray-200 rounded animate-pulse"
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Payment Methods Skeleton */}
+    <section className="bg-white border-t border-gray-200 py-6">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-center gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-6 w-32 bg-gray-200 rounded animate-pulse"
+            ></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
 );
 
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-    const { addToCart } = useCart();
+  const { addToCart } = useCart();
 
   const {
     data: product,
@@ -68,16 +154,18 @@ export default function ProductDetailPage() {
   } = useQuery<IProduct, Error>({
     queryKey: ["product", id],
     queryFn: () => fetchProduct(id),
-    enabled: !!id, // Only run query if id exists
+    enabled: !!id,
   });
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // Handle loading state
+  // Handle loading state with skeleton
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <ProductSkeleton />;
   }
 
   // Handle error state
@@ -97,20 +185,18 @@ export default function ProductDetailPage() {
     );
   }
 
-  // Helper function to get image URL regardless of format
+  // Helper functions
   const getImageUrl = (image: ProductImage | string, index: number): string => {
     if (typeof image === "string") return image;
     return image.url || `/api/placeholder/400/400?text=Image+${index + 1}`;
   };
 
-  // Helper function to get image alt text
   const getImageAlt = (image: ProductImage | string, index: number): string => {
     if (typeof image === "string")
       return `${product.name} - Image ${index + 1}`;
     return image.alt || `${product.name} - Image ${index + 1}`;
   };
 
-  console.log(product);
   const finalPrice = product.price;
   const availableStock = product.stock || 0;
   const currentImage =
@@ -118,19 +204,56 @@ export default function ProductDetailPage() {
       ? getImageUrl(product.images[selectedImage], selectedImage)
       : "/api/placeholder/400/400?text=No+Image";
 
+  // Share functionality
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareText = `Check out ${
+    product.name
+  } - ₦${finalPrice.toLocaleString()}`;
+
+  const handleShare = (platform: string) => {
+    const encodedUrl = encodeURIComponent(currentUrl);
+    const encodedText = encodeURIComponent(shareText);
+
+    const urls = {
+      whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+    };
+
+    if (platform === "instagram") {
+      // Instagram doesn't support web sharing, so copy link instead
+      handleCopyLink();
+    } else if (urls[platform as keyof typeof urls]) {
+      window.open(
+        urls[platform as keyof typeof urls],
+        "_blank",
+        "width=600,height=400"
+      );
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   const handleAddToCart = async () => {
     if (product.stock === 0) {
       console.log("Product is out of stock");
       return;
     }
+
+    setIsAddingToCart(true);
     try {
-      const response = await addToCart(product?._id as string);
+      const response = await addToCart(product?._id as string, quantity);
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsAddingToCart(false);
     }
   };
-
-
 
   const incrementQuantity = () =>
     setQuantity((q) => Math.min(availableStock, q + 1));
@@ -238,24 +361,6 @@ export default function ProductDetailPage() {
                   {product.name}
                 </h1>
 
-                {/* Rating - Uncomment if needed */}
-                {/* <div className="flex items-center gap-2 mb-4">
-                  <div className="flex text-conces-gold">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      star <= Math.floor(product.rating || 4.5) ? (
-                        <FaStar key={star} size={16} />
-                      ) : star === Math.ceil(product.rating || 4.5) && (product.rating || 4.5) % 1 > 0 ? (
-                        <FaStarHalfAlt key={star} size={16} />
-                      ) : (
-                        <FaRegStar key={star} size={16} />
-                      )
-                    ))}
-                  </div>
-                  <span className="text-gray-600 text-sm">
-                    {product.rating?.toFixed(1) || '4.5'} ({product.reviews || 126} reviews)
-                  </span>
-                </div> */}
-
                 {/* Price */}
                 <div className="flex items-center gap-3 mb-6">
                   <span className="text-2xl font-bold text-conces-blue">
@@ -343,37 +448,70 @@ export default function ProductDetailPage() {
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
                   <button
                     onClick={handleAddToCart}
-                    disabled={availableStock === 0}
+                    disabled={availableStock === 0 || isAddingToCart}
                     className={`flex-1 flex items-center justify-center gap-2 border-2 py-3 px-6 rounded-md font-medium transition-colors ${
-                      availableStock === 0
+                      availableStock === 0 || isAddingToCart
                         ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
                         : "border-conces-blue text-conces-blue hover:bg-blue-50"
                     }`}
                   >
-                    <FaCartPlus size={16} />
-                    {availableStock === 0 ? "Out of Stock" : "Add to Cart"}
+                    {isAddingToCart ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <FaCartPlus size={16} />
+                        {availableStock === 0 ? "Out of Stock" : "Add to Cart"}
+                      </>
+                    )}
                   </button>
-                
                 </div>
 
                 {/* Social Sharing */}
                 <div className="flex items-center gap-4">
                   <span className="text-gray-600 text-sm">Share:</span>
-                  <div className="flex gap-4 text-conces-blue">
-                    <a href="#" aria-label="Share on WhatsApp">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => handleShare("whatsapp")}
+                      className="text-conces-blue hover:text-green-600 transition-colors"
+                      aria-label="Share on WhatsApp"
+                    >
                       <FaWhatsapp size={18} />
-                    </a>
-                    <a href="#" aria-label="Share on Facebook">
+                    </button>
+                    <button
+                      onClick={() => handleShare("facebook")}
+                      className="text-conces-blue hover:text-blue-600 transition-colors"
+                      aria-label="Share on Facebook"
+                    >
                       <FaFacebookF size={18} />
-                    </a>
-                    <a href="#" aria-label="Share on Instagram">
-                      <FaInstagram size={18} />
-                    </a>
-                    <a href="#" aria-label="Share on Twitter">
-                      <FaTwitter size={18} />
-                    </a>
+                    </button>
+                    <button
+                      onClick={() => handleShare("instagram")}
+                      className="text-conces-blue hover:text-pink-600 transition-colors relative"
+                      aria-label="Copy link (Instagram)"
+                    >
+                      {copied ? (
+                        <FaCheck size={18} className="text-green-600" />
+                      ) : (
+                        <FaInstagram size={18} />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleShare("twitter")}
+                      className="text-conces-blue hover:text-gray-900 transition-colors"
+                      aria-label="Share on Twitter"
+                    >
+                      <FaXTwitter size={18} />
+                    </button>
                   </div>
                 </div>
+                {copied && (
+                  <p className="text-xs text-green-600 mt-2">
+                    Link copied to clipboard!
+                  </p>
+                )}
               </div>
             </div>
           </div>

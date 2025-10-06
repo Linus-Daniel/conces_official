@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { FaBriefcase, FaCommentDots, FaEnvelope, FaGraduationCap, FaHandshake, FaLinkedin, FaLocationDot, FaTwitter, FaUser, FaUserGraduate, FaXmark } from 'react-icons/fa6';
+import { FaBriefcase, FaCommentDots, FaEnvelope, FaGraduationCap, FaHandshake, FaLinkedin, FaLocationDot, FaXTwitter, FaUser, FaUserGraduate, FaXmark } from 'react-icons/fa6';
 import { FaHandsHelping } from 'react-icons/fa';
 
 
@@ -417,7 +417,7 @@ const AlumniProfileModal = ({ isOpen, onClose, alumniId }:Props) => {
                                     rel="noopener noreferrer"
                                     className="text-gray-400 hover:text-blue-400"
                                   >
-                                    <FaTwitter className="fa-brands fa-twitter text-lg" />
+                                    <FaXTwitter className="fa-brands fa-twitter text-lg" />
                                   </a>
                                 )}
                                 <a

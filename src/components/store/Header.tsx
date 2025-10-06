@@ -5,7 +5,6 @@ import Link from 'next/link';
 import SearchInput from './Search';
 import CartIcon from './CartIcon';
 import { useSession } from 'next-auth/react';
-import { User, User2 } from 'lucide-react';
 
 export default function Header() {
   const {data} = useSession()
@@ -42,13 +41,10 @@ export default function Header() {
               CONCES
             </Link>
             <nav className="hidden lg:flex space-x-6">
-              <Link href="/" className="font-medium hover:text-royal-DEFAULT text-royal-dark">
+              <Link href="/store" className="font-medium hover:text-royal-DEFAULT text-royal-dark">
                 Home
               </Link>
-              <Link href="/store" className="font-medium hover:text-royal-DEFAULT text-royal-dark">
-                Apparel
-              </Link>
-              {/* Add other nav links */}
+              
             </nav>
           </div>
 

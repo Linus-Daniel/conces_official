@@ -23,6 +23,7 @@ import {
   Newspaper,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -155,7 +156,7 @@ console.log(subject)
     {
       icon: <Mail className="w-6 h-6" />,
       title: "Email Us",
-      contact: "contact@conces.org",
+      contact: "conces",
       time: "Response within 24 hours",
       description: "Best for detailed inquiries",
     },
@@ -301,7 +302,8 @@ console.log(subject)
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "contact@conces.org",
+          to:
+            process.env.NEXT_PUBLIC_CONTACT_EMAIL || "concesnational@gmail.com",
           subject: `CONCES Contact Form: ${generateEmailSubject()}`,
           content: {
             type: "html",
@@ -647,7 +649,7 @@ console.log(subject)
             </div>
 
             {/* Quick Links */}
-            <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6">
+            {/* <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 Quick Help
               </h3>
@@ -668,7 +670,7 @@ console.log(subject)
                   </a>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -681,9 +683,9 @@ console.log(subject)
             Don't wait to be part of something bigger. Connect with like-minded
             individuals and make a difference in your community.
           </p>
-          <button className="bg-white text-primary-dark px-8 py-4 rounded-full font-semibold text-lg hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+          <Link href={`/auth?mode=signup`} className="bg-white text-primary-dark px-8 py-4 rounded-full font-semibold text-lg hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300">
             Become a Member
-          </button>
+          </Link>
         </div>
       </section>
     </div>

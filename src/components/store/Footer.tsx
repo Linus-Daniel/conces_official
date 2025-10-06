@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
   FaFacebook,
-  FaTwitter,
   FaInstagram,
   FaYoutube,
   FaCcVisa,
   FaCcMastercard,
   FaCcPaypal,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -36,7 +36,7 @@ export default function Footer() {
                 href="#"
                 className="text-gray-300 hover:text-gold-DEFAULT transition"
               >
-                <FaTwitter size={20} />
+                <FaXTwitter size={20} />
               </a>
               <a
                 href="#"
@@ -102,54 +102,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Customer Service */}
-          <div>
-            <h3 className="text-xl font-bold mb-4 text-gold-DEFAULT">
-              Customer Service
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/shipping"
-                  className="text-gray-300 hover:text-gold-DEFAULT transition"
-                >
-                  Shipping Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/returns"
-                  className="text-gray-300 hover:text-gold-DEFAULT transition"
-                >
-                  Returns & Exchanges
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="text-gray-300 hover:text-gold-DEFAULT transition"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-gray-300 hover:text-gold-DEFAULT transition"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/size-guide"
-                  className="text-gray-300 hover:text-gold-DEFAULT transition"
-                >
-                  Size Guide
-                </Link>
-              </li>
-            </ul>
-          </div>
+     
 
           <div>
             <h3 className="text-xl font-bold mb-4 text-gold-DEFAULT">

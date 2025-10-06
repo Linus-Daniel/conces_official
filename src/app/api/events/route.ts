@@ -12,9 +12,9 @@ export async function GET(req: NextRequest) {
   console.log(user);
 
   try {
-    const B = await Chapter.find();
-
+    
     await dbConnect();
+    const B = await Chapter.find();
   } catch (error) {
     console.error("Database connection error:", error);
     return NextResponse.json(

@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import CommentsSection from "./CommentSections";
 
+import { useSession } from "next-auth/react";
+
 export interface Post {
   title: string;
   content: string;
@@ -41,6 +43,8 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
   const [likeCount, setLikeCount] = useState(post.likes);
   const [showComments, setShowComments] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.comments);
+  const { data: session } = useSession();
+  const user = session?.user;
 
 
   const typeConfig = useMemo(() => ({
@@ -137,11 +141,7 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
 
           <div className="flex items-center space-x-2">
             <div
-              className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium ${
-                currentTypeConfig?.bg
-              } ${
-                currentTypeConfig?.text
-              }`}
+              className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm font-medium ${currentTypeConfig?.bg} ${currentTypeConfig?.text}`}
             >
               <TypeIcon className="w-4 h-4" />
               <span className="capitalize">{post.type}</span>
@@ -198,58 +198,62 @@ export default function PostCard({ post, featured = false }: PostCardProps) {
       )}
 
       {/* Actions */}
-      <div className="p-4 pt-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <button
-              onClick={handleLike}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 ${
-                isLiked
-                  ? "bg-red-50 text-red-600"
-                  : "hover:bg-gray-50 text-gray-600"
-              }`}
-            >
-              <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-              <span className="text-sm font-medium">{likeCount}</span>
-            </button>
 
-            <button
-              onClick={handleCommentClick}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 ${
-                showComments
-                  ? "bg-[#1a3a8f]/10 text-[#1a3a8f]"
-                  : "hover:bg-gray-50 text-gray-600"
-              }`}
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span className="text-sm font-medium">{commentsCount}</span>
-            </button>
+      {user && (
+        <div className="p-4 pt-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <button
+                onClick={handleLike}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 ${
+                  isLiked
+                    ? "bg-red-50 text-red-600"
+                    : "hover:bg-gray-50 text-gray-600"
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                <span className="text-sm font-medium">{likeCount}</span>
+              </button>
 
-            <button className="flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-50 text-gray-600 transition-all duration-200">
-              <Share2 className="w-5 h-5" />
-              <span className="text-sm font-medium">Share</span>
-            </button>
+              <button
+                onClick={handleCommentClick}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 ${
+                  showComments
+                    ? "bg-[#1a3a8f]/10 text-[#1a3a8f]"
+                    : "hover:bg-gray-50 text-gray-600"
+                }`}
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span className="text-sm font-medium">{commentsCount}</span>
+              </button>
+
+              <button className="flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-gray-50 text-gray-600 transition-all duration-200">
+                <Share2 className="w-5 h-5" />
+                <span className="text-sm font-medium">Share</span>
+              </button>
+            </div>
+
+            {post.prayed && (
+              <div className="flex items-center space-x-1 text-[#e6c67b]">
+                <div className="w-2 h-2 bg-[#e6c67b] rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">
+                  {post.prayed} prayed
+                </span>
+              </div>
+            )}
           </div>
 
-          {post.prayed && (
-            <div className="flex items-center space-x-1 text-[#e6c67b]">
-              <div className="w-2 h-2 bg-[#e6c67b] rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">{post.prayed} prayed</span>
+          {showComments && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <CommentsSection
+                postId={post._id as string}
+                initialCommentsCount={commentsCount}
+                onCommentAdded={handleCommentAdded}
+              />
             </div>
           )}
         </div>
-
-        {/* Comments Section */}
-        {showComments && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <CommentsSection
-              postId={post._id as string}
-              initialCommentsCount={commentsCount}
-              onCommentAdded={handleCommentAdded}
-            />
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

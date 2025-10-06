@@ -38,14 +38,14 @@ function page() {
       <Hero />
       <About />
       <TalentHubSection />
+      <Event />
       <Features />
       <Anthem />
 
       <Shop />
       <Donate />
 
-      <Event />
-      <Sponsor />
+      {/* <Sponsor /> */}
       <Testimonial />
 
       <CTA />

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import React from 'react'
 
 function CTA() {
@@ -19,12 +20,12 @@ function CTA() {
                     Join a community of Christian engineers committed to excellence in faith and profession.
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-                    <span className="px-8 py-4 bg-gold-500 text-royal-900 font-bold rounded-lg hover:bg-gold-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg cursor-pointer">
+                   <Link href={`/auth?mode=signup`}className="px-8 py-4 bg-gold-500 text-royal-900 font-bold rounded-lg hover:bg-gold-400 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg cursor-pointer">
                         Create Your Free Account
-                    </span>
-                    <span className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white font-bold rounded-lg hover:bg-white/30 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg cursor-pointer">
+                    </Link>
+                    <Link href={`/about`} className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white font-bold rounded-lg hover:bg-white/30 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg cursor-pointer">
                         Learn More
-                    </span>
+                    </Link>
                 </div>
             </div>
         </div>
