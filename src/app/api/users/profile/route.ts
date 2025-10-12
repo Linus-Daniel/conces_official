@@ -25,10 +25,10 @@ export async function GET(request: NextRequest, {params}: {params: Promise<{id: 
     );
   }
 }
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } =await  params;
         const body = await request.json();
         const updatedUser = await User.findByIdAndUpdate(id, body, { new: true }).lean();
         if (!updatedUser) {
@@ -41,10 +41,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = await params;
         const deletedUser = await User.findByIdAndDelete(id).lean();
         if (!deletedUser) {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
