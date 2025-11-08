@@ -184,7 +184,7 @@ async function resendVerificationLink(user: any) {
 
 async function sendVerificationEmail(user: any, verificationToken: string) {
   try {
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/auth/verify-email?token=${verificationToken}`;
 
     const emailResponse = await api.post(
       `${process.env.NEXTAUTH_URL}/api/send-email`,
