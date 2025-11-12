@@ -4,6 +4,8 @@ import FeaturedProducts from '@/components/store/Products';
 import { IProduct } from '@/models/Product';
 import ProductsPage from './products/page';
 
+export const revalidate = 1800; // ISR: Revalidate every 30 minutes for store
+
 
 
 async function getProducts(): Promise<IProduct[]> {
