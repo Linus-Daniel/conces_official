@@ -160,9 +160,9 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
           Users Management
         </h2>
         <div className="flex gap-2 mt-4 md:mt-0">
-          <button className="bg-royal-DEFAULT text-white px-4 py-2 rounded-lg flex items-center hover:bg-royal-dark transition">
+          {/* <button className="bg-royal-DEFAULT text-white px-4 py-2 rounded-lg flex items-center hover:bg-royal-dark transition">
             <FaUserPlus className="mr-2" /> Add New User
-          </button>
+          </button> */}
           {selectedRows.length > 0 && (
             <button className="bg-red-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-red-700 transition">
               <FaTrash className="mr-2" /> Delete Selected (
