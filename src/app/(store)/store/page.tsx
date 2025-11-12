@@ -1,8 +1,6 @@
-import CategorySection from '@/components/store/CategorySection';
-import DonationBanner from '@/components/store/Donate';
-import FeaturedProducts from '@/components/store/Products';
+
 import { IProduct } from '@/models/Product';
-import ProductsPage from './products/page';
+import ProductsPage from '@/components/store/Products';
 
 export const revalidate = 1800; // ISR: Revalidate every 30 minutes for store
 

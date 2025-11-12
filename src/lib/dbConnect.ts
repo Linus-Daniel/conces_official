@@ -6,7 +6,6 @@ const MONGODB_URI =
     ? process.env.MONGODB_URI_PROD
     : process.env.MONGODB_URI_DEV;
 
-    console.log(MONGODB_URI)
 if (
   !MONGODB_URI ||
   (!MONGODB_URI.startsWith("mongodb://") &&
