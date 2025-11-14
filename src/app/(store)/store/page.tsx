@@ -1,6 +1,7 @@
 
 import { IProduct } from '@/models/Product';
 import ProductsPage from '@/components/store/Products';
+import PageWrapper from '@/components/store/PageWrapper';
 
 export const revalidate = 1800; // ISR: Revalidate every 30 minutes for store
 
@@ -40,7 +41,7 @@ export default async function StorePage() {
   return (
     <>
       {/* <CategorySection /> */}
-      <ProductsPage products={products} />
+      <PageWrapper products={products} />
     </>
   );
 }

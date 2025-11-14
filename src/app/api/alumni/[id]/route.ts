@@ -13,10 +13,7 @@ export async function GET(
     await dbConnect();
 const{id} = await params
     const session = await getServerSession(authOptions);
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.id !==id)
-    ) {
+    if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -49,10 +46,7 @@ export async function PUT(
     const {id} = await params
 
     const session = await getServerSession(authOptions);
-    if (
-      !session ||
-      (session.user.role !== "admin" && session.user.id !== id)
-    ) {
+    if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

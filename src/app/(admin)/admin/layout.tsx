@@ -17,7 +17,7 @@ export default function RootLayout({
     <html>
       <body className="antialiased">
           <AdminLayout>
-            <ProtectedRoute expectedRole="admin">
+            <ProtectedRoute expectedRole={["admin", "chapter-admin"]}>
               <main>{children}</main>
             </ProtectedRoute>
           </AdminLayout>

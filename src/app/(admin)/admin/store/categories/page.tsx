@@ -1,5 +1,6 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { 
   Plus, 
   Pencil, 
@@ -8,8 +9,11 @@ import {
   ChevronRight,
   Image as ImageIcon,
   ListTree,
-  Move
+  Move,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
+import api from '@/lib/axiosInstance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -47,119 +51,125 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from '@/components/ui/card';
 
 type Category = {
-  id: string;
+  _id: string;
   name: string;
   slug: string;
   description: string;
   image: string;
   parentId: string | null;
   children?: Category[];
-  productCount: number;
+  productCount?: number;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+// API functions
+const fetchCategories = async (): Promise<Category[]> => {
+  const response = await api.get('/store/categories');
+  return response.data.data;
+};
+
+const createCategory = async (category: Omit<Category, '_id' | 'children' | 'createdAt' | 'updatedAt'>): Promise<Category> => {
+  const response = await api.post('/store/categories', category);
+  return response.data.data;
+};
+
+const updateCategory = async ({ id, ...data }: { id: string } & Partial<Category>): Promise<Category> => {
+  const response = await api.put(`/store/categories/${id}`, data);
+  return response.data.data;
+};
+
+const deleteCategory = async (id: string): Promise<void> => {
+  await api.delete(`/store/categories/${id}`);
 };
 
 export default function CategoriesPage() {
-  // Sample data - replace with API calls in a real application
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: '1',
-      name: 'Electronics',
-      slug: 'electronics',
-      description: 'All electronic devices and accessories',
-      image: '',
-      parentId: null,
-      productCount: 124,
-      isActive: true,
-      children: [
-        {
-          id: '2',
-          name: 'Smartphones',
-          slug: 'smartphones',
-          description: 'Mobile phones and smartphones',
-          image: '',
-          parentId: '1',
-          productCount: 56,
-          isActive: true,
-        },
-        {
-          id: '3',
-          name: 'Laptops',
-          slug: 'laptops',
-          description: 'Laptops and notebooks',
-          image: '',
-          parentId: '1',
-          productCount: 42,
-          isActive: true,
-        },
-      ],
-    },
-    {
-      id: '4',
-      name: 'Clothing',
-      slug: 'clothing',
-      description: 'Fashion and apparel',
-      image: '',
-      parentId: null,
-      productCount: 89,
-      isActive: true,
-      children: [
-        {
-          id: '5',
-          name: "Men's Clothing",
-          slug: 'mens-clothing',
-          description: 'Clothing for men',
-          image: '',
-          parentId: '4',
-          productCount: 45,
-          isActive: true,
-          children: [
-            {
-              id: '6',
-              name: "Men's T-Shirts",
-              slug: 'mens-tshirts',
-              description: 'T-shirts for men',
-              image: '',
-              parentId: '5',
-              productCount: 23,
-              isActive: true,
-            },
-          ],
-        },
-        {
-          id: '7',
-          name: "Women's Clothing",
-          slug: 'womens-clothing',
-          description: 'Clothing for women',
-          image: '',
-          parentId: '4',
-          productCount: 44,
-          isActive: true,
-        },
-      ],
-    },
-    {
-      id: '8',
-      name: 'Home & Garden',
-      slug: 'home-garden',
-      description: 'Home decor and gardening supplies',
-      image: '',
-      parentId: null,
-      productCount: 67,
-      isActive: false,
-    },
-  ]);
+  const queryClient = useQueryClient();
 
-  const [openCategory, setOpenCategory] = useState<string[]>(['1', '4']);
+  // Fetch categories with React Query
+  const {
+    data: categoriesData = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Mutations
+  const createMutation = useMutation({
+    mutationFn: createCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setEditDialogOpen(false);
+      setCurrentCategory(null);
+      setNewCategory({
+        name: '',
+        slug: '',
+        description: '',
+        image: '',
+        parentId: null,
+        isActive: true,
+      });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setEditDialogOpen(false);
+      setCurrentCategory(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setDeleteDialogOpen(false);
+      setCurrentCategory(null);
+    },
+  });
+
+  // Process categories into a tree structure
+  const processCategories = (categories: Category[]): Category[] => {
+    const categoryMap = new Map<string, Category>();
+    const rootCategories: Category[] = [];
+
+    // First pass: create category map
+    categories.forEach(category => {
+      categoryMap.set(category._id, { ...category, children: [] });
+    });
+
+    // Second pass: build tree structure
+    categories.forEach(category => {
+      const processedCategory = categoryMap.get(category._id)!;
+      if (category.parentId && categoryMap.has(category.parentId)) {
+        const parent = categoryMap.get(category.parentId)!;
+        parent.children!.push(processedCategory);
+      } else {
+        rootCategories.push(processedCategory);
+      }
+    });
+
+    return rootCategories;
+  };
+
+  const categories = processCategories(categoriesData);
+  const [openCategory, setOpenCategory] = useState<string[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
-  const [newCategory, setNewCategory] = useState<Omit<Category, 'id' | 'children'>>({
+  const [newCategory, setNewCategory] = useState<Omit<Category, '_id' | 'children' | 'createdAt' | 'updatedAt'>>({
     name: '',
     slug: '',
     description: '',
     image: '',
     parentId: null,
-    productCount: 0,
     isActive: true,
   });
 
@@ -183,72 +193,34 @@ export default function CategoriesPage() {
 
   const handleSave = () => {
     if (currentCategory) {
-      // In a real app, this would be an API call
-      setCategories(prev => 
-        prev.map(cat => 
-          cat.id === currentCategory.id ? currentCategory : cat
-        )
-      );
+      updateMutation.mutate({ 
+        id: currentCategory._id, 
+        ...currentCategory 
+      });
     } else {
-      // Add new category
-      const newId = Math.random().toString(36).substring(2, 9);
-      const categoryToAdd = {
-        ...newCategory,
-        id: newId,
-        children: [],
-        productCount: 0,
-      };
-      
-      if (newCategory.parentId) {
-        setCategories(prev => 
-          prev.map(cat => 
-            cat.id === newCategory.parentId 
-              ? { ...cat, children: [...(cat.children || []), categoryToAdd] } 
-              : cat
-          )
-        );
-      } else {
-        setCategories(prev => [...prev, categoryToAdd]);
-      }
+      createMutation.mutate(newCategory);
     }
-    
-    setEditDialogOpen(false);
-    setCurrentCategory(null);
-    setNewCategory({
-      name: '',
-      slug: '',
-      description: '',
-      image: '',
-      parentId: null,
-      productCount: 0,
-      isActive: true,
-    });
   };
 
   const confirmDelete = () => {
     if (currentCategory) {
-      // In a real app, this would be an API call
-      setCategories(prev => 
-        prev.filter(cat => cat.id !== currentCategory.id)
-      );
+      deleteMutation.mutate(currentCategory._id);
     }
-    setDeleteDialogOpen(false);
-    setCurrentCategory(null);
   };
 
   const renderCategories = (categories: Category[], level = 0) => {
     return categories.map(category => (
-      <div key={category.id} className="space-y-2">
+      <div key={category._id} className="space-y-2">
         <div className={`flex items-center p-2 rounded-md ${level > 0 ? 'ml-6' : ''}`}>
           {category.children && category.children.length > 0 ? (
             <Collapsible
-              open={openCategory.includes(category.id)}
-              onOpenChange={() => toggleCategory(category.id)}
+              open={openCategory.includes(category._id)}
+              onOpenChange={() => toggleCategory(category._id)}
               className="w-full"
             >
               <div className="flex items-center w-full">
                 <CollapsibleTrigger className="mr-2">
-                  {openCategory.includes(category.id) ? (
+                  {openCategory.includes(category._id) ? (
                     <ChevronDown className="h-4 w-4" />
                   ) : (
                     <ChevronRight className="h-4 w-4" />
@@ -257,7 +229,7 @@ export default function CategoriesPage() {
                 <div className="flex-1 flex items-center">
                   <span className="font-medium">{category.name}</span>
                   <Badge variant="outline" className="ml-2">
-                    {category.productCount} products
+                    {category.productCount || 0} products
                   </Badge>
                   {!category.isActive && (
                     <Badge variant="secondary" className="ml-2">
@@ -272,7 +244,7 @@ export default function CategoriesPage() {
                     onClick={() => {
                       setNewCategory({
                         ...newCategory,
-                        parentId: category.id
+                        parentId: category._id
                       });
                       setCurrentCategory(null);
                       setEditDialogOpen(true);
@@ -321,7 +293,7 @@ export default function CategoriesPage() {
                   onClick={() => {
                     setNewCategory({
                       ...newCategory,
-                      parentId: category.id
+                      parentId: category._id
                     });
                     setCurrentCategory(null);
                     setEditDialogOpen(true);
@@ -351,6 +323,35 @@ export default function CategoriesPage() {
       </div>
     ));
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading categories...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
+          <p className="text-red-600 mb-4">
+            {error?.message || 'Failed to load categories'}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -448,7 +449,7 @@ export default function CategoriesPage() {
                 >
                   <option value="">No parent (root category)</option>
                   {categories.map(category => (
-                    <option key={category.id} value={category.id}>
+                    <option key={category._id} value={category._id}>
                       {category.name}
                     </option>
                   ))}

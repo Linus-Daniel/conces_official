@@ -19,7 +19,23 @@ export async function GET() {
 
   try {
     const session = await getServerSession(authOptions);
-    const userRole = session?.user?.role;
+    
+    // Authentication check
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Unauthorized - Please sign in" },
+        { status: 401 }
+      );
+    }
+
+    // Authorization check - only admins and chapter-admins can access chapters
+    const userRole = session.user.role;
+    if (!userRole || !["admin", "chapter-admin"].includes(userRole)) {
+      return NextResponse.json(
+        { error: "Forbidden - Insufficient permissions" },
+        { status: 403 }
+      );
+    }
 
     const chapters = await Chapter.find().sort({ createdAt: -1 });
     console.log(chapters)

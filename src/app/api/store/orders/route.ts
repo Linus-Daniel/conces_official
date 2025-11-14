@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
   try {
     await dbConnect();
 
+    const product =  await Product.find();
+
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {

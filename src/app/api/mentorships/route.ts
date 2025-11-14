@@ -31,11 +31,33 @@ export async function GET(req: NextRequest) {
   await dbConnect();
 
   const session = await getServerSession(authOptions);
+  
+  // Authorization check - only admins, chapter-admins, and alumni can view mentorships
+  if (!session || !["admin", "chapter-admin", "alumni"].includes(session.user.role)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
-    const mentorships = await Mentorship.find({});
+    let mentorships;
+    
+    // Different access levels based on role
+    if (session.user.role === "admin") {
+      // Admins can see all mentorships
+      mentorships = await Mentorship.find({}).populate('mentorId menteeId', 'fullName email');
+    } else if (session.user.role === "chapter-admin") {
+      // Chapter-admins can see mentorships in their chapter (need to implement chapter filtering)
+      mentorships = await Mentorship.find({}).populate('mentorId menteeId', 'fullName email');
+    } else {
+      // Alumni can only see their own mentorships
+      mentorships = await Mentorship.find({
+        $or: [
+          { mentorId: session.user.id },
+          { menteeId: session.user.id }
+        ]
+      }).populate('mentorId menteeId', 'fullName email');
+    }
 
-    return NextResponse.json(mentorships);
+    return NextResponse.json({ mentorships, count: mentorships.length });
   } catch (error) {
     console.error('[GET ALL MENTORSHIPS ERROR]', error);
     return NextResponse.json(

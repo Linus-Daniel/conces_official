@@ -15,6 +15,7 @@ import { FaUpload, FaTimes } from "react-icons/fa";
 import ImageUpload from "@/components/ImageUpload";
 import { IExecutive } from "@/models/Executive";
 import Image from "next/image";
+import { showSuccess, showError } from "@/lib/toast";
 
 export default function AdminExecutivesPage() {
   const [executives, setExecutives] = useState<IExecutive[]>([]);
@@ -114,7 +115,7 @@ export default function AdminExecutivesPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert(
+        await showSuccess(
           editingExecutive
             ? "Executive updated successfully!"
             : "Executive created successfully!"
@@ -124,11 +125,11 @@ export default function AdminExecutivesPage() {
         resetForm();
         fetchExecutives();
       } else {
-        alert(data.message || "An error occurred");
+        await showError(data.message || "An error occurred");
       }
     } catch (error) {
       console.error("Error saving executive:", error);
-      alert("An error occurred while saving");
+      await showError("An error occurred while saving");
     }
   };
 
@@ -159,14 +160,14 @@ export default function AdminExecutivesPage() {
         const data = await response.json();
 
         if (data.success) {
-          alert("Executive deleted successfully!");
+          await showSuccess("Executive deleted successfully!");
           fetchExecutives();
         } else {
-          alert(data.message || "An error occurred");
+          await showError(data.message || "An error occurred");
         }
       } catch (error) {
         console.error("Error deleting executive:", error);
-        alert("An error occurred while deleting");
+        await showError("An error occurred while deleting");
       }
     }
   };
@@ -213,14 +214,14 @@ export default function AdminExecutivesPage() {
         const data = await response.json();
 
         if (data.success) {
-          alert(data.message);
+          await showSuccess(data.message);
           fetchExecutives();
         } else {
-          alert(data.message || "An error occurred");
+          await showError(data.message || "An error occurred");
         }
       } catch (error) {
         console.error("Error in batch update:", error);
-        alert("An error occurred during batch update");
+        await showError("An error occurred during batch update");
       }
     }
   };
@@ -433,7 +434,7 @@ export default function AdminExecutivesPage() {
                           </button>
                           <button
                             onClick={() =>
-                              handleDelete(executive?.id, executive.name)
+                              handleDelete(executive._id as string, executive.name)
                             }
                             className="text-red-600 hover:text-red-900 p-1"
                           >

@@ -1,6 +1,8 @@
 // app/api/executives/route.ts - GET and POST for /api/executives
 
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/next-auth";
 import Executive from "@/models/Executive";
 import dbConnect from "@/lib/dbConnect";
 
@@ -9,6 +11,24 @@ import dbConnect from "@/lib/dbConnect";
 // =======================
 export async function GET(request: NextRequest) {
   try {
+    // Authentication check
+    const userSession = await getServerSession(authOptions);
+    if (!userSession?.user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized - Please sign in" },
+        { status: 401 }
+      );
+    }
+
+    // Authorization check - only admins and chapter-admins can access executives
+    const userRole = userSession.user.role;
+    if (!userRole || !["admin", "chapter-admin"].includes(userRole)) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden - Insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
@@ -71,6 +91,24 @@ export async function GET(request: NextRequest) {
 // =======================
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized - Please sign in" },
+        { status: 401 }
+      );
+    }
+
+    // Authorization check - only admins can create executives
+    const userRole = session.user.role;
+    if (!userRole || userRole !== "admin") {
+      return NextResponse.json(
+        { success: false, message: "Forbidden - Only admins can create executives" },
+        { status: 403 }
+      );
+    }
+
     await dbConnect();
 
     const body = await request.json();
@@ -80,7 +118,7 @@ export async function POST(request: NextRequest) {
       institution,
       level,
       position,
-      session,
+      session: academicSession,
       avatar,
       status,
       state,

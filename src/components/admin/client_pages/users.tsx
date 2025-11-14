@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   FaSearch,
   FaEdit,
@@ -17,6 +17,7 @@ import {
   FaCheck,
   FaSpinner,
 } from "react-icons/fa";
+import { showSuccess, showError } from "@/lib/toast";
 
 type User = {
   id: string;
@@ -41,6 +42,8 @@ type SortConfig = {
 
 export default function UsersManagement({ users,userRole }: { users: User[], userRole:string }) {
   // State
+
+  console.log(users)
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
@@ -51,6 +54,15 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
   );
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    role: "user" as "admin" | "chapter-admin" | "user",
+    chapter: "",
+    institution: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
@@ -66,6 +78,67 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
   );
 
   console.log(users);
+
+  // Additional state for chapters
+  const [chapters, setChapters] = useState<{_id: string, chapterName: string}[]>([]);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+
+  // Fetch chapters for dropdown
+  useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        const response = await fetch('/api/chapters');
+        const data = await response.json();
+        setChapters(data.chapters || []);
+      } catch (error) {
+        console.error('Failed to fetch chapters:', error);
+      }
+    };
+    fetchChapters();
+  }, []);
+
+  // Handle create user
+  const handleCreateUser = async () => {
+    if (!newUserData.fullName || !newUserData.email || !newUserData.chapter) {
+      await showError('Please fill in all required fields');
+      return;
+    }
+
+    setIsCreatingUser(true);
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUserData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await showSuccess(data.message);
+        setShowUserModal(false);
+        setNewUserData({
+          fullName: "",
+          email: "",
+          phone: "",
+          role: "user",
+          chapter: "",
+          institution: "",
+        });
+        // Refresh the page or update users list
+        window.location.reload();
+      } else {
+        await showError(data.message || 'Failed to create user');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      await showError('Failed to create user');
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
   // Sorting
   const sortedUsers = [...users].sort((a, b) => {
     if ((a[sortConfig.key] ?? "") < (b[sortConfig.key] ?? "")) {
@@ -160,9 +233,12 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
           Users Management
         </h2>
         <div className="flex gap-2 mt-4 md:mt-0">
-          {/* <button className="bg-royal-DEFAULT text-white px-4 py-2 rounded-lg flex items-center hover:bg-royal-dark transition">
+          <button 
+            onClick={() => setShowUserModal(true)}
+            className="bg-royal-DEFAULT text-white px-4 py-2 rounded-lg flex items-center hover:bg-royal-dark transition"
+          >
             <FaUserPlus className="mr-2" /> Add New User
-          </button> */}
+          </button>
           {selectedRows.length > 0 && (
             <button className="bg-red-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-red-700 transition">
               <FaTrash className="mr-2" /> Delete Selected (
@@ -715,6 +791,143 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {showUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add New User</h3>
+              <button
+                onClick={() => setShowUserModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={newUserData.fullName}
+                  onChange={(e) => setNewUserData({...newUserData, fullName: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={newUserData.email}
+                  onChange={(e) => setNewUserData({...newUserData, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  value={newUserData.phone}
+                  onChange={(e) => setNewUserData({...newUserData, phone: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Institution
+                </label>
+                <input
+                  type="text"
+                  value={newUserData.institution}
+                  onChange={(e) => setNewUserData({...newUserData, institution: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+                  placeholder="Enter institution name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role *
+                </label>
+                <select
+                  value={newUserData.role}
+                  onChange={(e) => setNewUserData({...newUserData, role: e.target.value as "admin" | "chapter-admin" | "user"})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+                >
+                  <option value="user">User</option>
+                  <option value="chapter-admin">Chapter Admin</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Chapter *
+                </label>
+                <select
+                  value={newUserData.chapter}
+                  onChange={(e) => setNewUserData({...newUserData, chapter: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-royal-DEFAULT focus:border-transparent"
+                >
+                  <option value="">Select a chapter</option>
+                  {chapters.map((chapter) => (
+                    <option key={chapter._id} value={chapter._id}>
+                      {chapter.chapterName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowUserModal(false)}
+                disabled={isCreatingUser}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateUser}
+                disabled={isCreatingUser}
+                className="px-4 py-2 bg-royal-DEFAULT text-white rounded-md hover:bg-royal-dark disabled:opacity-50 flex items-center"
+              >
+                {isCreatingUser ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <FaUserPlus className="mr-2" />
+                    Create User
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong> New users will receive a default password 'password123' and should change it upon first login.
+              </p>
             </div>
           </div>
         </div>

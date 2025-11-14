@@ -43,7 +43,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             />
 
             <main className="flex-1 overflow-y-auto p-1 sm:p-2 md:p-4 bg-gray-100">
-              <SessionProvider>{children}</SessionProvider>
+              {children}
             </main>
           </div>
         </div>

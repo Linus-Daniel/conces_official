@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/next-auth"; // your NextAuth config
 import { redirect } from "next/navigation";
 
 type ProtectedPageProps = {
-  expectedRole: string;
+  expectedRole: string | string[];
   children: React.ReactNode;
 };
 
@@ -13,13 +13,17 @@ export default async function ProtectedPage({
 }: ProtectedPageProps) {
   const session = await getServerSession(authOptions);
   console.log(session?.user.role,"Current user Role")
-  const authorized = session?.user.role === expectedRole;
+  
+  // Support both single role and multiple roles
+  const allowedRoles = Array.isArray(expectedRole) ? expectedRole : [expectedRole];
+  const authorized = session?.user?.role && allowedRoles.includes(session.user.role);
   console.log(authorized,"Authorized")
 
   if (!session) {
     redirect("/auth");
   }
-  if (session.user.role !== expectedRole) {
+  
+  if (!authorized) {
     redirect("/unauthorized");
   }
 
