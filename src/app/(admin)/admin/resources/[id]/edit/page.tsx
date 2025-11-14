@@ -118,11 +118,20 @@ export default function EditResource() {
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this resource?")) return;
     try {
-      console.log("Deleting resource:", id);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/resources");
+      const response = await fetch(`/api/resources/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        alert('Resource deleted successfully!');
+        router.push('/admin/resources');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to delete resource: ${errorData.error || 'Unknown error'}`);
+      }
     } catch (error) {
       console.error("Error deleting resource:", error);
+      alert('Failed to delete resource. Please try again.');
     }
   };
 

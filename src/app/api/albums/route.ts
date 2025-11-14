@@ -1,4 +1,4 @@
-// app/api/gallery/route.ts
+// app/api/albums/route.ts - Alias for gallery to fix frontend integration
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const [images, total] = await Promise.all([
+    const [albums, total] = await Promise.all([
       Gallery.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Gallery.countDocuments(filter),
     ]);
 
     return NextResponse.json({
-      images,
+      albums,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -48,9 +48,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("GET /api/gallery error:", error);
+    console.error("GET /api/albums error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch images" },
+      { error: "Failed to fetch albums" },
       { status: 500 }
     );
   }
@@ -66,35 +66,21 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { images } = body;
 
-    // Handle bulk upload
-    if (Array.isArray(images)) {
-      const createdImages = await Gallery.insertMany(images);
-      return NextResponse.json(
-        {
-          success: true,
-          message: `${createdImages.length} images uploaded successfully`,
-          images: createdImages,
-        },
-        { status: 201 }
-      );
-    }
-
-    // Handle single upload
-    const newImage = await Gallery.create(body);
+    // Handle single album creation
+    const newAlbum = await Gallery.create(body);
     return NextResponse.json(
       {
         success: true,
-        message: "Image uploaded successfully",
-        image: newImage,
+        message: "Album created successfully",
+        album: newAlbum,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("POST /api/gallery error:", error);
+    console.error("POST /api/albums error:", error);
     return NextResponse.json(
-      { error: "Failed to upload image(s)" },
+      { error: "Failed to create album" },
       { status: 500 }
     );
   }

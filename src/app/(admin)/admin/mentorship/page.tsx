@@ -12,8 +12,9 @@ async function page() {
         headers: { cookie: cookieStore.toString() },
       });
       const data = response.data;
-      console.log(data);
-      return data;
+      console.log(data,"Data from mentorship requests");
+      
+      return data.mentorships;
     } catch (error) {
       console.error("Error fetching mentorship requests:", error);
     }

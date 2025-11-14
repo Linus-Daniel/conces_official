@@ -1,5 +1,7 @@
 // app/api/gallery/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/next-auth";
 import dbConnect from "@/lib/dbConnect";
 import Gallery from "@/models/Album";
 
@@ -37,6 +39,11 @@ export async function PUT(
   try {
     await dbConnect();
 
+    const session = await getServerSession(authOptions);
+    if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const id = (await params).id;
 
@@ -69,6 +76,12 @@ export async function DELETE(
 ) {
   try {
     await dbConnect();
+    
+    const session = await getServerSession(authOptions);
+    if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     const { id } = await params;
 
     const deletedImage = await Gallery.findByIdAndDelete(id);

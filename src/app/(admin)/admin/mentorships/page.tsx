@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FiEye, FiCheck, FiX, FiUsers, FiClock, FiSearch } from "react-icons/fi";
+import { FiEye, FiCheck, FiX, FiUsers, FiClock, FiSearch, FiTrash } from "react-icons/fi";
 import { showSuccess, showError } from "@/lib/toast";
 
 interface Mentorship {
@@ -72,6 +72,29 @@ export default function MentorshipsPage() {
       }
     } catch (error) {
       await showError("Failed to update mentorship");
+      console.error(error);
+    }
+  };
+
+  const deleteMentorship = async (id: string, mentorName: string, menteeName: string) => {
+    if (!confirm(`Are you sure you want to delete the mentorship between ${mentorName} and ${menteeName}?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/mentorships/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await showSuccess("Mentorship deleted successfully");
+        fetchMentorships();
+      } else {
+        const data = await response.json();
+        await showError(data.error || "Failed to delete mentorship");
+      }
+    } catch (error) {
+      await showError("Failed to delete mentorship");
       console.error(error);
     }
   };
@@ -285,6 +308,17 @@ export default function MentorshipsPage() {
                             title="View Details"
                           >
                             <FiEye size={16} />
+                          </button>
+                          <button
+                            onClick={() => deleteMentorship(
+                              mentorship._id, 
+                              mentorship.mentorId?.fullName || 'Unknown',
+                              mentorship.menteeId?.fullName || 'Unknown'
+                            )}
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                            title="Delete Mentorship"
+                          >
+                            <FiTrash size={16} />
                           </button>
                         </div>
                       </td>

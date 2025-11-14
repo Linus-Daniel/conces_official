@@ -91,6 +91,25 @@ export default function ContentManagement() {
     setSelectedType("all");
   };
 
+  const handleDeleteResource = async (resourceId: string, resourceTitle: string) => {
+    if (!confirm(`Are you sure you want to delete: ${resourceTitle}?`)) {
+      return;
+    }
+
+    try {
+      const response = await api.delete(`/resources/${resourceId}`);
+      
+      if (response.status === 200 || response.status === 204) {
+        // Remove from local state
+        setResources(prev => prev.filter(resource => resource._id !== resourceId));
+        // You could also show a success toast here
+      }
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+      alert('Failed to delete resource. Please try again.');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
@@ -226,7 +245,10 @@ export default function ContentManagement() {
                     <button className="text-royal-DEFAULT hover:text-royal-dark">
                       <FaEdit />
                     </button>
-                    <button className="text-red-500 hover:text-red-700">
+                    <button 
+                      onClick={() => handleDeleteResource(content._id, content.title)}
+                      className="text-red-500 hover:text-red-700"
+                    >
                       <FaTrash />
                     </button>
                     <ApprovalActions item={content} />

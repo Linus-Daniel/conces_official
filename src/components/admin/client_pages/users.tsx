@@ -20,6 +20,7 @@ import {
 import { showSuccess, showError } from "@/lib/toast";
 
 type User = {
+  _id: string;
   id: string;
   fullName: string;
   email: string;
@@ -139,6 +140,33 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
       setIsCreatingUser(false);
     }
   };
+
+  // Handle delete user
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete user: ${userName}?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await showSuccess('User deleted successfully');
+        // Refresh the page or update users list
+        window.location.reload();
+      } else {
+        await showError(data.message || 'Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      await showError('Failed to delete user');
+    }
+  };
+
   // Sorting
   const sortedUsers = [...users].sort((a, b) => {
     if ((a[sortConfig.key] ?? "") < (b[sortConfig.key] ?? "")) {
@@ -498,7 +526,7 @@ export default function UsersManagement({ users,userRole }: { users: User[], use
                         className="text-red-500 hover:text-red-700"
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Handle delete
+                          handleDeleteUser(user._id, user.fullName);
                         }}
                       >
                         <FaTrash />

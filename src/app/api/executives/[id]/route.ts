@@ -1,5 +1,7 @@
 // app/api/executives/[id]/route.js - GET, PUT, DELETE for /api/executives/[id]
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/next-auth";
 import dbConnect from "@/lib/dbConnect";
 import Executive from "@/models/Executive";
 import mongoose from "mongoose";
@@ -7,6 +9,11 @@ import mongoose from "mongoose";
 // GET /api/executives/[id] - Get single executive by ID
 export async function GET(request:NextRequest, { params }:{ params: Promise<{ id: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
     await dbConnect();
 
     const { id } = await params;
@@ -54,6 +61,11 @@ export async function GET(request:NextRequest, { params }:{ params: Promise<{ id
 // PUT /api/executives/[id] - Update executive
 export async function PUT(request:NextRequest, { params }:{params:Promise<{id:string}>}) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
     await dbConnect();
 
     const { id } = await params;
@@ -149,6 +161,11 @@ export async function PUT(request:NextRequest, { params }:{params:Promise<{id:st
 // DELETE /api/executives/[id] - Delete executive
 export async function DELETE(request:NextRequest, { params }:{ params: Promise<{ id: string }> }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== "admin") {
+      return NextResponse.json({ success: false, message: "Unauthorized - Admin only" }, { status: 401 });
+    }
+
     await dbConnect();
 
     const { id } = await params;

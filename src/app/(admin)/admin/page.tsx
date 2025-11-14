@@ -1,6 +1,5 @@
 import DashboardOverview from "@/components/admin/OverView";
 import api from "@/lib/axiosInstance";
-import { combineSlices } from "@reduxjs/toolkit";
 import { cookies } from "next/headers";
 
 const getDashboardStats = async () => {
