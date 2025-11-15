@@ -12,11 +12,10 @@ async function page() {
   try{
     const response = api.get("/community/posts");
     const postDatas = (await response).data;
-    console.log(postDatas);
     posts = postDatas;
   }
   catch(error){
-    console.log(error);
+    console.error("Error fetching community posts:", error instanceof Error ? error.message : "Unknown error");
   }
   return (
     <div>

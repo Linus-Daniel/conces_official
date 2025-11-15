@@ -16,7 +16,6 @@ class HubApiClient {
   constructor() {
     this.baseUrl =
       process.env.NEXT_PUBLIC_HUB_API_URL || "http://localhost:3001";
-    console.log("Hub API URL:", this.baseUrl);
 
     // Create axios instance with base configuration
     this.axiosInstance = axios.create({

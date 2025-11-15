@@ -306,7 +306,7 @@ export default function AlumniManagement() {
         if (format === "csv") {
           const csvContent = [
             Object.keys(alumniData[0]).join(","),
-            ...alumniData.map(row => 
+            ...alumniData.map((row:[]) => 
               Object.values(row).map(field => 
                 `"${String(field).replace(/"/g, '""')}"` // Escape quotes
               ).join(",")

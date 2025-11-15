@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaQuoteRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 import api from '@/lib/axiosInstance';
+import { TestimonialSkeleton } from '../ui/Skeletons';
 
 type Testimonial = {
   _id: string;
@@ -18,14 +19,18 @@ const Testimonial = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [slidesToShow, setSlidesToShow] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
+        setLoading(true);
         const res = await api.get('/testimonies');
         setTestimonials(res.data || []);
       } catch (err) {
         console.error('Failed to fetch testimonies:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -79,6 +84,35 @@ const Testimonial = () => {
     else if (touchStart - touchEnd < -50) prevSlide();
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <section id="testimonials" className="py-12 md:py-20 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 md:mb-16">
+            <span className="inline-block px-3 py-1 bg-royal-100 text-royal-700 font-medium rounded-full text-xs md:text-sm mb-3">
+              Success Stories
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4">
+              Member <span className="text-royal-700">Testimonials</span>
+            </h2>
+            <div className="w-16 md:w-20 h-1 bg-gold-400 mx-auto mb-6 md:mb-8"></div>
+            <p className="max-w-3xl mx-auto text-gray-600 text-sm sm:text-base md:text-lg">
+              Hear from students and alumni whose lives and careers have been transformed through CONCES.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <TestimonialSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // No testimonials case
   if (!testimonials.length) return null;
 
   return (

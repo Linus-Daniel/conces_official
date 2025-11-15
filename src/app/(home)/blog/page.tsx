@@ -4,6 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { FaBookOpen, FaClock, FaUser } from "react-icons/fa";
 import api from "@/lib/axiosInstance";
+import { BlogPageSkeleton } from "@/components/ui/Skeletons";
 
 // Define TypeScript interfaces for our blog data
 interface BlogAuthor {
@@ -103,14 +104,7 @@ const BlogPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-royal-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading blog posts...</p>
-        </div>
-      </div>
-    );
+    return <BlogPageSkeleton />;
   }
 
   if (error) {

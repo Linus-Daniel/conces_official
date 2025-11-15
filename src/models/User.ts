@@ -12,6 +12,8 @@ export interface IUser extends Document {
   verified: boolean;
   verificationToken?: string;
   verificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   location?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +38,8 @@ const UserSchema = new Schema<IUser>(
     verified: { type: Boolean, default: false },
     verificationToken: { type: String },
     verificationExpires: { type: Date },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date },
   },
   {
     timestamps: true,
@@ -43,6 +47,7 @@ const UserSchema = new Schema<IUser>(
 );
 
 UserSchema.index({ verificationToken: 1 });
+UserSchema.index({ passwordResetToken: 1 });
 UserSchema.index({ email: 1, chapter: 1 }, { unique: true });
 
 UserSchema.methods.comparePassword = async function (

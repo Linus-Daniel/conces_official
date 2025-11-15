@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 export default function AboutPage() {
   const query = useSearchParams();
   const tab = query.get("tab");
-  console.log(tab);
 
   const [activeTab, setActiveTab] = useState("history");
 

@@ -6,6 +6,7 @@ import React from "react";
 import { IEvent } from "@/types";
 import EventCard from "../ui/EventCard";
 import api from "@/lib/axiosInstance";
+import { EventGridSkeleton } from "../ui/Skeletons";
 
 // Constants
 const EVENTS_TO_DISPLAY = 4;
@@ -17,16 +18,6 @@ async function fetchEvents(): Promise<IEvent[]> {
   return data;
 }
 
-// Loading skeleton component
-function EventCardSkeleton() {
-  return (
-    <div className="animate-pulse">
-      <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
-      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-    </div>
-  );
-}
 
 // Error component
 function ErrorState({ error }: { error: Error }) {
@@ -119,11 +110,7 @@ function Events() {
         {/* Events Grid */}
         <div className="min-h-[200px]">
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
-              {[...Array(EVENTS_TO_DISPLAY)].map((_, index) => (
-                <EventCardSkeleton key={index} />
-              ))}
-            </div>
+            <EventGridSkeleton count={EVENTS_TO_DISPLAY} />
           ) : isError ? (
             <ErrorState error={error as Error} />
           ) : displayEvents.length === 0 ? (

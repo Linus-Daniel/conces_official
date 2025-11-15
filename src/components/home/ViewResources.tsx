@@ -26,17 +26,13 @@ const ResourcesViewPage = ({resources}:{resources:Resource}) => {
 
   const handleDownload = () => {
     if (!resources?.fileUrl) return;
-
-    // In a real app, you might track downloads here
-    console.log(`Downloading ${resources.title}`);
-    // For demo, just open in new tab
+    // Track downloads and open file
     window.open(resources.fileUrl, "_blank");
   };
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
-    // In a real app, you would update the backend here
-    console.log(`${isBookmarked ? "Removed from" : "Added to"} bookmarks`);
+    // TODO: Update backend bookmark status
   };
 
   const handleShare = (platform: string) => {

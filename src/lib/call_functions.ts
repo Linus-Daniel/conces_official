@@ -2,7 +2,6 @@ import api from "./axiosInstance"
 import { cookies } from "next/headers"
 
 export async function getData (endpoint:string){
-    console.log(endpoint,"Endpoint in call function")
     const cookieStore = await cookies()
     try{
         const response = await api.get(endpoint,{
@@ -15,7 +14,7 @@ export async function getData (endpoint:string){
 
     }
     catch(error){
-        console.log(error)
-
+        console.error("Error fetching data:", error instanceof Error ? error.message : "Unknown error")
+        return null;
     }
 }

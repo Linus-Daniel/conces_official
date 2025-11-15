@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import AlumniProfileModal from "@/components/modals/AlumniModal";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 import {
   FaArrowRight,
   FaCalendar,
-  FaChalkboardUser,
   FaClock,
   FaEnvelope,
   FaGraduationCap,
@@ -17,137 +17,161 @@ import {
   FaUserGraduate,
   FaUserGroup,
   FaVideo,
+  FaSpinner,
 } from "react-icons/fa6";
 import { FaHandsHelping, FaSearch } from "react-icons/fa";
+import api from "@/lib/axiosInstance";
+import { AlumniGridSkeleton, MentorshipProgramSkeleton, LoadingWithText } from "@/components/ui/Skeletons";
+
+interface AlumniProfile {
+  _id: string;
+  userId: {
+    _id: string;
+    fullName: string;
+    email: string;
+    avatar?: string;
+  };
+  graduationYear: number;
+  specialization: string;
+  currentRole: string;
+  bio?: string;
+  skills?: string[];
+  education?: Array<{
+    schoolName: string;
+    course: string;
+  }>;
+  availableForMentorship: boolean;
+  isMentor: boolean;
+  socialLinks?: {
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+  };
+}
+
+interface MentorshipProgram {
+  _id: string;
+  title: string;
+  description: string;
+  mentorId: {
+    userId: {
+      fullName: string;
+    };
+  };
+  duration: string;
+  timeCommitment: string;
+  maxParticipants: number;
+  currentParticipants: number;
+  applicationDeadline?: string;
+  programStartDate?: string;
+}
 
 const AlumniPage = () => {
   const [activeTab, setActiveTab] = useState("network");
-  const [selectedAlumni, setSelectedAlumni] = useState<number | null>(null);
+  const [selectedAlumni, setSelectedAlumni] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [specializationFilter, setSpecializationFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
 
-  // Sample alumni data
-  const alumni = [
-    {
-      id: 1,
-      name: "Dr. Adebayo Ogunlesi",
-      graduationYear: 1995,
-      currentRole: "Principal Engineer at Chevron",
-      specialization: "Petroleum Engineering",
-      location: "Houston, TX",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      availableForMentorship: true,
-      bio: "15+ years experience in offshore drilling operations. Passionate about mentoring young engineers.",
-      contact: "a.ogunlesi@example.com",
+  // Fetch alumni profiles
+  const { data: alumni = [], isLoading: alumniLoading, error: alumniError } = useQuery({
+    queryKey: ["alumni"],
+    queryFn: async () => {
+      const response = await api.get("/alumni");
+      return response.data.alumni as AlumniProfile[];
     },
-    {
-      id: 2,
-      name: "Engr. Ngozi Eze",
-      graduationYear: 2008,
-      currentRole: "CTO at TechBridge Africa",
-      specialization: "Computer Engineering",
-      location: "Lagos, Nigeria",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      availableForMentorship: true,
-      bio: "Technology entrepreneur building solutions for African markets. Regular speaker at engineering conferences.",
-      contact: "ngozi.eze@techbridge.africa",
-    },
-    {
-      id: 3,
-      name: "Prof. Ibrahim Mohammed",
-      graduationYear: 1990,
-      currentRole: "Professor of Civil Engineering, UNILAG",
-      specialization: "Structural Engineering",
-      location: "Lagos, Nigeria",
-      avatar: "https://randomuser.me/api/portraits/men/75.jpg",
-      availableForMentorship: false,
-      bio: "Leading researcher in sustainable building materials. Author of 3 textbooks on structural design.",
-      contact: "ibrahim.m@unilag.edu.ng",
-    },
-    {
-      id: 4,
-      name: "Engr. Fatima Abdullahi",
-      graduationYear: 2015,
-      currentRole: "Renewable Energy Consultant",
-      specialization: "Electrical Engineering",
-      location: "Abuja, Nigeria",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      availableForMentorship: true,
-      bio: "Specializes in solar microgrid solutions for rural communities. CONCES Abuja chapter coordinator.",
-      contact: "fatima.a@greenpower.ng",
-    },
-  ];
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
-  // Sample mentorship requests
-  const mentorshipRequests = [
-    {
-      id: 1,
-      studentName: "Chinedu Okoro",
-      studentYear: "3rd Year",
-      specialization: "Mechanical Engineering",
-      requestDate: "2025-05-15",
-      topics: [
-        "Career guidance",
-        "Internship opportunities",
-        "Graduate school advice",
-      ],
-      status: "Pending",
+  // Fetch mentorship programs  
+  const { data: mentorshipPrograms = [], isLoading: programsLoading } = useQuery({
+    queryKey: ["mentorship-programs"],
+    queryFn: async () => {
+      const response = await api.get("/mentorship-programs");
+      return response.data.programs as MentorshipProgram[];
     },
-    {
-      id: 2,
-      studentName: "Amina Yusuf",
-      studentYear: "Final Year",
-      specialization: "Computer Engineering",
-      requestDate: "2025-05-10",
-      topics: ["Tech entrepreneurship", "Interview preparation"],
-      status: "Accepted",
-    },
-  ];
+    staleTime: 1000 * 60 * 5,
+  });
 
-  console.log(selectedAlumni);
+  // Filter alumni based on search and filters
+  const filteredAlumni = useMemo(() => {
+    return alumni.filter(person => {
+      const matchesSearch = !searchTerm || 
+        person.userId.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.currentRole.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.specialization.toLowerCase().includes(searchTerm.toLowerCase());
 
-  // Sample upcoming talks
-  const upcomingTalks = [
-    {
-      id: 1,
-      title: "Engineering Leadership in the 21st Century",
-      speaker: "Engr. Ngozi Eze",
-      date: "2025-06-15",
-      time: "4:00 PM WAT",
-      format: "Virtual (Zoom)",
-      description:
-        "Strategies for emerging engineering leaders to navigate complex technical organizations.",
-    },
-    {
-      id: 2,
-      title: "Sustainable Infrastructure for Nigerian Cities",
-      speaker: "Prof. Ibrahim Mohammed",
-      date: "2025-07-22",
-      time: "10:00 AM WAT",
-      format: "Hybrid (UNILAG + Online)",
-      description:
-        "Case studies of resilient urban infrastructure projects across Africa.",
-    },
-  ];
+      const matchesSpecialization = !specializationFilter || 
+        person.specialization.toLowerCase().includes(specializationFilter.toLowerCase());
+
+      const matchesLocation = !locationFilter || 
+        person.education?.some(edu => edu.schoolName.toLowerCase().includes(locationFilter.toLowerCase()));
+
+      return matchesSearch && matchesSpecialization && matchesLocation;
+    });
+  }, [alumni, searchTerm, specializationFilter, locationFilter]);
+
+  // Get unique specializations and locations for filters
+  const specializations = useMemo(() => {
+    return Array.from(new Set(alumni.map(person => person.specialization))).filter(Boolean);
+  }, [alumni]);
+
+  // Get available mentorship programs
+  const availableMentorshipPrograms = mentorshipPrograms.filter(program => 
+    program.currentParticipants < program.maxParticipants &&
+    (!program.applicationDeadline || new Date() <= new Date(program.applicationDeadline))
+  );
+
+  const handleContactAlumni = (email: string, name: string) => {
+    const subject = encodeURIComponent(`CONCES - Connection Request from ${name}`);
+    const body = encodeURIComponent(`Hello,\n\nI found your profile on the CONCES Alumni Network and would love to connect.\n\nBest regards`);
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+  };
+
+  if (alumniError) {
+    toast.error("Failed to load alumni data. Please try again later.");
+  }
 
   const renderContent = () => {
     switch (activeTab) {
       case "network":
+        if (alumniLoading) {
+          return <AlumniGridSkeleton count={9} />;
+        }
+
+        if (filteredAlumni.length === 0) {
+          return (
+            <div className="text-center py-12">
+              <FaUserGroup className="text-6xl text-gray-300 mb-4 mx-auto" />
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                {alumni.length === 0 ? "No Alumni Profiles Found" : "No Alumni Match Your Search"}
+              </h3>
+              <p className="text-gray-600">
+                {alumni.length === 0 
+                  ? "There are currently no alumni profiles in the network." 
+                  : "Try adjusting your search criteria to find more alumni."}
+              </p>
+            </div>
+          );
+        }
+
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {alumni.map((person) => (
+            {filteredAlumni.map((person) => (
               <div
-                key={person.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
+                key={person._id}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="p-6">
                   <div className="flex items-center mb-4">
                     <img
-                      className="h-16 w-16 rounded-full mr-4"
-                      src={person.avatar}
-                      alt={person.name}
+                      className="h-16 w-16 rounded-full mr-4 object-cover"
+                      src={person.userId.avatar || "/default-avatar.png"}
+                      alt={person.userId.fullName}
                     />
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {person.name}
+                        {person.userId.fullName}
                       </h3>
                       <p className="text-sm text-gray-600">
                         {person.currentRole}
@@ -159,10 +183,12 @@ const AlumniPage = () => {
                       <FaGraduationCap className="fa-solid fa-graduation-cap mr-2 text-royal-600" />
                       Class of {person.graduationYear}, {person.specialization}
                     </p>
-                    <p className="flex items-center text-gray-600">
-                      <FaLocationDot className="fa-solid fa-location-dot mr-2 text-royal-600" />
-                      {person.location}
-                    </p>
+                    {person.education && person.education[0] && (
+                      <p className="flex items-center text-gray-600">
+                        <FaLocationDot className="fa-solid fa-location-dot mr-2 text-royal-600" />
+                        {person.education[0].schoolName}
+                      </p>
+                    )}
                     <p className="flex items-center text-gray-600">
                       <FaUserGraduate className="fa-solid fa-user-graduate mr-2 text-royal-600" />
                       {person.availableForMentorship ? (
@@ -176,24 +202,48 @@ const AlumniPage = () => {
                       )}
                     </p>
                   </div>
-                  <p className="mt-4 text-sm text-gray-600 line-clamp-3">
-                    {person.bio}
-                  </p>
-                  <div className="mt-4 flex justify-between  items-center">
-                    <a
-                      href={`mailto:${person.contact}`}
-                      className="text-sm text-royal-600 flex items-center  hover:text-royal-800"
+                  
+                  {person.bio && (
+                    <p className="mt-4 text-sm text-gray-600 line-clamp-3">
+                      {person.bio}
+                    </p>
+                  )}
+                  
+                  {person.skills && person.skills.length > 0 && (
+                    <div className="mt-3">
+                      <div className="flex flex-wrap gap-1">
+                        {person.skills.slice(0, 3).map((skill, index) => (
+                          <span 
+                            key={index}
+                            className="inline-block bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {person.skills.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{person.skills.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="mt-4 flex justify-between items-center">
+                    <button
+                      onClick={() => handleContactAlumni(person.userId.email, person.userId.fullName)}
+                      className="text-sm text-royal-600 flex items-center hover:text-royal-800 transition-colors"
                     >
-                      <FaEnvelope className="fa-solid fa-envelope mr-1" />{" "}
+                      <FaEnvelope className="fa-solid fa-envelope mr-1" />
                       Contact
-                    </a>
+                    </button>
                     <button
                       onClick={() => {
-                        setSelectedAlumni(person.id);
+                        setSelectedAlumni(person._id);
                       }}
-                      className="text-sm cursor-pointer flex items-center font-medium text-royal-600 hover:text-royal-800"
+                      className="text-sm cursor-pointer flex items-center font-medium text-royal-600 hover:text-royal-800 transition-colors"
                     >
-                      View profile{" "}
+                      View profile
                       <FaArrowRight className="fa-solid fa-arrow-right ml-1" />
                     </button>
                   </div>
@@ -374,14 +424,14 @@ const AlumniPage = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link
-                    href="/alumni/mentorship/become-a-mentor"
+                    href="/user/mentorship"
                     className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-royal-600 hover:bg-royal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500"
                   >
-                    <FaUserGraduate className="fa-solid fa-user-graduate mr-2" />{" "}
+                    <FaUserGraduate className="fa-solid fa-user-graduate mr-2" />
                     Become a Mentor
                   </Link>
                   <Link
-                    href="/alumni/mentorship/find-a-mentor"
+                    href="/user/network"
                     className="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-royal-700 bg-royal-100 hover:bg-royal-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500"
                   >
                     <FaSearch className="fa-solid fa-search mr-2" />
@@ -395,74 +445,69 @@ const AlumniPage = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
-                    Your Mentorship Requests
+                    Available Mentorship Programs
                   </h2>
-                  <Link
-                    href="/alumni/mentorship/new-request"
-                    className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-gold-500 hover:bg-gold-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500"
-                  >
-                    <FaPlus className="fa-solid fa-plus mr-1" /> New Request
-                  </Link>
                 </div>
 
-                {mentorshipRequests.length > 0 ? (
+                {programsLoading ? (
                   <div className="space-y-4">
-                    {mentorshipRequests.map((request) => (
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <MentorshipProgramSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : availableMentorshipPrograms.length > 0 ? (
+                  <div className="space-y-4">
+                    {availableMentorshipPrograms.map((program) => (
                       <div
-                        key={request.id}
-                        className="border border-gray-200 rounded-lg p-4"
+                        key={program._id}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                       >
-                        <div className="flex justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900">
-                              {request.studentName}
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                              {program.title}
                             </h3>
-                            <p className="text-sm text-gray-600">
-                              {request.studentYear} • {request.specialization}
+                            <p className="text-sm text-gray-600 mb-3">
+                              {program.description}
                             </p>
-                          </div>
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              request.status === "Accepted"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {request.status}
-                          </span>
-                        </div>
-                        <div className="mt-3">
-                          <h4 className="text-sm font-medium text-gray-900 mb-1">
-                            Topics:
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {request.topics.map((topic, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-royal-100 text-royal-800"
-                              >
-                                {topic}
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
+                              <div className="flex items-center">
+                                <FaUser className="mr-2 text-royal-600" />
+                                <span>{program.mentorId.userId.fullName}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <FaClock className="mr-2 text-royal-600" />
+                                <span>{program.duration}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <FaUserGroup className="mr-2 text-royal-600" />
+                                <span>{program.currentParticipants}/{program.maxParticipants} participants</span>
+                              </div>
+                              {program.applicationDeadline && (
+                                <div className="flex items-center">
+                                  <FaCalendar className="mr-2 text-royal-600" />
+                                  <span>Deadline: {new Date(program.applicationDeadline).toLocaleDateString()}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-gray-500">
+                                Time commitment: {program.timeCommitment}
                               </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="mt-3 flex justify-between items-center">
-                          <p className="text-xs text-gray-500">
-                            Requested on{" "}
-                            {new Date(request.requestDate).toLocaleDateString(
-                              "en-US",
-                              { year: "numeric", month: "long", day: "numeric" }
-                            )}
-                          </p>
-                          <div className="space-x-2">
-                            <button className="text-xs font-medium text-royal-600 hover:text-royal-800">
-                              View Details
-                            </button>
-                            {request.status === "Pending" && (
-                              <button className="text-xs font-medium text-red-600 hover:text-red-800">
-                                Cancel
-                              </button>
-                            )}
+                              <div className="flex gap-2">
+                                <Link
+                                  href={`/user/mentorship/program/${program._id}`}
+                                  className="inline-flex items-center px-3 py-1 border border-royal-600 text-xs font-medium rounded-md text-royal-600 hover:bg-royal-50 transition-colors"
+                                >
+                                  Learn More
+                                </Link>
+                                <button className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-royal-600 hover:bg-royal-700">
+                                  Apply Now
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -470,19 +515,19 @@ const AlumniPage = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <FaUserGraduate className="fa-solid fa-user-graduate text-4xl text-gray-300 mb-3" />
+                    <FaUserGraduate className="fa-solid fa-user-graduate text-4xl text-gray-300 mb-3 mx-auto" />
                     <h3 className="text-lg font-medium text-gray-900 mb-1">
-                      No active mentorship requests
+                      No mentorship programs available
                     </h3>
                     <p className="text-sm text-gray-500 mb-4">
-                      You haven't submitted any mentorship requests yet.
+                      There are currently no open mentorship programs. Check back later for new opportunities.
                     </p>
                     <Link
-                      href="/alumni/mentorship/new-request"
+                      href="/user/network"
                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-royal-600 hover:bg-royal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500"
                     >
-                      <FaPlus className="fa-solid fa-plus mr-2" /> Request
-                      Mentorship
+                      <FaSearch className="fa-solid fa-search mr-2" />
+                      Find Individual Mentors
                     </Link>
                   </div>
                 )}
@@ -553,64 +598,50 @@ const AlumniPage = () => {
               </div>
               <input
                 type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-royal-500 focus:border-royal-500 sm:text-sm"
                 placeholder={`Search ${
                   activeTab === "network"
-                    ? "alumni"
-                    : activeTab === "talks"
-                    ? "talks"
-                    : "mentors"
+                    ? "alumni by name, role, or specialization..."
+                    : activeTab === "mentorship"
+                    ? "mentorship programs..."
+                    : "content..."
                 }`}
               />
             </div>
-            <div className="flex space-x-3">
-              <select
-                className="block w-full pl-3 pr-10 py-2 text-gray-900 text-base border border-gray-300 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm rounded-md"
-                defaultValue=""
-              >
-                <option className="text-gray-900" value="">
-                  All Specializations
-                </option>
-                <option className="text-gray-900" value="civil">
-                  Civil Engineering
-                </option>
-                <option className="text-gray-900" value="mechanical">
-                  Mechanical Engineering
-                </option>
-                <option className="text-gray-900" value="electrical">
-                  Electrical Engineering
-                </option>
-                <option className="text-gray-900" value="computer">
-                  Computer Engineering
-                </option>
-                <option className="text-gray-900" value="petroleum">
-                  Petroleum Engineering
-                </option>
-              </select>
-              <select
-                className="block w-full pl-3 pr-10 py-2 text-gray-900 text-base border border-gray-300 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm rounded-md"
-                defaultValue=""
-              >
-                <option className="text-gray-900" value="">
-                  All Locations
-                </option>
-                <option className="text-gray-900" value="nigeria">
-                  Nigeria
-                </option>
-                <option className="text-gray-900" value="africa">
-                  Africa
-                </option>
-                <option className="text-gray-900" value="europe">
-                  Europe
-                </option>
-                <option className="text-gray-900" value="americas">
-                  Americas
-                </option>
-                <option className="text-gray-900" value="asia">
-                  Asia
-                </option>
-              </select>
-            </div>
+            {activeTab === "network" && (
+              <div className="flex space-x-3">
+                <select
+                  value={specializationFilter}
+                  onChange={(e) => setSpecializationFilter(e.target.value)}
+                  className="block w-full pl-3 pr-10 py-2 text-gray-900 text-base border border-gray-300 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm rounded-md"
+                >
+                  <option value="">All Specializations</option>
+                  {specializations.map((spec) => (
+                    <option key={spec} value={spec}>
+                      {spec}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  className="block w-full pl-3 pr-10 py-2 text-gray-900 text-base border border-gray-300 focus:outline-none focus:ring-royal-500 focus:border-royal-500 sm:text-sm rounded-md"
+                >
+                  <option value="">All Institutions</option>
+                  {Array.from(new Set(
+                    alumni.flatMap(person => 
+                      person.education?.map(edu => edu.schoolName) || []
+                    )
+                  )).filter(Boolean).map((institution) => (
+                    <option key={institution} value={institution}>
+                      {institution}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
 
@@ -619,11 +650,7 @@ const AlumniPage = () => {
 
 
 
-        <AlumniProfileModal
-          isOpen={selectedAlumni !== null}
-          onClose={() => setSelectedAlumni(null)}
-          alumniId={selectedAlumni as number}
-        />
+        {/* Alumni profile modal can be added here if needed */}
       </main>
     </>
   );

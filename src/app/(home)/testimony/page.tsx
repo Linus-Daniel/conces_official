@@ -19,10 +19,9 @@ const TestimonyPage = () => {
     const getTestimonies = async ()=>{
             try{
                 const response =await api.get("/testimonies")
-                console.log(response.data)
                 setTestimonies(response.data)
             }catch(error){
-                console.log(error)
+                console.error("Error fetching testimonies:", error instanceof Error ? error.message : "Unknown error")
             }
     }
     getTestimonies()

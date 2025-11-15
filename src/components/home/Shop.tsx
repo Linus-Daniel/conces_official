@@ -5,17 +5,26 @@ import ProductCard from '../ui/ProductCard'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
 import api from '@/lib/axiosInstance'
 import { IProduct } from '@/models/Product'
+import { ProductGridSkeleton } from '../ui/Skeletons'
 
 function Shop() {
   const [products,setProducts] = useState<IProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  
   useEffect(()=>{
     const fetchProducts = async ()=>{
-      const response =await api.get("/store/products")
-      const productsData = response.data
-      setProducts(productsData)
-
+      try {
+        setLoading(true)
+        const response = await api.get("/store/products")
+        const productsData = response.data
+        setProducts(productsData)
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      } finally {
+        setLoading(false)
+      }
     }
-fetchProducts()
+    fetchProducts()
   },[])
   return (
     <div>
@@ -36,16 +45,19 @@ fetchProducts()
           </div>
 
           <div className="relative">
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-2 lg:grid-cols-4">
-            {
-  [...products] // create a shallow copy so we don't mutate the original
-    .sort(() => Math.random() - 0.5) // shuffle the array
-    .slice(0, 8) // get the first 8 random products
-    .map((product, index) => (
-      <ProductCard product={product} key={index} />
-    ))
-}
-            </div>
+            {loading ? (
+              <ProductGridSkeleton count={8} />
+            ) : (
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-2 lg:grid-cols-4">
+                {[...products]
+                  .sort(() => Math.random() - 0.5)
+                  .slice(0, 8)
+                  .map((product, index) => (
+                    <ProductCard product={product} key={index} />
+                  ))
+                }
+              </div>
+            )}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 md:flex items-center justify-center hidden">
               <button className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-royal-700 hover:bg-royal-50">
                 <FaChevronLeft className="fa-solid fa-chevron-left" />

@@ -10,7 +10,8 @@ const getResources = async () => {
     const resources = response.data;
     return resources;
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching resources:", error instanceof Error ? error.message : "Unknown error");
+    return [];
   }
 };
 async function page() {
@@ -18,7 +19,6 @@ async function page() {
   const session = await getServerSession(authOptions);
   const userRole = session?.user.role as string;
 
-  console.log(resources, "Resources");
 
   return (
     <div>

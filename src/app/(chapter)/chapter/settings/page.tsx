@@ -1,857 +1,824 @@
-// "use client"
-// import React, { useState, useEffect } from "react";
-// import {
-//   QrCode,
-//   Shield,
-//   Download,
-//   Trash2,
-//   Monitor,
-//   AlertTriangle,
-//   Eye,
-//   EyeOff,
-//   Copy,
-//   Check,
-// } from "lucide-react";
+"use client";
 
-// // Enhanced Settings Page with Advanced Features
-// const EnhancedSettingsPage = () => {
-//   const [activeTab, setActiveTab] = useState("profile");
-//   const [notificationPrefs, setNotificationPrefs] = useState({});
-//   const [privacySettings, setPrivacySettings] = useState({});
-//   const [activeSessions, setActiveSessions] = useState([]);
-//   const [securityEvents, setSecurityEvents] = useState([]);
-//   const [twoFactorSetup, setTwoFactorSetup] = useState({
-//     enabled: false,
-//     qrCode: "",
-//     secret: "",
-//     backupCodes: [],
-//   });
-//   const [showBackupCodes, setShowBackupCodes] = useState(false);
-//   const [copied, setCopied] = useState("");
+import React, { useState, useRef } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  School,
+  Camera,
+  Lock,
+  Save,
+  Check,
+  X,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
+  Shield,
+  RefreshCw,
+  Bell,
+  Building,
+} from "lucide-react";
+import api from "@/lib/axiosInstance";
 
-//   // Load enhanced settings data
-//   useEffect(() => {
-//     if (activeTab === "notifications") {
-//       fetchNotificationPreferences();
-//     } else if (activeTab === "privacy") {
-//       fetchPrivacySettings();
-//     } else if (activeTab === "security") {
-//       fetchSecurityData();
-//     }
-//   }, [activeTab]);
-
-//   const fetchNotificationPreferences = async () => {
-//     try {
-//       const response = await fetch("/api/settings/notifications");
-//       if (response.ok) {
-//         const data = await response.json();
-//         setNotificationPrefs(data.preferences);
-//       }
-//     } catch (error) {
-//       console.error("Failed to fetch notification preferences:", error);
-//     }
-//   };
-
-//   const fetchPrivacySettings = async () => {
-//     try {
-//       const response = await fetch("/api/settings/privacy");
-//       if (response.ok) {
-//         const data = await response.json();
-//         setPrivacySettings(data.settings);
-//       }
-//     } catch (error) {
-//       console.error("Failed to fetch privacy settings:", error);
-//     }
-//   };
-
-//   const fetchSecurityData = async () => {
-//     try {
-//       const [sessionsResponse, eventsResponse] = await Promise.all([
-//         fetch("/api/settings/sessions"),
-//         fetch("/api/settings/security-log"),
-//       ]);
-
-//       if (sessionsResponse.ok) {
-//         const sessionsData = await sessionsResponse.json();
-//         setActiveSessions(sessionsData.sessions);
-//       }
-
-//       if (eventsResponse.ok) {
-//         const eventsData = await eventsResponse.json();
-//         setSecurityEvents(eventsData.events);
-//       }
-//     } catch (error) {
-//       console.error("Failed to fetch security data:", error);
-//     }
-//   };
-
-//   const updateNotificationPreferences = async (newPrefs) => {
-//     try {
-//       const response = await fetch("/api/settings/notifications", {
-//         method: "PUT",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(newPrefs),
-//       });
-
-//       if (response.ok) {
-//         setNotificationPrefs(newPrefs);
-//         // Show success message
-//       }
-//     } catch (error) {
-//       console.error("Failed to update notification preferences:", error);
-//     }
-//   };
-
-//   const updatePrivacySettings = async (newSettings) => {
-//     try {
-//       const response = await fetch("/api/settings/privacy", {
-//         method: "PUT",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(newSettings),
-//       });
-
-//       if (response.ok) {
-//         setPrivacySettings(newSettings);
-//         // Show success message
-//       }
-//     } catch (error) {
-//       console.error("Failed to update privacy settings:", error);
-//     }
-//   };
-
-//   const setup2FA = async () => {
-//     try {
-//       const response = await fetch("/api/settings/two-factor", {
-//         method: "POST",
-//       });
-
-//       if (response.ok) {
-//         const data = await response.json();
-//         setTwoFactorSetup({
-//           enabled: false,
-//           qrCode: data.qrCode,
-//           secret: data.secret,
-//           backupCodes: data.backupCodes,
-//         });
-//       }
-//     } catch (error) {
-//       console.error("Failed to setup 2FA:", error);
-//     }
-//   };
-
-//   const exportUserData = async () => {
-//     try {
-//       const response = await fetch("/api/settings/data-export", {
-//         method: "POST",
-//       });
-
-//       if (response.ok) {
-//         const data = await response.json();
-//         const blob = new Blob([JSON.stringify(data.data, null, 2)], {
-//           type: "application/json",
-//         });
-//         const url = URL.createObjectURL(blob);
-//         const a = document.createElement("a");
-//         a.href = url;
-//         a.download = data.filename;
-//         a.click();
-//         URL.revokeObjectURL(url);
-//       }
-//     } catch (error) {
-//       console.error("Failed to export data:", error);
-//     }
-//   };
-
-//   const copyToClipboard = async (text, type) => {
-//     await navigator.clipboard.writeText(text);
-//     setCopied(type);
-//     setTimeout(() => setCopied(""), 2000);
-//   };
-
-//   const tabs = [
-//     { id: "profile", label: "Profile", icon: "User" },
-//     { id: "security", label: "Security", icon: "Shield" },
-//     { id: "notifications", label: "Notifications", icon: "Bell" },
-//     { id: "privacy", label: "Privacy", icon: "Eye" },
-//     { id: "sessions", label: "Sessions", icon: "Monitor" },
-//     { id: "data", label: "Data & Privacy", icon: "Download" },
-//   ];
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 py-8">
-//       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-//         <div className="bg-white shadow-sm rounded-lg">
-//           {/* Header */}
-//           <div className="px-6 py-4 border-b border-gray-200">
-//             <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-//           </div>
-
-//           <div className="flex">
-//             {/* Sidebar */}
-//             <div className="w-64 bg-gray-50 border-r border-gray-200">
-//               <nav className="py-4">
-//                 {tabs.map((tab) => (
-//                   <button
-//                     key={tab.id}
-//                     onClick={() => setActiveTab(tab.id)}
-//                     className={`w-full flex items-center px-6 py-3 text-left text-sm font-medium transition-colors ${
-//                       activeTab === tab.id
-//                         ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
-//                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-//                     }`}
-//                   >
-//                     {tab.label}
-//                   </button>
-//                 ))}
-//               </nav>
-//             </div>
-
-//             {/* Content */}
-//             <div className="flex-1 p-6">
-//               {/* Enhanced Notifications Tab */}
-//               {activeTab === "notifications" && (
-//                 <div className="space-y-6">
-//                   <h2 className="text-lg font-medium text-gray-900">
-//                     Notification Preferences
-//                   </h2>
-
-//                   <div className="space-y-6">
-//                     {/* Email Notifications */}
-//                     <div className="bg-gray-50 rounded-lg p-6">
-//                       <h3 className="text-md font-medium text-gray-900 mb-4">
-//                         Email Notifications
-//                       </h3>
-//                       <div className="space-y-4">
-//                         {[
-//                           {
-//                             key: "emailNotifications",
-//                             label: "General Email Notifications",
-//                             desc: "Receive important updates via email",
-//                           },
-//                           {
-//                             key: "chapterUpdates",
-//                             label: "Chapter Updates",
-//                             desc: "News and updates from your chapter",
-//                           },
-//                           {
-//                             key: "eventReminders",
-//                             label: "Event Reminders",
-//                             desc: "Reminders for upcoming events",
-//                           },
-//                           {
-//                             key: "securityAlerts",
-//                             label: "Security Alerts",
-//                             desc: "Important security notifications",
-//                           },
-//                           {
-//                             key: "mentionNotifications",
-//                             label: "Mentions & Replies",
-//                             desc: "When someone mentions or replies to you",
-//                           },
-//                           {
-//                             key: "newsletterSubscription",
-//                             label: "Newsletter",
-//                             desc: "Monthly newsletter and announcements",
-//                           },
-//                         ].map((setting) => (
-//                           <div
-//                             key={setting.key}
-//                             className="flex items-center justify-between"
-//                           >
-//                             <div>
-//                               <h4 className="text-sm font-medium text-gray-900">
-//                                 {setting.label}
-//                               </h4>
-//                               <p className="text-sm text-gray-500">
-//                                 {setting.desc}
-//                               </p>
-//                             </div>
-//                             <label className="relative inline-flex items-center cursor-pointer">
-//                               <input
-//                                 type="checkbox"
-//                                 className="sr-only peer"
-//                                 checked={
-//                                   notificationPrefs[setting.key] || false
-//                                 }
-//                                 onChange={(e) => {
-//                                   const newPrefs = {
-//                                     ...notificationPrefs,
-//                                     [setting.key]: e.target.checked,
-//                                   };
-//                                   updateNotificationPreferences(newPrefs);
-//                                 }}
-//                               />
-//                               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-//                             </label>
-//                           </div>
-//                         ))}
-//                       </div>
-//                     </div>
-
-//                     {/* Digest Frequency */}
-//                     <div className="bg-gray-50 rounded-lg p-6">
-//                       <h3 className="text-md font-medium text-gray-900 mb-4">
-//                         Email Digest Frequency
-//                       </h3>
-//                       <select
-//                         value={notificationPrefs.digestFrequency || "weekly"}
-//                         onChange={(e) => {
-//                           const newPrefs = {
-//                             ...notificationPrefs,
-//                             digestFrequency: e.target.value,
-//                           };
-//                           updateNotificationPreferences(newPrefs);
-//                         }}
-//                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-//                       >
-//                         <option value="daily">Daily</option>
-//                         <option value="weekly">Weekly</option>
-//                         <option value="monthly">Monthly</option>
-//                         <option value="never">Never</option>
-//                       </select>
-//                     </div>
-//                   </div>
-//                 </div>
-//               )}
-
-//               {/* Enhanced Privacy Tab */}
-//               {activeTab === "privacy" && (
-//                 <div className="space-y-6">
-//                   <h2 className="text-lg font-medium text-gray-900">
-//                     Privacy Settings
-//                   </h2>
-
-//                   <div className="space-y-6">
-//                     {/* Profile Visibility */}
-//                     <div className="bg-gray-50 rounded-lg p-6">
-//                       <h3 className="text-md font-medium text-gray-900 mb-4">
-//                         Profile Visibility
-//                       </h3>
-//                       <div className="space-y-3">
-//                         {[
-//                           {
-//                             value: "public",
-//                             label: "Public",
-//                             desc: "Anyone can see your profile",
-//                           },
-//                           {
-//                             value: "members",
-//                             label: "Members Only",
-//                             desc: "Only registered members can see your profile",
-//                           },
-//                           {
-//                             value: "chapter",
-//                             label: "Chapter Only",
-//                             desc: "Only members of your chapter can see your profile",
-//                           },
-//                           {
-//                             value: "private",
-//                             label: "Private",
-//                             desc: "Only you can see your profile",
-//                           },
-//                         ].map((option) => (
-//                           <label
-//                             key={option.value}
-//                             className="flex items-center space-x-3 cursor-pointer"
-//                           >
-//                             <input
-//                               type="radio"
-//                               name="profileVisibility"
-//                               value={option.value}
-//                               checked={
-//                                 privacySettings.profileVisibility ===
-//                                 option.value
-//                               }
-//                               onChange={(e) => {
-//                                 const newSettings = {
-//                                   ...privacySettings,
-//                                   profileVisibility: e.target.value,
-//                                 };
-//                                 updatePrivacySettings(newSettings);
-//                               }}
-//                               className="text-blue-600 focus:ring-blue-500"
-//                             />
-//                             <div>
-//                               <p className="text-sm font-medium text-gray-900">
-//                                 {option.label}
-//                               </p>
-//                               <p className="text-sm text-gray-500">
-//                                 {option.desc}
-//                               </p>
-//                             </div>
-//                           </label>
-//                         ))}
-//                       </div>
-//                     </div>
-
-//                     {/* Privacy Controls */}
-//                     <div className="bg-gray-50 rounded-lg p-6">
-//                       <h3 className="text-md font-medium text-gray-900 mb-4">
-//                         Privacy Controls
-//                       </h3>
-//                       <div className="space-y-4">
-//                         {[
-//                           {
-//                             key: "showContactInfo",
-//                             label: "Show Contact Information",
-//                             desc: "Allow others to see your email and phone",
-//                           },
-//                           {
-//                             key: "showActivityStatus",
-//                             label: "Show Activity Status",
-//                             desc: "Show when you were last active",
-//                           },
-//                           {
-//                             key: "allowDirectMessages",
-//                             label: "Allow Direct Messages",
-//                             desc: "Let other members send you direct messages",
-//                           },
-//                           {
-//                             key: "showOnlineStatus",
-//                             label: "Show Online Status",
-//                             desc: "Show when you are currently online",
-//                           },
-//                           {
-//                             key: "indexInSearchEngines",
-//                             label: "Search Engine Indexing",
-//                             desc: "Allow search engines to index your profile",
-//                           },
-//                         ].map((setting) => (
-//                           <div
-//                             key={setting.key}
-//                             className="flex items-center justify-between"
-//                           >
-//                             <div>
-//                               <h4 className="text-sm font-medium text-gray-900">
-//                                 {setting.label}
-//                               </h4>
-//                               <p className="text-sm text-gray-500">
-//                                 {setting.desc}
-//                               </p>
-//                             </div>
-//                             <label className="relative inline-flex items-center cursor-pointer">
-//                               <input
-//                                 type="checkbox"
-//                                 className="sr-only peer"
-//                                 checked={privacySettings[setting.key] || false}
-//                                 onChange={(e) => {
-//                                   const newSettings = {
-//                                     ...privacySettings,
-//                                     [setting.key]: e.target.checked,
-//                                   };
-//                                   updatePrivacySettings(newSettings);
-//                                 }}
-//                               />
-//                               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-//                             </label>
-//                           </div>
-//                         ))}
-//                       </div>
-//                     </div>
-
-//                     {/* Data Consent */}
-//                     <div className="bg-blue-50 rounded-lg p-6">
-//                       <h3 className="text-md font-medium text-gray-900 mb-4">
-//                         Data Processing Consent
-//                       </h3>
-//                       <div className="space-y-4">
-//                         <div className="flex items-center justify-between">
-//                           <div>
-//                             <h4 className="text-sm font-medium text-gray-900">
-//                               Data Processing
-//                             </h4>
-//                             <p className="text-sm text-gray-500">
-//                               Consent to process your data for platform
-//                               functionality
-//                             </p>
-//                           </div>
-//                           <span className="text-sm font-medium text-green-600">
-//                             Required
-//                           </span>
-//                         </div>
-//                         <div className="flex items-center justify-between">
-//                           <div>
-//                             <h4 className="text-sm font-medium text-gray-900">
-//                               Marketing Communications
-//                             </h4>
-//                             <p className="text-sm text-gray-500">
-//                               Receive marketing emails and promotional content
-//                             </p>
-//                           </div>
-//                           <label className="relative inline-flex items-center cursor-pointer">
-//                             <input
-//                               type="checkbox"
-//                               className="sr-only peer"
-//                               checked={
-//                                 privacySettings.marketingConsent || false
-//                               }
-//                               onChange={(e) => {
-//                                 const newSettings = {
-//                                   ...privacySettings,
-//                                   marketingConsent: e.target.checked,
-//                                 };
-//                                 updatePrivacySettings(newSettings);
-//                               }}
-//                             />
-//                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-//                           </label>
-//                         </div>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//               )}
-
-//               {/* Enhanced Security Tab */}
-//               {activeTab === "security" && (
-//                 <div className="space-y-6">
-//                   <h2 className="text-lg font-medium text-gray-900">
-//                     Security Settings
-//                   </h2>
-
-//                   {/* Two-Factor Authentication */}
-//                   <div className="bg-green-50 rounded-lg p-6">
-//                     <div className="flex items-center justify-between mb-4">
-//                       <div>
-//                         <h3 className="text-md font-medium text-gray-900">
-//                           Two-Factor Authentication
-//                         </h3>
-//                         <p className="text-sm text-gray-600">
-//                           Add an extra layer of security to your account
-//                         </p>
-//                       </div>
-//                       <span
-//                         className={`px-3 py-1 rounded-full text-xs font-medium ${
-//                           twoFactorSetup.enabled
-//                             ? "bg-green-100 text-green-800"
-//                             : "bg-red-100 text-red-800"
-//                         }`}
-//                       >
-//                         {twoFactorSetup.enabled ? "Enabled" : "Disabled"}
-//                       </span>
-//                     </div>
-
-//                     {!twoFactorSetup.enabled && !twoFactorSetup.qrCode && (
-//                       <button
-//                         onClick={setup2FA}
-//                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-//                       >
-//                         <Shield className="w-4 h-4 mr-2" />
-//                         Enable 2FA
-//                       </button>
-//                     )}
-
-//                     {twoFactorSetup.qrCode && !twoFactorSetup.enabled && (
-//                       <div className="space-y-4">
-//                         <div className="text-center">
-//                           <h4 className="text-sm font-medium text-gray-900 mb-2">
-//                             Scan QR Code
-//                           </h4>
-//                           <img
-//                             src={twoFactorSetup.qrCode}
-//                             alt="2FA QR Code"
-//                             className="mx-auto w-48 h-48 border rounded-lg"
-//                           />
-//                           <p className="text-xs text-gray-500 mt-2">
-//                             Scan with Google Authenticator or similar app
-//                           </p>
-//                         </div>
-
-//                         <div>
-//                           <label className="block text-sm font-medium text-gray-700 mb-1">
-//                             Manual Entry Key
-//                           </label>
-//                           <div className="flex items-center space-x-2">
-//                             <input
-//                               type="text"
-//                               value={twoFactorSetup.secret}
-//                               readOnly
-//                               className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
-//                             />
-//                             <button
-//                               onClick={() =>
-//                                 copyToClipboard(twoFactorSetup.secret, "secret")
-//                               }
-//                               className="p-2 border border-gray-300 rounded-md hover:bg-gray-50"
-//                             >
-//                               {copied === "secret" ? (
-//                                 <Check className="w-4 h-4" />
-//                               ) : (
-//                                 <Copy className="w-4 h-4" />
-//                               )}
-//                             </button>
-//                           </div>
-//                         </div>
-
-//                         <div>
-//                           <label className="block text-sm font-medium text-gray-700 mb-1">
-//                             Verification Code
-//                           </label>
-//                           <input
-//                             type="text"
-//                             placeholder="Enter 6-digit code"
-//                             className="w-full px-3 py-2 border border-gray-300 rounded-md"
-//                           />
-//                         </div>
-
-//                         <button className="w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-//                           Verify and Enable 2FA
-//                         </button>
-//                       </div>
-//                     )}
-
-//                     {twoFactorSetup.enabled && (
-//                       <div className="space-y-4">
-//                         <div className="flex items-center justify-between">
-//                           <span className="text-sm font-medium text-gray-900">
-//                             2FA is enabled for your account
-//                           </span>
-//                           <button className="text-sm text-red-600 hover:text-red-500">
-//                             Disable 2FA
-//                           </button>
-//                         </div>
-
-//                         <button
-//                           onClick={() => setShowBackupCodes(!showBackupCodes)}
-//                           className="text-sm text-blue-600 hover:text-blue-500"
-//                         >
-//                           {showBackupCodes ? "Hide" : "Show"} Backup Codes
-//                         </button>
-
-//                         {showBackupCodes && (
-//                           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-//                             <h4 className="text-sm font-medium text-gray-900 mb-2">
-//                               Backup Codes
-//                             </h4>
-//                             <p className="text-xs text-gray-600 mb-3">
-//                               Store these codes safely. You can use them to
-//                               access your account if you lose your authenticator
-//                               device.
-//                             </p>
-//                             <div className="grid grid-cols-2 gap-2">
-//                               {twoFactorSetup.backupCodes.map((code, index) => (
-//                                 <div
-//                                   key={index}
-//                                   className="flex items-center justify-between bg-white px-3 py-2 rounded border text-sm font-mono"
-//                                 >
-//                                   <span>{code}</span>
-//                                   <button
-//                                     onClick={() =>
-//                                       copyToClipboard(code, `code-${index}`)
-//                                     }
-//                                     className="text-gray-400 hover:text-gray-600"
-//                                   >
-//                                     {copied === `code-${index}` ? (
-//                                       <Check className="w-3 h-3" />
-//                                     ) : (
-//                                       <Copy className="w-3 h-3" />
-//                                     )}
-//                                   </button>
-//                                 </div>
-//                               ))}
-//                             </div>
-//                           </div>
-//                         )}
-//                       </div>
-//                     )}
-//                   </div>
-
-//                   {/* Security Events */}
-//                   <div className="bg-gray-50 rounded-lg p-6">
-//                     <h3 className="text-md font-medium text-gray-900 mb-4">
-//                       Recent Security Events
-//                     </h3>
-//                     <div className="space-y-3">
-//                       {securityEvents.map((event) => (
-//                         <div
-//                           key={event.id}
-//                           className="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0"
-//                         >
-//                           <div className="flex items-center space-x-3">
-//                             <div
-//                               className={`w-2 h-2 rounded-full ${
-//                                 event.success ? "bg-green-500" : "bg-red-500"
-//                               }`}
-//                             ></div>
-//                             <div>
-//                               <p className="text-sm font-medium text-gray-900">
-//                                 {event.description}
-//                               </p>
-//                               <p className="text-xs text-gray-500">
-//                                 {event.location} • {event.ipAddress} •{" "}
-//                                 {new Date(event.timestamp).toLocaleString()}
-//                               </p>
-//                             </div>
-//                           </div>
-//                           <span
-//                             className={`px-2 py-1 rounded-full text-xs font-medium ${
-//                               event.success
-//                                 ? "bg-green-100 text-green-800"
-//                                 : "bg-red-100 text-red-800"
-//                             }`}
-//                           >
-//                             {event.success ? "Success" : "Failed"}
-//                           </span>
-//                         </div>
-//                       ))}
-//                     </div>
-//                   </div>
-//                 </div>
-//               )}
-
-//               {/* Sessions Tab */}
-//               {activeTab === "sessions" && (
-//                 <div className="space-y-6">
-//                   <h2 className="text-lg font-medium text-gray-900">
-//                     Active Sessions
-//                   </h2>
-
-//                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-//                     <div className="flex items-center">
-//                       <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
-//                       <p className="text-sm text-yellow-800">
-//                         If you see any unfamiliar sessions, revoke them
-//                         immediately and change your password.
-//                       </p>
-//                     </div>
-//                   </div>
-
-//                   <div className="space-y-4">
-//                     {activeSessions.map((session) => (
-//                       <div
-//                         key={session.id}
-//                         className="bg-white border border-gray-200 rounded-lg p-6"
-//                       >
-//                         <div className="flex items-center justify-between">
-//                           <div className="flex items-center space-x-4">
-//                             <div className="flex-shrink-0">
-//                               <Monitor className="w-8 h-8 text-gray-400" />
-//                             </div>
-//                             <div>
-//                               <h3 className="text-sm font-medium text-gray-900 flex items-center">
-//                                 {session.device}
-//                                 {session.current && (
-//                                   <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-//                                     Current Session
-//                                   </span>
-//                                 )}
-//                               </h3>
-//                               <p className="text-sm text-gray-600">
-//                                 {session.location}
-//                               </p>
-//                               <p className="text-xs text-gray-500">
-//                                 Last active:{" "}
-//                                 {new Date(session.lastActive).toLocaleString()}
-//                               </p>
-//                               <p className="text-xs text-gray-500">
-//                                 IP: {session.ipAddress}
-//                               </p>
-//                             </div>
-//                           </div>
-
-//                           {!session.current && (
-//                             <button className="px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50">
-//                               Revoke
-//                             </button>
-//                           )}
-//                         </div>
-//                       </div>
-//                     ))}
-//                   </div>
-
-//                   <button className="w-full py-2 px-4 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50">
-//                     Revoke All Other Sessions
-//                   </button>
-//                 </div>
-//               )}
-
-//               {/* Data & Privacy Tab */}
-//               {activeTab === "data" && (
-//                 <div className="space-y-6">
-//                   <h2 className="text-lg font-medium text-gray-900">
-//                     Data & Privacy
-//                   </h2>
-
-//                   {/* Data Export */}
-//                   <div className="bg-blue-50 rounded-lg p-6">
-//                     <div className="flex items-center justify-between mb-4">
-//                       <div>
-//                         <h3 className="text-md font-medium text-gray-900">
-//                           Export Your Data
-//                         </h3>
-//                         <p className="text-sm text-gray-600">
-//                           Download a copy of all your data
-//                         </p>
-//                       </div>
-//                       <Download className="w-6 h-6 text-blue-600" />
-//                     </div>
-//                     <p className="text-sm text-gray-600 mb-4">
-//                       This will include your profile information, chapter
-//                       membership, activity history, and settings.
-//                     </p>
-//                     <button
-//                       onClick={exportUserData}
-//                       className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-//                     >
-//                       <Download className="w-4 h-4 mr-2" />
-//                       Export Data
-//                     </button>
-//                   </div>
-
-//                   {/* Account Deletion */}
-//                   <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-//                     <div className="flex items-center justify-between mb-4">
-//                       <div>
-//                         <h3 className="text-md font-medium text-gray-900">
-//                           Delete Account
-//                         </h3>
-//                         <p className="text-sm text-gray-600">
-//                           Permanently delete your account and all data
-//                         </p>
-//                       </div>
-//                       <Trash2 className="w-6 h-6 text-red-600" />
-//                     </div>
-//                     <div className="bg-red-100 border border-red-200 rounded-lg p-4 mb-4">
-//                       <div className="flex items-start">
-//                         <AlertTriangle className="w-5 h-5 text-red-600 mr-2 mt-0.5" />
-//                         <div>
-//                           <h4 className="text-sm font-medium text-red-800">
-//                             This action cannot be undone
-//                           </h4>
-//                           <p className="text-sm text-red-700 mt-1">
-//                             Deleting your account will:
-//                           </p>
-//                           <ul className="text-sm text-red-700 mt-2 list-disc list-inside">
-//                             <li>Remove all your personal data</li>
-//                             <li>Cancel any active memberships</li>
-//                             <li>Delete your activity history</li>
-//                             <li>Remove you from all chapters</li>
-//                           </ul>
-//                         </div>
-//                       </div>
-//                     </div>
-//                     <button className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50">
-//                       <Trash2 className="w-4 h-4 mr-2" />
-//                       Delete Account
-//                     </button>
-//                   </div>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default EnhancedSettingsPage;
-import React from 'react'
-
-function page() {
-  return (
-    <div>page</div>
-  )
+interface UserProfile {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  institution: string;
+  role: "student" | "alumni" | "chapter-admin" | "admin";
+  avatar?: string;
+  location?: string;
+  verified: boolean;
+  chapter?: {
+    _id: string;
+    chapterName: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
-export default page
+// Custom hook for fetching user profile
+const useUserProfile = () => {
+  return useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      const response = await api.get("/users/profile");
+      return response.data.userProfile as UserProfile;
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+    retry: 2,
+  });
+};
+
+// Avatar upload component
+const AvatarUpload = ({
+  currentAvatar,
+  onAvatarChange,
+}: {
+  currentAvatar?: string;
+  onAvatarChange: (url: string) => void;
+}) => {
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => setPreviewUrl(e.target?.result as string);
+    reader.readAsDataURL(file);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "avatars");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      onAvatarChange(data.secure_url);
+      setPreviewUrl(null);
+    } catch (error) {
+      console.error("Avatar upload error:", error);
+      alert("Failed to upload avatar");
+      setPreviewUrl(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center space-y-4">
+      <div className="relative">
+        <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+          {previewUrl || currentAvatar ? (
+            <img
+              src={previewUrl || currentAvatar}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User className="w-10 h-10 text-blue-400" />
+          )}
+        </div>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+        >
+          {uploading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Camera className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+      <p className="text-sm text-gray-600">Click camera to upload new photo</p>
+    </div>
+  );
+};
+
+// Password change form
+const PasswordChangeForm = () => {
+  const [passwords, setPasswords] = useState({
+    current: "",
+    new: "",
+    confirm: "",
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+  const [isChanging, setIsChanging] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const validatePasswords = () => {
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      setMessage({ type: "error", text: "All fields are required" });
+      return false;
+    }
+    if (passwords.new.length < 6) {
+      setMessage({
+        type: "error",
+        text: "New password must be at least 6 characters",
+      });
+      return false;
+    }
+    if (passwords.new !== passwords.confirm) {
+      setMessage({ type: "error", text: "New passwords don't match" });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validatePasswords()) return;
+
+    setIsChanging(true);
+    setMessage(null);
+
+    try {
+      await api.put("/user/change-password", {
+        currentPassword: passwords.current,
+        newPassword: passwords.new,
+      });
+
+      setMessage({ type: "success", text: "Password changed successfully!" });
+      setPasswords({ current: "", new: "", confirm: "" });
+    } catch (error: any) {
+      setMessage({
+        type: "error",
+        text: error.response?.data?.error || "Failed to change password",
+      });
+    } finally {
+      setIsChanging(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {message && (
+        <div
+          className={`p-3 rounded-lg flex items-center space-x-2 ${
+            message.type === "success"
+              ? "bg-green-50 text-green-700"
+              : "bg-red-50 text-red-700"
+          }`}
+        >
+          {message.type === "success" ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <AlertCircle className="w-4 h-4" />
+          )}
+          <span className="text-sm">{message.text}</span>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Current Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPasswords.current ? "text" : "password"}
+            value={passwords.current}
+            onChange={(e) =>
+              setPasswords({ ...passwords, current: e.target.value })
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+            required
+          />
+          <button
+            type="button"
+            onClick={() =>
+              setShowPasswords({
+                ...showPasswords,
+                current: !showPasswords.current,
+              })
+            }
+            className="absolute right-3 top-3"
+          >
+            {showPasswords.current ? (
+              <EyeOff className="w-4 h-4 text-gray-400" />
+            ) : (
+              <Eye className="w-4 h-4 text-gray-400" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          New Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPasswords.new ? "text" : "password"}
+            value={passwords.new}
+            onChange={(e) =>
+              setPasswords({ ...passwords, new: e.target.value })
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+            required
+            minLength={6}
+          />
+          <button
+            type="button"
+            onClick={() =>
+              setShowPasswords({ ...showPasswords, new: !showPasswords.new })
+            }
+            className="absolute right-3 top-3"
+          >
+            {showPasswords.new ? (
+              <EyeOff className="w-4 h-4 text-gray-400" />
+            ) : (
+              <Eye className="w-4 h-4 text-gray-400" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Confirm New Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPasswords.confirm ? "text" : "password"}
+            value={passwords.confirm}
+            onChange={(e) =>
+              setPasswords({ ...passwords, confirm: e.target.value })
+            }
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+            required
+            minLength={6}
+          />
+          <button
+            type="button"
+            onClick={() =>
+              setShowPasswords({
+                ...showPasswords,
+                confirm: !showPasswords.confirm,
+              })
+            }
+            className="absolute right-3 top-3"
+          >
+            {showPasswords.confirm ? (
+              <EyeOff className="w-4 h-4 text-gray-400" />
+            ) : (
+              <Eye className="w-4 h-4 text-gray-400" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isChanging}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center"
+      >
+        {isChanging ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Changing Password...
+          </>
+        ) : (
+          <>
+            <Lock className="w-4 h-4 mr-2" />
+            Change Password
+          </>
+        )}
+      </button>
+    </form>
+  );
+};
+
+export default function SettingsPage() {
+  const { data: session, update: updateSession } = useSession();
+  const queryClient = useQueryClient();
+  const [activeSection, setActiveSection] = useState("profile");
+
+  const { data: userProfile, isLoading, error, refetch } = useUserProfile();
+
+  const [profileForm, setProfileForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    institution: "",
+    location: "",
+    avatar: "",
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  // Update form when profile data loads
+  React.useEffect(() => {
+    if (userProfile) {
+      setProfileForm({
+        fullName: userProfile.fullName || "",
+        email: userProfile.email || "",
+        phone: userProfile.phone || "",
+        institution: userProfile.institution || "",
+        location: userProfile.location || "",
+        avatar: userProfile.avatar || "",
+      });
+    }
+  }, [userProfile]);
+
+  // Profile update mutation
+  const profileMutation = useMutation({
+    mutationFn: async (data: typeof profileForm) => {
+      const response = await api.put(`/users/${userProfile?._id}`, data);
+      return response.data.user;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["userProfile"], data);
+      updateSession();
+      setSaveMessage({ type: "success", text: "Profile updated successfully!" });
+      setTimeout(() => setSaveMessage(null), 5000);
+    },
+    onError: (error: any) => {
+      setSaveMessage({
+        type: "error",
+        text: error.response?.data?.error || "Failed to update profile",
+      });
+      setTimeout(() => setSaveMessage(null), 5000);
+    },
+  });
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    profileMutation.mutate(profileForm);
+  };
+
+  const handleAvatarChange = (url: string) => {
+    setProfileForm({ ...profileForm, avatar: url });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="flex items-center space-x-3">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <span className="text-gray-600">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="flex items-center space-x-3">
+          <AlertCircle className="w-6 h-6 text-red-600" />
+          <div>
+            <h3 className="text-lg font-medium text-red-900">
+              Error loading profile
+            </h3>
+            <p className="text-red-700">
+              Failed to load your profile. Please try again.
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-sm rounded-lg">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">Chapter Admin Settings</h1>
+            <p className="text-gray-600">Manage your chapter admin profile and preferences</p>
+          </div>
+
+          <div className="flex">
+            {/* Sidebar */}
+            <div className="w-64 bg-gray-50 border-r border-gray-200">
+              <nav className="py-4">
+                <button
+                  onClick={() => setActiveSection("profile")}
+                  className={`w-full flex items-center px-6 py-3 text-left text-sm font-medium transition-colors ${
+                    activeSection === "profile"
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  <User className="w-4 h-4 mr-3" />
+                  Profile
+                </button>
+                <button
+                  onClick={() => setActiveSection("password")}
+                  className={`w-full flex items-center px-6 py-3 text-left text-sm font-medium transition-colors ${
+                    activeSection === "password"
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  <Lock className="w-4 h-4 mr-3" />
+                  Password
+                </button>
+                <button
+                  onClick={() => setActiveSection("notifications")}
+                  className={`w-full flex items-center px-6 py-3 text-left text-sm font-medium transition-colors ${
+                    activeSection === "notifications"
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  <Bell className="w-4 h-4 mr-3" />
+                  Notifications
+                </button>
+                <button
+                  onClick={() => setActiveSection("chapter")}
+                  className={`w-full flex items-center px-6 py-3 text-left text-sm font-medium transition-colors ${
+                    activeSection === "chapter"
+                      ? "bg-blue-50 text-blue-700 border-r-2 border-blue-500"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  <Building className="w-4 h-4 mr-3" />
+                  Chapter Settings
+                </button>
+              </nav>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 p-6">
+              {/* Profile Section */}
+              {activeSection === "profile" && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2">
+                    <form onSubmit={handleProfileSubmit} className="space-y-6">
+                      {saveMessage && (
+                        <div
+                          className={`p-4 rounded-lg flex items-center space-x-3 ${
+                            saveMessage.type === "success"
+                              ? "bg-green-50 text-green-700 border border-green-200"
+                              : "bg-red-50 text-red-700 border border-red-200"
+                          }`}
+                        >
+                          {saveMessage.type === "success" ? (
+                            <Check className="w-5 h-5" />
+                          ) : (
+                            <AlertCircle className="w-5 h-5" />
+                          )}
+                          <span>{saveMessage.text}</span>
+                        </div>
+                      )}
+
+                      <div className="space-y-4">
+                        <h2 className="text-lg font-medium text-gray-900">
+                          Chapter Admin Profile
+                        </h2>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Full Name
+                            </label>
+                            <input
+                              type="text"
+                              value={profileForm.fullName}
+                              onChange={(e) =>
+                                setProfileForm({
+                                  ...profileForm,
+                                  fullName: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Email Address
+                            </label>
+                            <input
+                              type="email"
+                              value={profileForm.email}
+                              onChange={(e) =>
+                                setProfileForm({ ...profileForm, email: e.target.value })
+                              }
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Phone Number
+                            </label>
+                            <input
+                              type="text"
+                              value={profileForm.phone}
+                              onChange={(e) =>
+                                setProfileForm({ ...profileForm, phone: e.target.value })
+                              }
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Institution
+                            </label>
+                            <input
+                              type="text"
+                              value={profileForm.institution}
+                              onChange={(e) =>
+                                setProfileForm({
+                                  ...profileForm,
+                                  institution: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Location
+                            </label>
+                            <input
+                              type="text"
+                              value={profileForm.location}
+                              onChange={(e) =>
+                                setProfileForm({
+                                  ...profileForm,
+                                  location: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="City, Country"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end pt-6">
+                          <button
+                            type="submit"
+                            disabled={profileMutation.isPending}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center"
+                          >
+                            {profileMutation.isPending ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="w-4 h-4 mr-2" />
+                                Save Changes
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Avatar and Account Info */}
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 rounded-lg p-6">
+                      <h3 className="font-medium text-gray-900 mb-4">Profile Photo</h3>
+                      <AvatarUpload
+                        currentAvatar={profileForm.avatar}
+                        onAvatarChange={handleAvatarChange}
+                      />
+                    </div>
+
+                    {/* Account Info */}
+                    <div className="bg-gray-50 rounded-lg p-6 space-y-3">
+                      <h3 className="font-medium text-gray-900">Account Details</h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Role:</span>
+                          <span className="text-gray-900 capitalize">
+                            {userProfile?.role}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Status:</span>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              userProfile?.verified
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {userProfile?.verified ? "Verified" : "Pending"}
+                          </span>
+                        </div>
+                        {userProfile?.chapter && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Chapter:</span>
+                            <span className="text-gray-900">
+                              {userProfile.chapter.chapterName}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Admin since:</span>
+                          <span className="text-gray-900">
+                            {new Date(userProfile?.createdAt || "").toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Password Section */}
+              {activeSection === "password" && (
+                <div className="max-w-md mx-auto">
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h3 className="font-medium text-gray-900 mb-4">Change Password</h3>
+                    <PasswordChangeForm />
+                  </div>
+                </div>
+              )}
+
+              {/* Notifications Section */}
+              {activeSection === "notifications" && (
+                <div className="space-y-6">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Notification Preferences
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Email Notifications</h4>
+                        <p className="text-sm text-gray-600">
+                          Receive important chapter updates via email
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Chapter Member Requests</h4>
+                        <p className="text-sm text-gray-600">
+                          Get notified when new members request to join
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Event Notifications</h4>
+                        <p className="text-sm text-gray-600">
+                          Receive updates about chapter events and activities
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Chapter Settings Section */}
+              {activeSection === "chapter" && (
+                <div className="space-y-6">
+                  <h2 className="text-lg font-medium text-gray-900">
+                    Chapter Management Settings
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Auto-approve Members</h4>
+                        <p className="text-sm text-gray-600">
+                          Automatically approve new member applications
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Public Chapter Profile</h4>
+                        <p className="text-sm text-gray-600">
+                          Make chapter information visible to public
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Event Creation</h4>
+                        <p className="text-sm text-gray-600">
+                          Allow chapter members to create events
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only peer" defaultChecked />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

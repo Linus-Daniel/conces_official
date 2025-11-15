@@ -20,6 +20,17 @@ export const authOptions: NextAuthOptions = {
         const user = await User.findOne({ email });
         if (!user) throw new Error("User not found");
 
+        // Check if user is verified
+        if (!user.verified) {
+          // Check if verification token has expired
+          const now = new Date();
+          if (user.verificationExpires && user.verificationExpires < now) {
+            throw new Error("EMAIL_NOT_VERIFIED_EXPIRED");
+          } else {
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
+        }
+
         const isValid = await verifyPassword(password, user.password);
         if (!isValid) throw new Error("Invalid credentials");
 
@@ -32,6 +43,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           avatar: user.avatar,
           chapter: user.chapter,
+          verified: user.verified,
         };
       },
     }),
@@ -59,6 +71,7 @@ export const authOptions: NextAuthOptions = {
         token.phone = user.phone;
         token.avatar = user.avatar;
         token.chapter = user.chapter;
+        token.verified = user.verified;
       }
       return token;
     },
@@ -74,6 +87,7 @@ export const authOptions: NextAuthOptions = {
         session.user.phone = token.phone as string;
         session.user.avatar = token.avatar as string;
         session.user.chapter = token.chapter as string;
+        session.user.verified = token.verified as boolean;
       }
       return session;
     },

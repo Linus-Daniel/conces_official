@@ -10,6 +10,7 @@ import {
   Star,
 } from "lucide-react";
 import { IExecutive } from "@/models/Executive";
+import { ExecutiveGridSkeleton, LoadingWithText } from "@/components/ui/Skeletons";
 
 export default function ExecutivesPage() {
   const [activeExecutives, setActiveExecutives] = useState<IExecutive[]>([]);
@@ -158,10 +159,71 @@ export default function ExecutivesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600">Loading executives...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        {/* Header Skeleton */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Star className="w-10 h-10 text-blue-600" />
+                <h1 className="text-4xl font-bold text-gray-900">
+                  CONCES Executives
+                </h1>
+              </div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Conference of Nigeria Christian Engineering Students - National
+                Leadership Team
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-500">
+                <Calendar className="w-4 h-4" />
+                <span>2024/2025 Spiritual Session</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Tabs Skeleton */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white rounded-lg p-1 shadow-md">
+              <div className="flex">
+                <div className="bg-blue-600 text-white shadow-md px-6 py-2 rounded-md">
+                  Loading...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Skeleton */}
+          <div className="space-y-8">
+            {/* President Section Skeleton */}
+            <div>
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
+                  <Crown className="w-6 h-6 text-yellow-500" />
+                  National Leadership
+                </h2>
+                <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
+              </div>
+              <div className="flex justify-center mb-12">
+                <div className="w-full max-w-md">
+                  <ExecutiveGridSkeleton count={1} />
+                </div>
+              </div>
+            </div>
+
+            {/* Other Executives Section Skeleton */}
+            <div>
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
+                  <Users className="w-6 h-6 text-blue-600" />
+                  Executive Council
+                </h2>
+                <div className="w-24 h-1 bg-blue-400 mx-auto rounded-full"></div>
+              </div>
+              <ExecutiveGridSkeleton count={8} />
+            </div>
+          </div>
         </div>
       </div>
     );

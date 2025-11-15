@@ -55,7 +55,6 @@ const BlogPostPage = () => {
   const router = useRouter();
   const param = useParams();
   const slug = param.slug;
-  console.log(slug);
 
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
@@ -73,8 +72,6 @@ const BlogPostPage = () => {
         const response = await api.get(`/blog/${slug}`);
 
         const data = response.data.blog;
-
-        console.log(data);
         setBlogPost(data);
         setRelatedPosts(data.relatedPosts || []);
 

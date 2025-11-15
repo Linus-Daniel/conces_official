@@ -5,10 +5,9 @@ import React, { Suspense } from "react";
 async function getChapters() {
   try {
     const response = await api.get("/chapters");
-    console.log("Chapters fetched successfully:", response.data.chapters);
     return response.data.chapters;
   } catch (error) {
-    console.error("Error fetching chapters:", error);
+    console.error("Error fetching chapters:", error instanceof Error ? error.message : "Unknown error");
     return [];
   }
 }

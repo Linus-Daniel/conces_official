@@ -11,11 +11,10 @@ interface ResourcePageProps {
 const getResourceById = async (id: string) => {
   try {
     const response = await api.get(`/resources/${id}`);
-    console.log(response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching resources:', error);
-    return [];
+    console.error('Error fetching resource:', error instanceof Error ? error.message : "Unknown error");
+    return null;
   }
 };
 

@@ -487,7 +487,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
     setIsResending(true);
 
     try {
-      await api.post("/api/resend-verification", { email: verificationEmail });
+      await api.post("/auth/resend-verification", { email: verificationEmail });
       toast.success("Verification email resent successfully!");
     } catch (err: any) {
       const errorMessage =
@@ -503,7 +503,7 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
     setIsLoading(true);
 
     try {
-      await api.post("/api/forgot-password", { email });
+      await api.post("/auth/forgot-password", { email });
       toast.success("Password reset link sent to your email!");
       setShowForgotPasswordModal(false);
     } catch (err: any) {
@@ -600,13 +600,30 @@ const AuthForm = ({ chapters = [] }: { chapters?: IChapter[] }) => {
             toast.warn("Unrecognized role, redirecting to home");
             router.push("/");
         }
-      } catch (error) {
-        toast.error("Invalid email or password");
+      } catch (error: any) {
+        // Handle specific verification errors
+        if (error.message === "EMAIL_NOT_VERIFIED") {
+          setVerificationEmail(loginFormData.email);
+          setShowEmailVerificationModal(true);
+          toast.error("Please verify your email before logging in.");
+        } else if (error.message === "EMAIL_NOT_VERIFIED_EXPIRED") {
+          setVerificationEmail(loginFormData.email);
+          setShowEmailVerificationModal(true);
+          toast.error("Your verification link has expired. A new one has been sent.");
+          // Automatically resend verification
+          try {
+            await handleResendVerification();
+          } catch (resendError) {
+            console.error("Failed to resend verification:", resendError);
+          }
+        } else {
+          toast.error("Invalid email or password");
+        }
       } finally {
         setIsLoading(false);
       }
     },
-    [loginFormData, validateLoginForm, login, router]
+    [loginFormData, validateLoginForm, login, router, handleResendVerification]
   );
 
   // Memoized chapter options
