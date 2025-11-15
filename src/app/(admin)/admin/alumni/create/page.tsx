@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FiSave, FiArrowLeft, FiUpload } from "react-icons/fi";
+import { FiSave, FiArrowLeft, FiUpload, FiSearch } from "react-icons/fi";
 import { showSuccess, showError } from "@/lib/toast";
 
 interface AlumniFormData {
@@ -33,9 +33,20 @@ interface AlumniFormData {
   };
 }
 
+interface User {
+  _id: string;
+  fullName: string;
+  email: string;
+  role: string;
+}
+
 export default function CreateAlumniPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [userSearch, setUserSearch] = useState("");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [formData, setFormData] = useState<AlumniFormData>({
     userId: "",
     graduationYear: new Date().getFullYear(),
@@ -51,6 +62,49 @@ export default function CreateAlumniPage() {
   });
 
   const [skillInput, setSkillInput] = useState("");
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/api/users");
+      const data = await response.json();
+      
+      if (response.ok) {
+        setUsers(data.users || []);
+        setFilteredUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const filterUsers = (searchTerm: string) => {
+    if (!searchTerm) {
+      setFilteredUsers(users);
+      return;
+    }
+    
+    const filtered = users.filter(user => 
+      user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  };
+
+  const handleUserSearch = (value: string) => {
+    setUserSearch(value);
+    filterUsers(value);
+    setShowUserDropdown(value.length > 0);
+  };
+
+  const selectUser = (user: User) => {
+    setFormData({ ...formData, userId: user._id });
+    setUserSearch(user.fullName);
+    setShowUserDropdown(false);
+  };
 
   const addEducation = () => {
     setFormData({
@@ -145,18 +199,46 @@ export default function CreateAlumniPage() {
           <div>
             <h3 className="text-lg font-medium mb-4">Basic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="md:col-span-2 relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  User ID *
+                  Select User *
                 </label>
-                <input
-                  type="text"
-                  value={formData.userId}
-                  onChange={(e) => setFormData({ ...formData, userId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                  placeholder="Enter user ID"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiSearch className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={userSearch}
+                    onChange={(e) => handleUserSearch(e.target.value)}
+                    onFocus={() => setShowUserDropdown(userSearch.length > 0)}
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Search for a user..."
+                    required
+                  />
+                </div>
+                
+                {showUserDropdown && filteredUsers.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredUsers.map((user) => (
+                      <div
+                        key={user._id}
+                        onClick={() => selectUser(user)}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="font-medium text-gray-900">{user.fullName}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-xs text-gray-400 capitalize">{user.role}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {showUserDropdown && filteredUsers.length === 0 && userSearch && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg p-4 text-gray-500 text-center">
+                    No users found
+                  </div>
+                )}
               </div>
 
               <div>

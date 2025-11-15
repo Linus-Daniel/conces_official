@@ -38,10 +38,11 @@ export default function BecomeMentorPage() {
     primaryExpertise: "",
     secondaryExpertise: "",
     skills: "",
-    style: "",
+    mentorshipStyle: "",
     preferredTimes: "",
-    menteeCount: 3,
+    maxMentees: 3,
     motivation: "",
+    experience: "",
     acceptedTerms: false,
   });
 
@@ -72,7 +73,7 @@ export default function BecomeMentorPage() {
         }
         return true;
       case 1:
-        if (!form.style || !form.preferredTimes) {
+        if (!form.mentorshipStyle || !form.preferredTimes) {
           toast.error("Please fill all required fields");
           return false;
         }
@@ -96,10 +97,11 @@ export default function BecomeMentorPage() {
         primaryExpertise: "",
         secondaryExpertise: "",
         skills: "",
-        style: "",
+        mentorshipStyle: "",
         preferredTimes: "",
-        menteeCount: 3,
+        maxMentees: 3,
         motivation: "",
+        experience: "",
         acceptedTerms: false,
       });
       setCurrentStep(0);
@@ -222,17 +224,16 @@ export default function BecomeMentorPage() {
                     Preferred Mentorship Style <span className="text-destructive">*</span>
                   </Label>
                   <Select
-                    value={form.style}
-                    onValueChange={(val) => handleChange("style", val)}
+                    value={form.mentorshipStyle}
+                    onValueChange={(val) => handleChange("mentorshipStyle", val)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select your preferred style" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="casual">Casual/Informal</SelectItem>
-                      <SelectItem value="structured">Structured</SelectItem>
-                      <SelectItem value="project">Project-based</SelectItem>
-                      <SelectItem value="career">Career-focused</SelectItem>
+                      <SelectItem value="individual">Individual (1-on-1)</SelectItem>
+                      <SelectItem value="group">Group Mentoring</SelectItem>
+                      <SelectItem value="hybrid">Hybrid (Both)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -254,9 +255,9 @@ export default function BecomeMentorPage() {
                   <Input
                     type="number"
                     min={1}
-                    max={10}
-                    value={form.menteeCount}
-                    onChange={(e) => handleChange("menteeCount", Number(e.target.value))}
+                    max={20}
+                    value={form.maxMentees}
+                    onChange={(e) => handleChange("maxMentees", Number(e.target.value))}
                     className="w-24"
                   />
                 </div>
@@ -268,11 +269,21 @@ export default function BecomeMentorPage() {
                 <h2 className="text-xl font-semibold">Final Details</h2>
 
                 <div className="space-y-2">
-                  <Label>Why do you want to be a mentor?</Label>
+                  <Label>Why do you want to be a mentor? <span className="text-destructive">*</span></Label>
                   <Textarea
                     value={form.motivation}
                     onChange={(e) => handleChange("motivation", e.target.value)}
                     placeholder="Share your motivation for becoming a mentor"
+                    className="min-h-[120px]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Relevant Experience <span className="text-destructive">*</span></Label>
+                  <Textarea
+                    value={form.experience}
+                    onChange={(e) => handleChange("experience", e.target.value)}
+                    placeholder="Describe your professional experience and achievements that qualify you as a mentor"
                     className="min-h-[120px]"
                   />
                 </div>

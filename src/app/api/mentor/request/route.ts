@@ -3,85 +3,86 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/next-auth";
 import dbConnect from "@/lib/dbConnect";
 import MentorRequest from "@/models/MentorRequest";
+import AlumniProfile from "@/models/Alumni";
 
 export async function POST(req: NextRequest) {
   await dbConnect();
 
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== "alumni") {
-    console.log("[DEBUG] Unauthorized access attempt");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await req.json();
-  const {
-    primaryExpertise,
-    secondaryExpertise,
-    skills,
-    style,
-    preferredTimes,
-    motivation,
-    menteeCount,
-    acceptedTerms,
-  } = body;
-
-  // Debug log: received payload
-  console.log("[DEBUG] Mentor request payload:", body);
-
-  const missingFields = [];
-
-  if (!primaryExpertise) missingFields.push("primaryExpertise");
-  if (!skills) missingFields.push("skills");
-  if (!style) missingFields.push("style");
-  if (!preferredTimes) missingFields.push("preferredTimes");
-  if (!motivation) missingFields.push("motivation");
-  if (!acceptedTerms) missingFields.push("acceptedTerms");
-
-  if (missingFields.length > 0) {
-    console.warn("[DEBUG] Missing fields:", missingFields);
-    return NextResponse.json(
-      { error: `Missing required fields: ${missingFields.join(", ")}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Unauthorized - Alumni access only" }, { status: 401 });
   }
 
   try {
-    const existing = await MentorRequest.findOne({
-      userId: session.user.id,
-      status: { $in: ["pending", "approved"] },
-    });
+    // Get the alumni profile
+    const alumniProfile = await AlumniProfile.findOne({ userId: session.user.id });
+    if (!alumniProfile) {
+      return NextResponse.json({ error: "Alumni profile not found" }, { status: 404 });
+    }
 
-    if (existing) {
-      console.warn(
-        "[DEBUG] Duplicate request detected for user:",
-        session.user.id
-      );
+    const body = await req.json();
+    const {
+      primaryExpertise,
+      secondaryExpertise,
+      skills,
+      mentorshipStyle,
+      preferredTimes,
+      maxMentees,
+      motivation,
+      experience,
+      acceptedTerms,
+    } = body;
+
+    // Validate required fields
+    const missingFields = [];
+    if (!primaryExpertise) missingFields.push("primaryExpertise");
+    if (!skills || skills.length === 0) missingFields.push("skills");
+    if (!mentorshipStyle) missingFields.push("mentorshipStyle");
+    if (!preferredTimes) missingFields.push("preferredTimes");
+    if (!motivation) missingFields.push("motivation");
+    if (!experience) missingFields.push("experience");
+    if (!acceptedTerms) missingFields.push("acceptedTerms");
+
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { error: "Request already submitted or approved" },
+        { error: `Missing required fields: ${missingFields.join(", ")}` },
         { status: 400 }
       );
     }
 
-    const newRequest = await MentorRequest.create({
-      userId: session.user.id,
+    // Check for existing pending request
+    const existingRequest = await MentorRequest.findOne({
+      alumniId: alumniProfile._id,
+      status: "pending",
+    });
+
+    if (existingRequest) {
+      return NextResponse.json(
+        { error: "You already have a pending mentor request" },
+        { status: 400 }
+      );
+    }
+
+    // Create the mentor request
+    const mentorRequest = await MentorRequest.create({
+      alumniId: alumniProfile._id,
       primaryExpertise,
       secondaryExpertise,
-      skills: skills.split(",").map((s: string) => s.trim()),
-      style,
+      skills: Array.isArray(skills) ? skills : skills.split(",").map((s: string) => s.trim()),
+      mentorshipStyle,
       preferredTimes,
+      maxMentees: maxMentees || 3,
       motivation,
-      menteeCount,
-      acceptedTerms,
+      experience,
     });
-
-    console.log("[DEBUG] Mentor request created:", newRequest._id);
 
     return NextResponse.json({
-      message: "Mentor request submitted",
-      data: newRequest,
-    });
+      message: "Mentor request submitted successfully",
+      request: mentorRequest,
+    }, { status: 201 });
+
   } catch (error) {
-    console.error("[ERROR] Failed to submit mentor request:", error);
+    console.error("Error submitting mentor request:", error);
     return NextResponse.json(
       { error: "Failed to submit mentor request" },
       { status: 500 }
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   await dbConnect();
 
   const session = await getServerSession(authOptions);
@@ -98,13 +99,43 @@ export async function GET() {
   }
 
   try {
-    const requests = await MentorRequest.find()
-      .populate("userId", "fullName email avatar") // optional
-      .sort({ createdAt: -1 });
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status");
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json({ data: requests });
+    // Build query
+    let query: any = {};
+    if (status) {
+      query.status = status;
+    }
+
+    const requests = await MentorRequest.find(query)
+      .populate({
+        path: "alumniId",
+        populate: {
+          path: "userId",
+          select: "fullName email avatar"
+        }
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await MentorRequest.countDocuments(query);
+
+    return NextResponse.json({
+      requests,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
-    console.error("[ERROR] Failed to fetch mentor requests:", error);
+    console.error("Error fetching mentor requests:", error);
     return NextResponse.json(
       { error: "Failed to fetch mentor requests" },
       { status: 500 }

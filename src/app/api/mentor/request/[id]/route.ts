@@ -15,21 +15,36 @@ export async function GET(
   const { id } = await params;
   const session = await getServerSession(authOptions);
 
-  if (!session || !["admin", "chapter-admin"].includes(session.user.role)) {
+  if (!session || !["admin", "chapter-admin", "alumni"].includes(session.user.role)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const mentorRequest = await MentorRequest.findById(id)
-      .populate("userId", "fullName email avatar");
+      .populate({
+        path: "alumniId",
+        populate: {
+          path: "userId",
+          select: "fullName email avatar"
+        }
+      })
+      .populate("reviewedBy", "fullName");
 
     if (!mentorRequest) {
       return NextResponse.json({ error: "Mentor request not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: mentorRequest });
+    // Alumni can only view their own requests
+    if (session.user.role === "alumni") {
+      const alumniProfile = await AlumniProfile.findOne({ userId: session.user.id });
+      if (!alumniProfile || mentorRequest.alumniId._id.toString() !== alumniProfile._id.toString()) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
+
+    return NextResponse.json({ request: mentorRequest });
   } catch (error) {
-    console.error("[ERROR] Failed to fetch mentor request:", error);
+    console.error("Error fetching mentor request:", error);
     return NextResponse.json(
       { error: "Failed to fetch mentor request" },
       { status: 500 }
@@ -52,7 +67,7 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { status } = body;
+    const { status, adminNotes } = body;
 
     if (!["approved", "rejected"].includes(status)) {
       return NextResponse.json(
@@ -75,31 +90,37 @@ export async function PUT(
     }
 
     // Update the mentor request status
-    mentorRequest.status = status;
-    mentorRequest.reviewedAt = new Date();
-    mentorRequest.reviewedBy = session.user.id;
-    await mentorRequest.save();
+    const updatedRequest = await MentorRequest.findByIdAndUpdate(
+      id,
+      {
+        status,
+        adminNotes,
+        reviewedAt: new Date(),
+        reviewedBy: session.user.id,
+      },
+      { new: true }
+    ).populate({
+      path: "alumniId",
+      populate: {
+        path: "userId",
+        select: "fullName email avatar"
+      }
+    });
 
     // If approved, update the alumni profile to mark them as a mentor
     if (status === "approved") {
-      await AlumniProfile.findOneAndUpdate(
-        { userId: mentorRequest.userId },
-        { 
-          isMentor: true,
-          availableForMentorship: true
-        }
-      );
-
-      // Optional: Update user role if needed
-      // await User.findByIdAndUpdate(mentorRequest.userId, { role: "mentor" });
+      await AlumniProfile.findByIdAndUpdate(mentorRequest.alumniId, {
+        isMentor: true,
+        availableForMentorship: true
+      });
     }
 
     return NextResponse.json({
       message: `Mentor request ${status} successfully`,
-      data: mentorRequest
+      request: updatedRequest
     });
   } catch (error) {
-    console.error("[ERROR] Failed to update mentor request:", error);
+    console.error("Error updating mentor request:", error);
     return NextResponse.json(
       { error: "Failed to update mentor request" },
       { status: 500 }
